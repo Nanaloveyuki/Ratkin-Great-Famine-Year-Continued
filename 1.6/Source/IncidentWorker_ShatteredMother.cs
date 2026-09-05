@@ -64,6 +64,7 @@ namespace MouseDisaster
 
             if (children.Count == 0)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(new[] { mother });
                 return false;
             }
 

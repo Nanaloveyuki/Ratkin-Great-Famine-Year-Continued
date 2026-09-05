@@ -60,6 +60,7 @@ namespace MouseDisaster
 
             if (children.Count == 0)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(new[] { trader });
                 return false;
             }
 
@@ -78,6 +79,7 @@ namespace MouseDisaster
             ChoiceLetter_ChildExchange letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_ChildExchangeLetter, group) as ChoiceLetter_ChildExchange;
             if (letter == null)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(group);
                 return false;
             }
 

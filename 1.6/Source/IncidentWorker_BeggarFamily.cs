@@ -68,6 +68,7 @@ namespace MouseDisaster
 
             if (babies.Count == 0)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
                 return false;
             }
 

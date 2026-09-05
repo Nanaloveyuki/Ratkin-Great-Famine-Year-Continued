@@ -229,6 +229,7 @@ namespace MouseDisaster
 
             if (babies.Count == 0)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(new[] { mother });
                 return false;
             }
 
@@ -301,6 +302,7 @@ namespace MouseDisaster
             Pawn escortPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_TraderRatkinEscort, faction, DevelopmentalStage.Adult, 0.6f);
             if (escortPawn == null)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
                 return false;
             }
 
@@ -325,6 +327,7 @@ namespace MouseDisaster
 
             if (pawns.Count <= 2)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
                 return false;
             }
 
@@ -445,6 +448,7 @@ namespace MouseDisaster
             ChoiceLetter_FamineRefugees letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_AcceptFamineRefugees, pawns) as ChoiceLetter_FamineRefugees;
             if (letter == null)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
                 return false;
             }
 

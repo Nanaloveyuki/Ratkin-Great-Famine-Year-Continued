@@ -56,6 +56,8 @@ namespace MouseDisaster
             Pawn adult = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, faction, DevelopmentalStage.Adult, 0.35f);
             if (adult == null || children.Count == 0)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(children);
+                MouseDisasterUtility.DestroyFailedIncidentPawns(new[] { adult });
                 return false;
             }
 

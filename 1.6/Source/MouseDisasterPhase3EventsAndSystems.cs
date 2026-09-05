@@ -166,6 +166,7 @@ namespace MouseDisaster
                 LetterMaker.MakeLetter(def.letterLabel, def.letterText, DefDatabase<LetterDef>.GetNamed("MouseDisaster_MisguidedKinshipLetter"), babies) as ChoiceLetter_MouseDisasterMisguidedKinship;
             if (letter == null)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(babies);
                 return false;
             }
 

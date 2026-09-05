@@ -50,6 +50,7 @@ namespace MouseDisaster
             ChoiceLetter_FamineRefugees letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_AcceptFamineRefugees, pawns) as ChoiceLetter_FamineRefugees;
             if (letter == null)
             {
+                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
                 return false;
             }
 

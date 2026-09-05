@@ -404,8 +404,135 @@ namespace MouseDisaster
 
         internal static void ResetPendingState()
         {
+            BegAttempts.Clear();
+            BeggedColonists.Clear();
+            BegSuccess.Clear();
+            SiegeBeggarPawnIds.Clear();
+            SiegeBeggarStoleFoodSuccess.Clear();
+            StrongSiegePawnIds.Clear();
+            AirDropStayUntilTickByPawnId.Clear();
+            WallGnawCounts.Clear();
+            ForcePrisonerOnPurchasePawnIds.Clear();
+            TradableChattelPawnIds.Clear();
+            ChildExchangeMoodPawnIds.Clear();
             ActiveChildExchangeByTraderId.Clear();
             ActiveAbandonedDeliveryByAdultId.Clear();
+            MapPawnCaches.Clear();
+            PrisonerScavengeDelayStateByPawnId.Clear();
+            PrisonerScavengeBurstRemainingByPawnId.Clear();
+            PrisonerScavengeBurstCooldownByPawnId.Clear();
+            PrisonerScavengeLastLogTickByPawnId.Clear();
+            PrisonerScavengeLastLogMessageByPawnId.Clear();
+            TailBiteLastAttemptTickByPawnId.Clear();
+            TailBiteLastVictimTickByPawnId.Clear();
+            TailBiteLastNotifyTickByPawnId.Clear();
+            FloatingTextLastTickByKey.Clear();
+        }
+
+        internal static List<int> CopyForcePrisonerOnPurchasePawnIds()
+        {
+            return ForcePrisonerOnPurchasePawnIds.ToList();
+        }
+
+        internal static List<int> CopyTradableChattelPawnIds()
+        {
+            return TradableChattelPawnIds.ToList();
+        }
+
+        internal static List<int> CopyChildExchangeMoodPawnIds()
+        {
+            return ChildExchangeMoodPawnIds.ToList();
+        }
+
+        internal static List<int> CopySiegeBeggarPawnIds()
+        {
+            return SiegeBeggarPawnIds.ToList();
+        }
+
+        internal static List<int> CopySiegeBeggarStoleFoodSuccessPawnIds()
+        {
+            return SiegeBeggarStoleFoodSuccess.ToList();
+        }
+
+        internal static List<int> CopyStrongSiegePawnIds()
+        {
+            return StrongSiegePawnIds.ToList();
+        }
+
+        internal static Dictionary<int, int> CopyAirDropStayUntilTickByPawnId()
+        {
+            return new Dictionary<int, int>(AirDropStayUntilTickByPawnId);
+        }
+
+        internal static Dictionary<int, int> CopyWallGnawCounts()
+        {
+            return new Dictionary<int, int>(WallGnawCounts);
+        }
+
+        internal static void RestorePendingMarkerState(
+            IEnumerable<int> forcePrisonerOnPurchasePawnIds,
+            IEnumerable<int> tradableChattelPawnIds,
+            IEnumerable<int> childExchangeMoodPawnIds,
+            IEnumerable<int> siegeBeggarPawnIds,
+            IEnumerable<int> siegeBeggarStoleFoodSuccessPawnIds,
+            IEnumerable<int> strongSiegePawnIds,
+            IDictionary<int, int> airDropStayUntilTickByPawnId,
+            IDictionary<int, int> wallGnawCounts)
+        {
+            ForcePrisonerOnPurchasePawnIds.Clear();
+            TradableChattelPawnIds.Clear();
+            ChildExchangeMoodPawnIds.Clear();
+            SiegeBeggarPawnIds.Clear();
+            SiegeBeggarStoleFoodSuccess.Clear();
+            StrongSiegePawnIds.Clear();
+            AirDropStayUntilTickByPawnId.Clear();
+            WallGnawCounts.Clear();
+
+            if (forcePrisonerOnPurchasePawnIds != null)
+            {
+                ForcePrisonerOnPurchasePawnIds.UnionWith(forcePrisonerOnPurchasePawnIds);
+            }
+
+            if (tradableChattelPawnIds != null)
+            {
+                TradableChattelPawnIds.UnionWith(tradableChattelPawnIds);
+            }
+
+            if (childExchangeMoodPawnIds != null)
+            {
+                ChildExchangeMoodPawnIds.UnionWith(childExchangeMoodPawnIds);
+            }
+
+            if (siegeBeggarPawnIds != null)
+            {
+                SiegeBeggarPawnIds.UnionWith(siegeBeggarPawnIds);
+            }
+
+            if (siegeBeggarStoleFoodSuccessPawnIds != null)
+            {
+                SiegeBeggarStoleFoodSuccess.UnionWith(siegeBeggarStoleFoodSuccessPawnIds);
+            }
+
+            if (strongSiegePawnIds != null)
+            {
+                StrongSiegePawnIds.UnionWith(strongSiegePawnIds);
+            }
+
+            if (airDropStayUntilTickByPawnId != null)
+            {
+                foreach (KeyValuePair<int, int> pair in airDropStayUntilTickByPawnId)
+                {
+                    AirDropStayUntilTickByPawnId[pair.Key] = pair.Value;
+                }
+            }
+
+            if (wallGnawCounts != null)
+            {
+                foreach (KeyValuePair<int, int> pair in wallGnawCounts)
+                {
+                    WallGnawCounts[pair.Key] = pair.Value;
+                }
+            }
         }
 
         internal static void CleanupLoadedPendingState()
@@ -7541,6 +7668,41 @@ namespace MouseDisaster
                 map,
                 CellFinder.EdgeRoadChance_Ignore,
                 out cell);
+        }
+
+        public static void DestroyFailedIncidentPawns(IEnumerable<Pawn> pawns)
+        {
+            if (pawns == null)
+            {
+                return;
+            }
+
+            foreach (Pawn pawn in pawns)
+            {
+                if (pawn == null || pawn.Destroyed)
+                {
+                    continue;
+                }
+
+                MouseDisasterVisitorUtility.RemoveVisitorRecord(pawn);
+                ClearTradeLeaderState(pawn);
+                ResetBeggarState(pawn);
+                UnmarkTradableChattel(pawn);
+                ConsumeForcedPrisonerOnPurchase(pawn);
+                ChildExchangeMoodPawnIds.Remove(pawn.thingIDNumber);
+                ActiveChildExchangeByTraderId.Remove(pawn.thingIDNumber);
+                ActiveAbandonedDeliveryByAdultId.Remove(pawn.thingIDNumber);
+
+                if (pawn.Spawned)
+                {
+                    pawn.DeSpawnOrDeselect();
+                }
+
+                if (!pawn.Destroyed)
+                {
+                    pawn.Destroy();
+                }
+            }
         }
 
         public static void MakeTravelAndExitLord(Map map, IEnumerable<Pawn> pawns, IntVec3 travelDest, bool includeBabiesInExit = true)
