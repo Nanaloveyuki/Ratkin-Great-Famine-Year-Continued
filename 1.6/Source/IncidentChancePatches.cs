@@ -57,6 +57,16 @@ namespace MouseDisaster
             __result = false;
             return false;
         }
+
+        public static void Postfix(IncidentWorker __instance, IncidentParms parms, bool __result)
+        {
+            if (!__result || !MouseDisasterIncidentCatalog.IsKnownIncident(__instance?.def?.defName))
+            {
+                return;
+            }
+
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordIncidentExecuted(__instance.def, parms);
+        }
     }
 
     [HarmonyPatch(typeof(IncidentDef), nameof(IncidentDef.TargetAllowed))]

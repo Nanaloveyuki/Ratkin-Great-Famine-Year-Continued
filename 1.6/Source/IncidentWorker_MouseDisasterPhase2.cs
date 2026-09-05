@@ -205,7 +205,7 @@ namespace MouseDisaster
 
             GenSpawn.Spawn(mother, entryCell, map);
             mother.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
-            MouseDisasterPhase2Utility.InfectWithPlague(mother);
+            MouseDisasterPhase2Utility.InfectWithPlague(mother, Rand.Chance(0.9f) ? 0.82f : 0.42f);
 
             List<Pawn> babies = new List<Pawn>();
             for (int i = 0; i < 3; i++)
@@ -223,7 +223,7 @@ namespace MouseDisaster
                 {
                     baby.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
                 }
-                MouseDisasterPhase2Utility.InfectWithPlague(baby);
+                MouseDisasterPhase2Utility.InfectWithPlague(baby, 0.25f);
                 babies.Add(baby);
             }
 
@@ -234,21 +234,32 @@ namespace MouseDisaster
 
             MouseDisasterUtility.LinkIncidentParentToChildren(mother, babies);
             MouseDisasterUtility.TryStartLeadYourPetAbandonedDropoff(mother, babies, foodCell);
-            MouseDisasterUtility.RegisterAbandonedDelivery(mother, babies, foodCell);
+            MouseDisasterGuanyinTuUtility.ApplyN004StartingState(mother, babies);
             List<Thing> targets = new List<Thing> { mother };
             targets.AddRange(babies);
             List<Pawn> pawns = new List<Pawn> { mother };
             pawns.AddRange(babies);
-            if (MouseDisasterAbandonedDeliveryPolicy.ShouldRegisterAsVisitorChoiceTargets())
+
+            GameComponent_MouseDisasterNarrative narrative = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
+            MouseDisasterN004Record record = narrative?.RegisterN004(mother, babies, map, foodCell);
+            ChoiceLetter_MouseDisasterAbandonedChildren choiceLetter = record == null
+                ? null
+                : LetterMaker.MakeLetter(
+                    "MouseDisaster_N004_Label".Translate(),
+                    "MouseDisaster_N004_EntryText".Translate(),
+                    MouseDisasterDefOf.MouseDisaster_AbandonedChildrenLetter,
+                    pawns) as ChoiceLetter_MouseDisasterAbandonedChildren;
+            if (choiceLetter != null)
             {
-                MouseDisasterVisitorUtility.RegisterVisitors(pawns);
+                choiceLetter.mother = mother;
+                choiceLetter.children = babies;
+                choiceLetter.map = map;
+                choiceLetter.foodCell = foodCell;
+                Find.LetterStack.ReceiveLetter(choiceLetter, null);
+                return true;
             }
 
-            if (!MouseDisasterAbandonedDeliveryPolicy.ShouldRegisterAsVisitorChoiceTargets() ||
-                !MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, targets);
-            }
+            SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, targets);
             return true;
         }
     }

@@ -3977,6 +3977,25 @@ namespace MouseDisaster
             }
         }
 
+        public static void CancelAbandonedDelivery(Pawn adult, IEnumerable<Pawn> children = null)
+        {
+            if (adult != null)
+            {
+                ActiveAbandonedDeliveryByAdultId.Remove(adult.thingIDNumber);
+                TryEndLeadYourPetLeashForPet(adult);
+            }
+
+            if (children == null)
+            {
+                return;
+            }
+
+            foreach (Pawn child in children)
+            {
+                TryEndLeadYourPetLeashForPet(child);
+            }
+        }
+
         public static void ProcessAbandonedDeliveries(Map map)
         {
             if (map == null || ActiveAbandonedDeliveryByAdultId.Count == 0)

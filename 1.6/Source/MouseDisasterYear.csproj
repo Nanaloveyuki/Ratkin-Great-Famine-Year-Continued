@@ -61,6 +61,7 @@
     <Compile Include="BirthPatches.cs" />
     <Compile Include="BeggarSiegePatches.cs" />
     <Compile Include="ChoiceLetter_ChildExchange.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterAbandonedChildren.cs" />
     <Compile Include="ChoiceLetter_FamineRefugees.cs" />
     <Compile Include="ChoiceLetter_MouseDisasterFoodGive.cs" />
     <Compile Include="ChoiceLetter_MouseDisasterRequest.cs" />
@@ -75,6 +76,10 @@
     <Compile Include="GameComponent_MouseDisasterBroadcastHope.cs" />
     <Compile Include="GameComponent_MouseDisasterFamineYear.cs" />
     <Compile Include="GameComponent_MouseDisasterGeneRestoreState.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_N004.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_N004Effects.cs" />
+    <Compile Include="MouseDisasterGuanyinTu.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />
     <Compile Include="GameComponent_MouseDisasterPawnGeneration.cs" />
     <Compile Include="GameComponent_MouseDisasterVisitorControl.cs" />
@@ -135,6 +140,8 @@
     <Compile Include="MouseDisasterSubtypeUtility.cs" />
     <Compile Include="MouseDisasterPhase2Utility.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterChildExchangeMood.cs" />
+    <Compile Include="ThoughtWorker_MouseDisasterGuanyinTu.cs" />
+    <Compile Include="ThoughtWorker_MouseDisasterN004.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterVisitorShelterMood.cs" />
     <Compile Include="MouseDisasterUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

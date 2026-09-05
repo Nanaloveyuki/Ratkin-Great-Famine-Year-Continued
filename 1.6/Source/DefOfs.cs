@@ -42,6 +42,7 @@ namespace MouseDisaster
         public static HediffDef MouseDisaster_SiegeBeggar;
         public static HediffDef MouseDisaster_GreatFamineAdult;
         public static HediffDef MouseDisaster_GreatFamineChild;
+        public static HediffDef MouseDisaster_GuanyinTuSatiety;
 
         public static MentalStateDef MouseDisaster_BeggingState;
         public static MentalStateDef MouseDisaster_ThievingState;
@@ -65,6 +66,8 @@ namespace MouseDisaster
         public static LetterDef MouseDisaster_FoodGiveLetter;
         public static LetterDef MouseDisaster_VisitorControlLetter;
         public static LetterDef MouseDisaster_RequestLetter;
+        public static LetterDef MouseDisaster_AbandonedChildrenLetter;
+        public static ThingDef MouseDisaster_GuanyinTu;
         public static ThingDef Filth_MouseDisasterPoop;
         public static GeneDef MouseDisaster_Gene_MoreLitter;
         public static GeneDef MouseDisaster_Gene_PrimalFertility;
@@ -95,6 +98,10 @@ namespace MouseDisaster
         public static ThoughtDef MouseDisaster_OverGnawedWallThought;
         public static ThoughtDef MouseDisaster_ChildExchangeFamilyMood;
         public static ThoughtDef MouseDisaster_VisitorSheltered;
+        public static ThoughtDef MouseDisaster_N004_MissingMother;
+        public static ThoughtDef MouseDisaster_N004_SurvivedCaptivity;
+        public static ThoughtDef MouseDisaster_N004_FamilySurvived;
+        public static ThoughtDef MouseDisaster_N004_MotherRegret;
 
         static MouseDisasterDefOf()
         {

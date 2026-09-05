@@ -8,6 +8,13 @@
     <flashColor>(0.65, 0.85, 1)</flashColor>
   </LetterDef>
   <LetterDef>
+    <defName>MouseDisaster_AbandonedChildrenLetter</defName>
+    <label>鼠疫托孤</label>
+    <letterClass>MouseDisaster.ChoiceLetter_MouseDisasterAbandonedChildren</letterClass>
+    <color>(0.86, 0.68, 0.62)</color>
+    <flashColor>(0.86, 0.68, 0.62)</flashColor>
+  </LetterDef>
+  <LetterDef>
     <defName>MouseDisaster_ChildExchangeLetter</defName>
     <label>易子而食</label>
     <letterClass>MouseDisaster.ChoiceLetter_ChildExchange</letterClass>

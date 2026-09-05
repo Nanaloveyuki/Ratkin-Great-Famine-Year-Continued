@@ -16,6 +16,45 @@
   <MouseDisaster_Settings_EnableNewContent_Tooltip>可在游戏运行期间即时切换。关闭后不再触发新的鼠灾事件、生成新的鼠灾 Pawn 或建立新的鼠灾受孕；已经存在的 Pawn、工作、信件、区域和状态不受影响并继续运行。</MouseDisaster_Settings_EnableNewContent_Tooltip>
   <MouseDisaster_Settings_NewContentDisabledHint>新内容生成已关闭。现有 Pawn 与事件状态仍会继续正常工作。</MouseDisaster_Settings_NewContentDisabledHint>
   <MouseDisaster_Settings_NewContentDisabledDebugMessage>鼠灾新内容生成已关闭，无法触发新事件。</MouseDisaster_Settings_NewContentDisabledDebugMessage>
+  <MouseDisaster_Narrative_OpeningLabel>穗音：一份记录</MouseDisaster_Narrative_OpeningLabel>
+  <MouseDisaster_Narrative_OpeningText>你可能已经注意到最近的鼠灾了。我叫穗音。我在记录这些鼠族的来去。先不用急着判断它们，看看它们从哪里来、需要什么，又会去哪。有些事情不会留下答案，但会留下结果。</MouseDisaster_Narrative_OpeningText>
+  <MouseDisaster_Narrative_ProgressLabel>记录继续</MouseDisaster_Narrative_ProgressLabel>
+  <MouseDisaster_Narrative_ProgressText>你已经见证了 {0} 个不同的鼠灾事件。我还在整理这些记录。它们看起来互不相干，但有些名字会再次出现，有些事情会留下后果。继续看下去，你会知道这场灾荒留下了什么。</MouseDisaster_Narrative_ProgressText>
+  <MouseDisaster_Narrative_RewardLabel>穗音的谢礼</MouseDisaster_Narrative_RewardLabel>
+  <MouseDisaster_Narrative_RewardText>你已经见证了 8 个不同的鼠灾事件。我送来了一批白银，共 {0} 份，已经放在殖民地的交易地点。把它当作谢礼，也可以把它当作我对下一次记录的预付。记录还没有结束。</MouseDisaster_Narrative_RewardText>
+  <MouseDisaster_GuanyinTuSatiety_Status>观音土饱腹：{0}/{1} 次，本轮剩余 {2} 天。</MouseDisaster_GuanyinTuSatiety_Status>
+  <!-- N-004 以下文本为临时版本，待 narrative-draft.md 精修后替换。 -->
+  <MouseDisaster_N004_Label>穗音：鼠疫托孤</MouseDisaster_N004_Label>
+  <MouseDisaster_N004_EntryText>一只感染鼠疫的鼠妈带着三个婴儿来到殖民地。她身上还带着一点观音土、零件和白银。她们已经停在投放点附近，你可以接收她们，也可以让她们离开，或者继续按原来的投放流程处理。</MouseDisaster_N004_EntryText>
+  <MouseDisaster_N004_Accept>接收她们</MouseDisaster_N004_Accept>
+  <MouseDisaster_N004_Reject>让她们离开</MouseDisaster_N004_Reject>
+  <MouseDisaster_N004_Ignore>暂时不管</MouseDisaster_N004_Ignore>
+  <MouseDisaster_N004_AcceptMessage>你接收了这对鼠妈和婴儿。先把她们安置下来，再决定如何处理鼠疫。</MouseDisaster_N004_AcceptMessage>
+  <MouseDisaster_N004_RejectMessage>你没有接收她们。鼠妈开始离开，婴儿被留在了地图上。</MouseDisaster_N004_RejectMessage>
+  <MouseDisaster_N004_1_Label>穗音：留下来的孩子</MouseDisaster_N004_1_Label>
+  <MouseDisaster_N004_1_Text>鼠妈没有撑过去，但至少有孩子活了下来。它们在你的照料下长大了。穗音把这个结果记了下来。</MouseDisaster_N004_1_Text>
+  <MouseDisaster_N004_2_Label>穗音：一家人还在</MouseDisaster_N004_2_Label>
+  <MouseDisaster_N004_2_Text>鼠妈和孩子都活了下来。孩子已经不再是婴儿，她们仍然在同一处屋檐下。穗音把这件事记了下来。</MouseDisaster_N004_2_Text>
+  <MouseDisaster_N004_3_Label>穗音：留下来的囚犯</MouseDisaster_N004_3_Label>
+  <MouseDisaster_N004_3_Text>鼠妈死了，活下来的孩子被关进了监狱或变成了奴隶。穗音没有评价，只把结果写进了记录。</MouseDisaster_N004_3_Text>
+  <MouseDisaster_N004_4_Label>穗音：没有留下来的人</MouseDisaster_N004_4_Label>
+  <MouseDisaster_N004_4_Text>鼠妈和孩子都没有活下来。穗音的记录停在了这里。</MouseDisaster_N004_4_Text>
+  <MouseDisaster_N004_5_Label>穗音：各自离开</MouseDisaster_N004_5_Label>
+  <MouseDisaster_N004_5_Text>鼠妈和孩子都活着离开了地图。她们没有再回来，穗音也没有找到后续消息。</MouseDisaster_N004_5_Text>
+  <MouseDisaster_N004_6_Label>穗音：没能救下来的孩子</MouseDisaster_N004_6_Label>
+  <MouseDisaster_N004_6_Text>鼠妈活了下来，但有孩子没有撑过去。她还在走，像是不知道该把孩子带到哪里。</MouseDisaster_N004_6_Text>
+  <MouseDisaster_N004_4_Message>这只是个故事，不是吗？一切都是固定好的剧本。</MouseDisaster_N004_4_Message>
+  <MouseDisaster_N004_Revisit_Label>穗音：又见面了</MouseDisaster_N004_Revisit_Label>
+  <MouseDisaster_N004_Revisit_Text>远征队在路上遇到了 {0}。它们没有立刻靠近，也没有逃跑，只是等着你再次决定这一次要怎么处理。</MouseDisaster_N004_Revisit_Text>
+  <MouseDisaster_N004_Revisit_Ignore>忽视它们</MouseDisaster_N004_Revisit_Ignore>
+  <MouseDisaster_N004_Revisit_Rescue>支付 250 白银，救助它们</MouseDisaster_N004_Revisit_Rescue>
+  <MouseDisaster_N004_Revisit_Kill>杀掉它们</MouseDisaster_N004_Revisit_Kill>
+  <MouseDisaster_N004_Revisit_RescueUnavailable>商队没有足够的白银。</MouseDisaster_N004_Revisit_RescueUnavailable>
+  <MouseDisaster_N004_Revisit_IgnoreMessage>你没有停下，远征队继续上路。</MouseDisaster_N004_Revisit_IgnoreMessage>
+  <MouseDisaster_N004_Revisit_RescueMessage>你支付了白银，把它们带进了远征队。四年后的回礼还没有到。</MouseDisaster_N004_Revisit_RescueMessage>
+  <MouseDisaster_N004_Revisit_KillMessage>这只是故事……不是吗？</MouseDisaster_N004_Revisit_KillMessage>
+  <MouseDisaster_N004_Revisit_RewardLabel>穗音的回礼</MouseDisaster_N004_Revisit_RewardLabel>
+  <MouseDisaster_N004_Revisit_RewardText>四年前的承诺有了结果。穗音送来 {0} 份白银，已经投放在殖民地的交易地点。</MouseDisaster_N004_Revisit_RewardText>
   <MouseDisaster_Settings_EnableAgeCap>启用鼠族年龄上限修正</MouseDisaster_Settings_EnableAgeCap>
   <MouseDisaster_Settings_EnableAgeCap_Tooltip>关闭后，鼠族年龄与老年病强化将按原版与种族设定处理。</MouseDisaster_Settings_EnableAgeCap_Tooltip>
   <MouseDisaster_Settings_EnableGnawing>启用啃食行为</MouseDisaster_Settings_EnableGnawing>
@@ -45,7 +84,7 @@
   <MouseDisaster_Settings_RatEggTraitChance>兼容特性生成概率：{0}%</MouseDisaster_Settings_RatEggTraitChance>
   <MouseDisaster_Settings_CompatDisabledHint>特性桥接已关闭：不再注入鼠蛋特性拓展兼容逻辑。</MouseDisaster_Settings_CompatDisabledHint>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>
-  <MouseDisaster_Settings_ImplNote>当前为第一期建设：已实装野生鼠族、偷窃、乞讨、啃食、尾巴与耳朵交互、部分特殊事件、繁殖基因，以及 50 岁后老年病强化。第二期计划新增叙事者"乐织终"、隐藏奖励、1 个事件及更多婴儿囚犯相关内容，敬请期待。</MouseDisaster_Settings_ImplNote>
+  <MouseDisaster_Settings_ImplNote>当前内容包含野生鼠族、偷窃、乞讨、啃食、尾巴与耳朵交互、特殊事件、繁殖基因、50 岁后老年病强化，以及穗音的第一批叙事和隐藏奖励。后续将继续扩展婴儿囚犯、鼠疫和灾鼠派系相关内容。</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>窝趴趴舔灰灰，肚肚咕咕叫，脏脏也系饭饭。</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_2>泥泥土土糊一嘴，窝还要叠着舌头舔。</MouseDisaster_PrisonerScavenge_Text_FloorDust_2>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_3>地缝缝里抠灰灰，窝小嘴最会刮渣渣。</MouseDisaster_PrisonerScavenge_Text_FloorDust_3>
