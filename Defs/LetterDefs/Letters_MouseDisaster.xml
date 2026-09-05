@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <LetterDef>
+    <defName>MouseDisaster_AcceptFamineRefugees</defName>
+    <label>灾荒逃难者</label>
+    <letterClass>MouseDisaster.ChoiceLetter_FamineRefugees</letterClass>
+    <color>(0.65, 0.85, 1)</color>
+    <flashColor>(0.65, 0.85, 1)</flashColor>
+  </LetterDef>
+  <LetterDef>
+    <defName>MouseDisaster_ChildExchangeLetter</defName>
+    <label>易子而食</label>
+    <letterClass>MouseDisaster.ChoiceLetter_ChildExchange</letterClass>
+    <color>(0.85, 0.78, 0.62)</color>
+    <flashColor>(0.85, 0.78, 0.62)</flashColor>
+  </LetterDef>
+  <LetterDef>
+    <defName>MouseDisaster_VisitorControlLetter</defName>
+    <label>鼠灾访客</label>
+    <letterClass>MouseDisaster.ChoiceLetter_MouseDisasterVisitorControl</letterClass>
+    <color>(0.68, 0.84, 0.74)</color>
+    <flashColor>(0.68, 0.84, 0.74)</flashColor>
+  </LetterDef>
+  <LetterDef>
+    <defName>MouseDisaster_FoodGiveLetter</defName>
+    <label>鼠灾投喂</label>
+    <letterClass>MouseDisaster.ChoiceLetter_MouseDisasterFoodGive</letterClass>
+    <color>(0.73, 0.83, 0.66)</color>
+    <flashColor>(0.73, 0.83, 0.66)</flashColor>
+  </LetterDef>
+  <LetterDef>
+    <defName>MouseDisaster_MisguidedKinshipLetter</defName>
+    <label>错误认知</label>
+    <letterClass>MouseDisaster.ChoiceLetter_MouseDisasterMisguidedKinship</letterClass>
+    <color>(0.88, 0.78, 0.68)</color>
+    <flashColor>(0.88, 0.78, 0.68)</flashColor>
+  </LetterDef>
+</Defs>

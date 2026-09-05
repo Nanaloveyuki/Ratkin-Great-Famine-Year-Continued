@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D2E7A08A-20C2-4A2D-9D59-AB0B0B2EA4C4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MouseDisaster</RootNamespace>
+    <AssemblyName>MouseDisaster</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Assemblies\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Assemblies\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\Assemblies\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\Assemblies\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\Assemblies\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\Assemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AgePatches.cs" />
+    <Compile Include="BirthPatches.cs" />
+    <Compile Include="BeggarSiegePatches.cs" />
+    <Compile Include="ChoiceLetter_ChildExchange.cs" />
+    <Compile Include="ChoiceLetter_FamineRefugees.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterFoodGive.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterRequest.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterVisitorControl.cs" />
+    <Compile Include="CommsConsolePatches.cs" />
+    <Compile Include="CompatibilityStabilityPatches.cs" />
+    <Compile Include="Area_MouseDisasterRelief.cs" />
+    <Compile Include="Designator_AreaMouseDisasterRelief.cs" />
+    <Compile Include="Designator_AreaMouseDisasterReliefExpand.cs" />
+    <Compile Include="Designator_AreaMouseDisasterReliefClear.cs" />
+    <Compile Include="IncidentWorker_AbandonedRatkinChildren.cs" />
+    <Compile Include="GameComponent_MouseDisasterBroadcastHope.cs" />
+    <Compile Include="GameComponent_MouseDisasterFamineYear.cs" />
+    <Compile Include="GameComponent_MouseDisasterGeneRestoreState.cs" />
+    <Compile Include="GameComponent_MouseDisasterPlague.cs" />
+    <Compile Include="GameComponent_MouseDisasterVisitorControl.cs" />
+    <Compile Include="MouseDisasterBroadcastHopePolicy.cs" />
+    <Compile Include="MouseDisasterAbandonedDeliveryPolicy.cs" />
+    <Compile Include="MouseDisasterBabyLeashPolicy.cs" />
+    <Compile Include="MouseDisasterBirthPolicy.cs" />
+    <Compile Include="MouseDisasterReliefAreaPolicy.cs" />
+    <Compile Include="MouseDisasterGeneRestorePolicy.cs" />
+    <Compile Include="MouseDisasterIncidentCatalog.cs" />
+    <Compile Include="MouseDisasterIncidentTargetPolicy.cs" />
+    <Compile Include="MouseDisasterGeneRemovalScope.cs" />
+    <Compile Include="MouseDisasterPrisonTransferUtility.cs" />
+    <Compile Include="MouseDisasterTraderTradePolicy.cs" />
+    <Compile Include="MouseDisasterVisitorChoicePolicy.cs" />
+    <Compile Include="MouseDisasterVisitorHostilityPolicy.cs" />
+    <Compile Include="IncidentChancePatches.cs" />
+    <Compile Include="DefOfs.cs" />
+    <Compile Include="FactionRelationPatches.cs" />
+    <Compile Include="FloatMenuOptionProvider_MouseDisasterVisitorControl.cs" />
+    <Compile Include="ResurrectionPatches.cs" />
+    <Compile Include="IncidentWorker_BeggarFamily.cs" />
+    <Compile Include="IncidentWorker_BeggarGroup.cs" />
+    <Compile Include="IncidentWorker_ChildExchange.cs" />
+    <Compile Include="IncidentWorker_FamineRefugees.cs" />
+    <Compile Include="IncidentWorker_LargeRefugeeWave.cs" />
+    <Compile Include="IncidentWorker_MouseDisasterPhase2.cs" />
+    <Compile Include="IncidentWorker_MouseDisasterSiege.cs" />
+    <Compile Include="IncidentWorker_RatkinTraderCaravan.cs" />
+    <Compile Include="IncidentWorker_ShatteredMother.cs" />
+    <Compile Include="IncidentWorker_ThiefRatkinChildGroup.cs" />
+    <Compile Include="IncidentWorker_ThiefRatkinGroup.cs" />
+    <Compile Include="IncidentWorker_WildRatkinChildWandersIn.cs" />
+    <Compile Include="IncidentWorker_WildRatkinGroupWandersIn.cs" />
+    <Compile Include="IncidentWorker_WildRatkinWandersIn.cs" />
+    <Compile Include="JobDriver_BegForFood.cs" />
+    <Compile Include="JobDriver_BroadcastHope.cs" />
+    <Compile Include="JobDriver_GnawTreeBark.cs" />
+    <Compile Include="JobDriver_GnawWall.cs" />
+    <Compile Include="JobDriver_PrisonerScavenge.cs" />
+    <Compile Include="JobGiver_MouseDisasterPrisonerScavenge.cs" />
+    <Compile Include="JobGiver_MouseDisasterTailBite.cs" />
+    <Compile Include="JobDriver_TailBite.cs" />
+    <Compile Include="GenePatches.cs" />
+    <Compile Include="DebugActions_MouseDisaster.cs" />
+    <Compile Include="JobGiver_MouseDisasterBeggar.cs" />
+    <Compile Include="JobGiver_MouseDisasterGnaw.cs" />
+    <Compile Include="JobGiver_MouseDisasterThief.cs" />
+    <Compile Include="MapComponent_MouseDisasterCompat.cs" />
+    <Compile Include="ModEntry.cs" />
+    <Compile Include="HarmonyBootstrap.cs" />
+    <Compile Include="IdentityLifecyclePatches.cs" />
+    <Compile Include="MouseDisasterPhase3Caravan.cs" />
+    <Compile Include="MouseDisasterPhase3EventsAndSystems.cs" />
+    <Compile Include="MouseDisasterPhase3MapIncidents.cs" />
+    <Compile Include="MouseDisasterSettings.cs" />
+    <Compile Include="MouseDisasterSubtypeUtility.cs" />
+    <Compile Include="MouseDisasterPhase2Utility.cs" />
+    <Compile Include="ThoughtWorker_MouseDisasterChildExchangeMood.cs" />
+    <Compile Include="ThoughtWorker_MouseDisasterVisitorShelterMood.cs" />
+    <Compile Include="MouseDisasterUtility.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReliefAreaFoodPatches.cs" />
+    <Compile Include="ThiefPatches.cs" />
+    <Compile Include="TradePatches.cs" />
+    <Compile Include="WildManPatches.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,20 @@
+﻿# Visual Studio / MSBuild
+.vs/
+*.user
+*.suo
+
+# Build intermediates
+**/obj/
+**/bin/
+*.pdb
+
+# Test projects
+tests/
+
+# Logs / caches
+*.log
+*.cache
+
+# OS junk
+Thumbs.db
+Desktop.ini

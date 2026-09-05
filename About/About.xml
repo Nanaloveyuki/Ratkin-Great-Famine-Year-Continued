@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>鼠灾-大荒年</name>
+  <author>乐织终</author>
+  <packageId>lezhizhong.mouse.disaster.famine</packageId>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <description>围绕“鼠灾”背景展开的鼠族灾荒事件模组，为殖民地带来更混乱也更有叙事感的鼠族危机。
+
+当前内容包含野生鼠族、偷窃、乞讨、啃食、尾巴与耳朵交互、部分特殊事件、繁殖基因，以及 50 岁后的老年病强化。后续计划继续扩展叙事者“乐织终”、隐藏奖励、更多事件与婴儿囚犯相关内容。
+
+具体效果以源码与 Def 配置为准。</description>
+  <modDependencies>
+    <li>
+      <packageId>Solaris.RatkinRaceMod</packageId>
+      <displayName>NewRatkinPlus[1.6]</displayName>
+      <steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=3497673755</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+      <steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=2009463077</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>Ludeon.RimWorld.Biotech</packageId>
+      <displayName>Biotech</displayName>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>brrainz.harmony</li>
+    <li>Ludeon.RimWorld</li>
+    <li>Ludeon.RimWorld.Biotech</li>
+    <li>Solaris.RatkinRaceMod</li>
+    <li>LeZhizhong.PrisonerWorkExpansion</li>
+    <li>cyanobot.toddlers</li>
+  </loadAfter>
+</ModMetaData>
