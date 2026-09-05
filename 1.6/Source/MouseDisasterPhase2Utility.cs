@@ -288,6 +288,12 @@ namespace MouseDisaster
 
                 if (!pawnLookup.TryGetValue(targetId, out Pawn targetPawn) || targetPawn == null || targetPawn.Dead || !targetPawn.Spawned)
                 {
+                    List<Pawn> orphanedPawns = ResolveAidRequestPawns(state, pawnLookup);
+                    if (orphanedPawns.Count > 0)
+                    {
+                        MouseDisasterUtility.MakeTravelAndExitLord(map, orphanedPawns, map.Center);
+                    }
+
                     ActiveAidRequestsByTargetPawnId.Remove(targetId);
                     continue;
                 }
@@ -295,6 +301,12 @@ namespace MouseDisaster
                 ThingDef requestedThingDef = ResolveRequestedThingDef(state.requestKind);
                 if (requestedThingDef == null)
                 {
+                    List<Pawn> orphanedPawns = ResolveAidRequestPawns(state, pawnLookup);
+                    if (orphanedPawns.Count > 0)
+                    {
+                        MouseDisasterUtility.MakeTravelAndExitLord(map, orphanedPawns, map.Center);
+                    }
+
                     ActiveAidRequestsByTargetPawnId.Remove(targetId);
                     continue;
                 }

@@ -108,16 +108,6 @@ namespace MouseDisaster
                 return;
             }
 
-            if (!MouseDisasterRuntime.AllowsNewContent)
-            {
-                for (int i = batches.Count - 1; i >= 0; i--)
-                {
-                    TryTruncateBatch(batches[i], "new content generation was disabled in Mod settings");
-                }
-                batches.Clear();
-                return;
-            }
-
             int nowTick = tickManager.TicksGame;
             for (int i = 0; i < batches.Count; i++)
             {
