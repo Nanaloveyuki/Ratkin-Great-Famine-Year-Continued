@@ -69,6 +69,11 @@ namespace MouseDisaster
         public static LetterDef MouseDisaster_AbandonedChildrenLetter;
         public static LetterDef MouseDisaster_N006Letter;
         public static LetterDef MouseDisaster_N007Letter;
+        public static LetterDef MouseDisaster_StoryLetter;
+        public static SitePartDef MouseDisaster_RecordSite;
+        public static ThingDef MouseDisaster_RecordCache;
+        public static ThingDef MouseDisaster_RecordPages;
+        public static ThingDef MouseDisaster_GrainBurrow;
         public static ThingDef MouseDisaster_GuanyinTu;
         public static ThingDef Filth_MouseDisasterPoop;
         public static GeneDef MouseDisaster_Gene_MoreLitter;

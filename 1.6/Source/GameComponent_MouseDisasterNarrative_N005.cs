@@ -23,6 +23,8 @@ namespace MouseDisaster
         public int mapId = -1;
         public int createdTick;
         public MouseDisasterN005Outcome outcome;
+        public List<NarrativePawnObservation> care = new List<NarrativePawnObservation>();
+        public bool careResolved;
 
         public void ExposeData()
         {
@@ -33,11 +35,15 @@ namespace MouseDisaster
             Scribe_Values.Look(ref mapId, "mapId", -1);
             Scribe_Values.Look(ref createdTick, "createdTick", 0);
             Scribe_Values.Look(ref outcome, "outcome", MouseDisasterN005Outcome.Pending);
+            Scribe_Collections.Look(ref care, "care", LookMode.Deep);
+            Scribe_Values.Look(ref careResolved, "careResolved");
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 exchangeChildren ??= new List<Pawn>();
                 exchangeChildren.RemoveAll(child => child == null);
+                care ??= new List<NarrativePawnObservation>();
+                care.RemoveAll(p => p == null);
             }
         }
     }
@@ -45,19 +51,23 @@ namespace MouseDisaster
     public partial class GameComponent_MouseDisasterNarrative
     {
         private List<MouseDisasterN005Record> n005Records = new List<MouseDisasterN005Record>();
+        private List<int> n005StartedTraderIds = new List<int>();
 
         private void ExposeN005Data()
         {
+            Scribe_Collections.Look(ref n005StartedTraderIds, "n005StartedTraderIds", LookMode.Value);
             Scribe_Collections.Look(ref n005Records, "mouseDisaster_narrativeN005Records", LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 n005Records ??= new List<MouseDisasterN005Record>();
+                n005StartedTraderIds ??= new List<int>();
                 n005Records.RemoveAll(record => record == null || record.traderId <= 0 || record.outcome == MouseDisasterN005Outcome.Pending);
             }
         }
 
         public void RecordN005Outcome(int traderId, Pawn trader, IEnumerable<Pawn> exchangeChildren, Pawn offeredBaby, Map map, MouseDisasterN005Outcome outcome)
         {
+            if (!NarrativeEnabled("N005") && !n005StartedTraderIds.Contains(traderId)) return;
             if (traderId <= 0 || outcome == MouseDisasterN005Outcome.Pending)
             {
                 return;
@@ -80,6 +90,10 @@ namespace MouseDisaster
                 outcome = outcome
             };
             n005Records.Add(record);
+            n005StartedTraderIds.Remove(traderId);
+            CompleteNarrativeFlag("N005");
+            if (outcome == MouseDisasterN005Outcome.Accepted)
+                record.care = record.exchangeChildren.Select(p => new NarrativePawnObservation { pawn = p }).ToList();
             ChangeNarratorTrust(TrustDeltaForN005Outcome(outcome));
 
             if (!IsNarratorActive())
@@ -106,12 +120,12 @@ namespace MouseDisaster
             switch (outcome)
             {
                 case MouseDisasterN005Outcome.Accepted:
-                    return 3;
+                    return 0;
                 case MouseDisasterN005Outcome.Rejected:
                 case MouseDisasterN005Outcome.TimedOut:
-                    return -1;
+                    return 0;
                 case MouseDisasterN005Outcome.Broken:
-                    return -2;
+                    return 0;
                 default:
                     return 0;
             }
@@ -132,6 +146,27 @@ namespace MouseDisaster
             }
 
             return Find.Maps?.FirstOrDefault(candidate => candidate.uniqueID == record?.mapId);
+        }
+
+        private void ProcessN005Care()
+        {
+            foreach (var record in n005Records.Where(r => r.outcome == MouseDisasterN005Outcome.Accepted && !r.careResolved))
+            {
+                if (record.care.Count == 0)
+                    record.care = record.exchangeChildren.Select(p => new NarrativePawnObservation { pawn = p }).ToList();
+                foreach (var person in record.care)
+                {
+                    ScanNarrativePawn(person, record.mapId, record.createdTick, allowCaptiveCare: true);
+                }
+                if (record.care.Any(p => p.end == NarrativePawnEnd.Pending)) continue;
+                record.careResolved = true;
+                string result = record.care.Count == 0 ? "N005Missing" : record.care.Any(p => p.end == NarrativePawnEnd.Dead) ? "N005Dead" :
+                    record.care.All(p => p.end == NarrativePawnEnd.Settled) ? "N005Care" :
+                    record.care.Any(p => p.end == NarrativePawnEnd.Left) ? "N005Left" : "N005Missing";
+                if (result == "N005Care") { ChangeNarratorTrust(3); CompleteNarrativeFlag("N005Care"); }
+                SendJournalOnce(result, ResolveN005Map(record));
+                if (successfulBroadcasts > 0) TryNarrativeEcho("BroadcastEcho", ResolveN005Map(record));
+            }
         }
     }
 }

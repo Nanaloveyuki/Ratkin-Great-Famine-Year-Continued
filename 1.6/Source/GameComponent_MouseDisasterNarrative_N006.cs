@@ -57,6 +57,10 @@ namespace MouseDisaster
         public int nextCheckTick = -1;
         public MouseDisasterN006Phase phase;
         public MouseDisasterN006Outcome outcome;
+        public Thing burrow;
+        public bool burrowSpawned;
+        public int nextLossTick;
+        public int losses;
 
         public void ExposeData()
         {
@@ -67,6 +71,10 @@ namespace MouseDisaster
             Scribe_Values.Look(ref nextCheckTick, "nextCheckTick", -1);
             Scribe_Values.Look(ref phase, "phase", MouseDisasterN006Phase.Tracking);
             Scribe_Values.Look(ref outcome, "outcome", MouseDisasterN006Outcome.Pending);
+            Scribe_References.Look(ref burrow, "burrow");
+            Scribe_Values.Look(ref burrowSpawned, "burrowSpawned");
+            Scribe_Values.Look(ref nextLossTick, "nextLossTick");
+            Scribe_Values.Look(ref losses, "losses");
         }
     }
 
@@ -74,7 +82,7 @@ namespace MouseDisaster
     {
         private const int N006TheftIncidentThreshold = 2;
         private const int N006BaitWaitTicks = GenDate.TicksPerDay;
-        private const int N006IgnoreWaitTicks = GenDate.TicksPerDay * 2;
+        private const int N006IgnoreWaitTicks = GenDate.TicksPerDay * 3;
         private static readonly HashSet<string> N006TheftIncidentDefNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "MouseDisaster_ThiefRatkinGroup",
@@ -96,7 +104,7 @@ namespace MouseDisaster
 
         public void NotifyN006TheftIncident(IncidentDef incidentDef, IncidentParms parms)
         {
-            if (!MouseDisasterRuntime.AllowsNewContent || !IsNarratorActive() || incidentDef == null ||
+            if (!NarrativeEnabled("N006") || incidentDef == null ||
                 !N006TheftIncidentDefNames.Contains(incidentDef.defName))
             {
                 return;
@@ -132,12 +140,12 @@ namespace MouseDisaster
                 record.foodCell = foodCell;
             }
 
-            if (record.theftIncidentCount < N006TheftIncidentThreshold || !record.foodCell.IsValid)
+            if (record.theftIncidentCount < (narrativeDebugForce ? 1 : MouseDisasterMod.Settings?.narrativeTheftGoal ?? N006TheftIncidentThreshold) || !record.foodCell.IsValid)
             {
                 return;
             }
 
-            if (TrySendN006ChoiceLetter(record, map, MouseDisasterN006LetterStage.Entry))
+            if (EnsureN006Burrow(record, map) && TrySendN006ChoiceLetter(record, map, MouseDisasterN006LetterStage.Entry))
             {
                 record.phase = MouseDisasterN006Phase.Decision;
             }
@@ -166,9 +174,12 @@ namespace MouseDisaster
             }
 
             Map map = ResolveN006Map(record);
+            if (map == null || !EnsureN006Burrow(record, map)) return false;
             switch (decision)
             {
                 case MouseDisasterN006InitialDecision.Seal:
+                    if (!TryConsumeNarrativeMaterial(map, ThingDefOf.WoodLog, 20))
+                    { message = "MouseDisaster_Story_NoWood".Translate(); return false; }
                     ResolveN006(record, MouseDisasterN006Outcome.Sealed, map);
                     message = "MouseDisaster_N006_Sealed_Message".Translate().ToString();
                     return true;
@@ -184,6 +195,7 @@ namespace MouseDisaster
                     message = "MouseDisaster_N006_Bait_Message".Translate().ToString();
                     return true;
                 case MouseDisasterN006InitialDecision.ForceClean:
+                    for (int loss = 0; loss < 5; loss++) TryConsumeN006Bait(map, ref record.foodCell);
                     ResolveN006(record, MouseDisasterN006Outcome.ForceCleaned, map);
                     message = "MouseDisaster_N006_ForceCleaned_Message".Translate().ToString();
                     return true;
@@ -256,6 +268,31 @@ namespace MouseDisaster
             for (int i = 0; i < n006Records.Count; i++)
             {
                 MouseDisasterN006Record record = n006Records[i];
+                if (record == null || record.phase == MouseDisasterN006Phase.Resolved) continue;
+                Map activeMap = ResolveN006Map(record);
+                if (activeMap == null)
+                {
+                    ResolveN006(record, MouseDisasterN006Outcome.LostClue, null);
+                    continue;
+                }
+                if (record.phase == MouseDisasterN006Phase.Tracking && NarrativeEnabled("N006") &&
+                    record.theftIncidentCount >= (MouseDisasterMod.Settings?.narrativeTheftGoal ?? N006TheftIncidentThreshold) &&
+                    TryFindN006FoodCell(activeMap, out IntVec3 foodCell))
+                {
+                    record.foodCell = foodCell;
+                    record.phase = MouseDisasterN006Phase.Decision;
+                    TrySendN006ChoiceLetter(record, activeMap, MouseDisasterN006LetterStage.Entry);
+                }
+                if (record.phase != MouseDisasterN006Phase.Tracking)
+                {
+                    if (!EnsureN006Burrow(record, activeMap))
+                    { ResolveN006(record, MouseDisasterN006Outcome.LostClue, activeMap); continue; }
+                    if (MouseDisasterRuntime.AllowsNewContent && now >= record.nextLossTick && record.losses < 3)
+                    {
+                        if (TryConsumeN006Bait(activeMap, ref record.foodCell)) record.losses++;
+                        record.nextLossTick = now + GenDate.TicksPerDay;
+                    }
+                }
                 if (record == null || record.nextCheckTick < 0 || now < record.nextCheckTick)
                 {
                     continue;
@@ -330,6 +367,9 @@ namespace MouseDisaster
             }
 
             record.outcome = outcome;
+            CompleteNarrativeFlag("N006");
+            if (outcome == MouseDisasterN006Outcome.BaitTraced) CompleteNarrativeFlag("N006Trace");
+            if (record.burrow != null && !record.burrow.Destroyed) record.burrow.Destroy();
             record.phase = MouseDisasterN006Phase.Resolved;
             record.nextCheckTick = -1;
             ChangeNarratorTrust(TrustDeltaForN006Outcome(outcome));
@@ -391,7 +431,7 @@ namespace MouseDisaster
 
             Thing food = map.listerThings.ThingsInGroup(ThingRequestGroup.FoodSourceNotPlantOrTree)
                 .Where(thing => thing != null && thing.Spawned && thing.def?.category == ThingCategory.Item &&
-                                thing.def.IsNutritionGivingIngestible && thing.IngestibleNow && thing.stackCount > 0)
+                                thing.def.IsNutritionGivingIngestible && thing.IngestibleNow && thing.stackCount > 0 && thing.GetSlotGroup() != null)
                 .OrderBy(thing => thing.Position.DistanceToSquared(map.Center))
                 .FirstOrDefault();
             if (food == null)
@@ -400,6 +440,32 @@ namespace MouseDisaster
             }
 
             cell = food.Position;
+            return true;
+        }
+
+        private static bool EnsureN006Burrow(MouseDisasterN006Record record, Map map)
+        {
+            if (record.burrowSpawned) return record.burrow != null && !record.burrow.Destroyed;
+            if (!MouseDisasterRuntime.AllowsNewContent || !record.foodCell.IsValid) return false;
+            IntVec3 cell = CellFinder.RandomClosewalkCellNear(record.foodCell, map, 3);
+            if (!cell.Standable(map) || cell.GetEdifice(map) != null) return false;
+            record.burrow = GenSpawn.Spawn(MouseDisasterDefOf.MouseDisaster_GrainBurrow, cell, map);
+            record.burrowSpawned = true;
+            record.nextLossTick = Current.Game.tickManager.TicksGame + GenDate.TicksPerDay;
+            return true;
+        }
+
+        private static bool TryConsumeNarrativeMaterial(Map map, ThingDef def, int count)
+        {
+            var stacks = map.listerThings.ThingsOfDef(def).Where(t => t.Spawned && !t.IsForbidden(Faction.OfPlayer)).ToList();
+            if (stacks.Sum(t => t.stackCount) < count) return false;
+            foreach (var stack in stacks)
+            {
+                int take = System.Math.Min(count, stack.stackCount);
+                stack.SplitOff(take).Destroy();
+                count -= take;
+                if (count == 0) break;
+            }
             return true;
         }
 
@@ -413,7 +479,8 @@ namespace MouseDisaster
             IntVec3 targetCell = preferredCell;
             List<Thing> foods = map.listerThings.ThingsInGroup(ThingRequestGroup.FoodSourceNotPlantOrTree)
                 .Where(thing => thing != null && thing.Spawned && thing.def?.category == ThingCategory.Item &&
-                                thing.def.IsNutritionGivingIngestible && thing.IngestibleNow && thing.stackCount > 0)
+                                thing.def.IsNutritionGivingIngestible && thing.IngestibleNow && thing.stackCount > 0 &&
+                                (!targetCell.IsValid || thing.Position.DistanceToSquared(targetCell) <= 144))
                 .OrderBy(thing => targetCell.IsValid ? thing.Position.DistanceToSquared(targetCell) : thing.Position.DistanceToSquared(map.Center))
                 .ToList();
             Thing bait = foods.FirstOrDefault();

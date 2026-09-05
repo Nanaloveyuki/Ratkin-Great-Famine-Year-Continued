@@ -787,7 +787,10 @@ namespace MouseDisaster
         public static bool TryMakeHostile(IEnumerable<Pawn> pawns, out int hostileCount)
         {
             hostileCount = 0;
-            return !IsN007ControlBlocked(pawns) && Component != null && Component.TryMakeHostile(pawns, out hostileCount);
+            List<Pawn> targets = pawns?.ToList() ?? new List<Pawn>();
+            if (IsN007ControlBlocked(targets) || Component == null || !Component.TryMakeHostile(targets, out hostileCount)) return false;
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeForce(targets);
+            return true;
         }
 
         public static bool IsN007ControlBlocked(IEnumerable<Pawn> pawns)

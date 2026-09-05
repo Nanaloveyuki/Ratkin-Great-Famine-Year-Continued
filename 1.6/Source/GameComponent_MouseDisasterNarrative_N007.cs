@@ -134,9 +134,9 @@ namespace MouseDisaster
             }
         }
 
-        public void NotifyN007PlagueIncident(IncidentDef incidentDef, IncidentParms parms)
+        public void NotifyN007PlagueIncident(IncidentDef incidentDef, IncidentParms parms, IEnumerable<Pawn> participants = null)
         {
-            if (!MouseDisasterRuntime.AllowsNewContent || !IsNarratorActive() || incidentDef == null ||
+            if (!NarrativeEnabled("N007") || incidentDef == null ||
                 !N007PlagueVisitorIncidentDefNames.Contains(incidentDef.defName))
             {
                 return;
@@ -148,7 +148,7 @@ namespace MouseDisaster
                 return;
             }
 
-            List<Pawn> infectedVisitors = map.mapPawns?.AllPawnsSpawned
+            List<Pawn> infectedVisitors = participants
                 ?.Where(IsN007PlagueVisitor)
                 .Distinct()
                 .ToList() ?? new List<Pawn>();
@@ -388,6 +388,7 @@ namespace MouseDisaster
                 Map map = ResolveN007Map(record);
                 if (map == null)
                 {
+                    ResolveN007(record, MouseDisasterN007Outcome.Handled, null);
                     continue;
                 }
 
@@ -478,7 +479,7 @@ namespace MouseDisaster
                 : "MouseDisaster_N007_RecoveryText";
             ChoiceLetter_MouseDisasterN007 letter = LetterMaker.MakeLetter(
                 labelKey.Translate(),
-                textKey.Translate(),
+                textKey.Translate() + "\n\n" + N007Counts(record),
                 MouseDisasterDefOf.MouseDisaster_N007Letter,
                 new TargetInfo(map.Center, map)) as ChoiceLetter_MouseDisasterN007;
             if (letter == null)
@@ -534,6 +535,10 @@ namespace MouseDisaster
             }
 
             record.outcome = outcome;
+            CompleteNarrativeFlag("N007");
+            if (outcome == MouseDisasterN007Outcome.RecoveredAndLeft || outcome == MouseDisasterN007Outcome.RecoveredAndStayed)
+                CompleteNarrativeFlag("N007Recovered");
+            if (outcome == MouseDisasterN007Outcome.RecoveredAndLeft) ScheduleRecoveredReturn(record);
             if (record.phase == MouseDisasterN007Phase.Quarantined || record.phase == MouseDisasterN007Phase.RecoveryDecision)
             {
                 StartN007Release(map, GetActiveN007Pawns(record, map));
@@ -557,10 +562,9 @@ namespace MouseDisaster
                     MouseDisasterN007Outcome.Died => "Died",
                     _ => "Handled"
                 };
-                ReceiveNarrativeLetter(
-                    "MouseDisaster_N007_" + suffix + "_Label",
-                    "MouseDisaster_N007_" + suffix + "_Text",
-                    map);
+                ReceiveNarrativeLetterText(
+                    ("MouseDisaster_N007_" + suffix + "_Label").Translate(),
+                    ("MouseDisaster_N007_" + suffix + "_Text").Translate() + "\n\n" + N007Counts(record), map);
             }
 
             return true;
@@ -579,6 +583,13 @@ namespace MouseDisaster
                 default:
                     return 0;
             }
+        }
+
+        private static string N007Counts(MouseDisasterN007Record record)
+        {
+            return "MouseDisaster_Story_N007Counts".Translate(record.pawnRecords.Count(p => p.recovered && !p.died),
+                record.pawnRecords.Count(p => p.died), record.pawnRecords.Count(p => p.leftMap),
+                record.pawnRecords.Count(p => p.handled));
         }
 
         private MouseDisasterN007Record FindActiveN007Record(int mapId)

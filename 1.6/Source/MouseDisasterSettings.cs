@@ -50,6 +50,23 @@ namespace MouseDisaster
         public float chaosPregnancyChancePercent = 2f;
         public int chaosPregnancyCheckIntervalTicks = 3000;
         public int broadcastHopeCooldownDays = 3;
+        public int narrativeAidGoal = 99;
+        public int narrativeBroadcastGoal = 3;
+        public int narrativeDriveLimit = 3;
+        public int narrativeAdultGoal = 100;
+        public bool enableNarrative = true;
+        public List<string> disabledNarrativeIds = new List<string>();
+        public int narrativeProgressGoal = 3;
+        public int narrativeRewardGoal = 8;
+        public int narrativeTheftGoal = 2;
+        public int narrativeEnvoyGoal = 5;
+        public int narrativeRelicGoal = 8;
+        public int narrativeEndingDelayDays = 30;
+        public float narrativeReturnChancePercent = 100f;
+        public int narrativeReturnDelayDays = 15;
+        public float narrativeN004ReturnChancePercent = 100f;
+        public float narrativeEchoChancePercent = 100f;
+        public int narrativeEchoCooldownDays = 3;
         public bool enableFamineYearSystem = false;
         public float famineYearChancePercent = 40f;
         public float famineYearDisasterBonusPercent = 20f;
@@ -79,6 +96,23 @@ namespace MouseDisaster
             chaosPregnancyChancePercent = 2f;
             chaosPregnancyCheckIntervalTicks = 3000;
             broadcastHopeCooldownDays = 3;
+            narrativeAidGoal = 99;
+            narrativeBroadcastGoal = 3;
+            narrativeDriveLimit = 3;
+            narrativeAdultGoal = 100;
+            enableNarrative = true;
+            disabledNarrativeIds = new List<string>();
+            narrativeProgressGoal = 3;
+            narrativeRewardGoal = 8;
+            narrativeTheftGoal = 2;
+            narrativeEnvoyGoal = 5;
+            narrativeRelicGoal = 8;
+            narrativeEndingDelayDays = 30;
+            narrativeReturnChancePercent = 100f;
+            narrativeReturnDelayDays = 15;
+            narrativeN004ReturnChancePercent = 100f;
+            narrativeEchoChancePercent = 100f;
+            narrativeEchoCooldownDays = 3;
             enableFamineYearSystem = false;
             famineYearChancePercent = 40f;
             famineYearDisasterBonusPercent = 20f;
@@ -114,6 +148,22 @@ namespace MouseDisaster
 
         public void ClampValues()
         {
+            narrativeProgressGoal = Mathf.Clamp(narrativeProgressGoal, 1, 50);
+            narrativeRewardGoal = Mathf.Clamp(narrativeRewardGoal, 1, 50);
+            narrativeTheftGoal = Mathf.Clamp(narrativeTheftGoal, 1, 20);
+            narrativeEnvoyGoal = Mathf.Clamp(narrativeEnvoyGoal, 1, 50);
+            narrativeRelicGoal = Mathf.Clamp(narrativeRelicGoal, 1, 50);
+            narrativeEndingDelayDays = Mathf.Clamp(narrativeEndingDelayDays, 0, 120);
+            narrativeReturnChancePercent = Mathf.Clamp(narrativeReturnChancePercent, 0f, 100f);
+            narrativeReturnDelayDays = Mathf.Clamp(narrativeReturnDelayDays, 1, 120);
+            narrativeN004ReturnChancePercent = Mathf.Clamp(narrativeN004ReturnChancePercent, 0f, 100f);
+            narrativeEchoChancePercent = Mathf.Clamp(narrativeEchoChancePercent, 0f, 100f);
+            narrativeEchoCooldownDays = Mathf.Clamp(narrativeEchoCooldownDays, 1, 60);
+            disabledNarrativeIds = (disabledNarrativeIds ?? new List<string>()).Where(id => MouseDisasterNarrativePolicy.SettingIds.Contains(id)).Distinct().ToList();
+            narrativeAidGoal = Mathf.Clamp(narrativeAidGoal, 1, 999);
+            narrativeBroadcastGoal = Mathf.Clamp(narrativeBroadcastGoal, 1, 99);
+            narrativeDriveLimit = Mathf.Clamp(narrativeDriveLimit, 0, 99);
+            narrativeAdultGoal = Mathf.Clamp(narrativeAdultGoal, 1, 500);
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
             ageDiseaseMultiplier = Mathf.Clamp(ageDiseaseMultiplier, MinAgeDiseaseMultiplier, MaxAgeDiseaseMultiplier);
             chaosPregnancyChancePercent = Mathf.Clamp(chaosPregnancyChancePercent, MinChaosPregnancyChancePercent, MaxChaosPregnancyChancePercent);
@@ -143,6 +193,19 @@ namespace MouseDisaster
 
         public override void ExposeData()
         {
+            Scribe_Values.Look(ref enableNarrative, "enableNarrative", true);
+            Scribe_Collections.Look(ref disabledNarrativeIds, "disabledNarrativeIds", LookMode.Value);
+            Scribe_Values.Look(ref narrativeProgressGoal, "narrativeProgressGoal", 3);
+            Scribe_Values.Look(ref narrativeRewardGoal, "narrativeRewardGoal", 8);
+            Scribe_Values.Look(ref narrativeTheftGoal, "narrativeTheftGoal", 2);
+            Scribe_Values.Look(ref narrativeEnvoyGoal, "narrativeEnvoyGoal", 5);
+            Scribe_Values.Look(ref narrativeRelicGoal, "narrativeRelicGoal", 8);
+            Scribe_Values.Look(ref narrativeEndingDelayDays, "narrativeEndingDelayDays", 30);
+            Scribe_Values.Look(ref narrativeReturnChancePercent, "narrativeReturnChancePercent", 100f);
+            Scribe_Values.Look(ref narrativeReturnDelayDays, "narrativeReturnDelayDays", 15);
+            Scribe_Values.Look(ref narrativeN004ReturnChancePercent, "narrativeN004ReturnChancePercent", 100f);
+            Scribe_Values.Look(ref narrativeEchoChancePercent, "narrativeEchoChancePercent", 100f);
+            Scribe_Values.Look(ref narrativeEchoCooldownDays, "narrativeEchoCooldownDays", 3);
             Scribe_Values.Look(ref enableNewContent, "enableNewContent", true);
             Scribe_Values.Look(ref enableAgeCapAdjustment, "enableAgeCapAdjustment", true);
             Scribe_Values.Look(ref enableWildRatkinIncidents, "enableWildRatkinIncidents", true);
@@ -165,6 +228,10 @@ namespace MouseDisaster
             Scribe_Values.Look(ref chaosPregnancyChancePercent, "chaosPregnancyChancePercent", 2f);
             Scribe_Values.Look(ref chaosPregnancyCheckIntervalTicks, "chaosPregnancyCheckIntervalTicks", 3000);
             Scribe_Values.Look(ref broadcastHopeCooldownDays, "broadcastHopeCooldownDays", 3);
+            Scribe_Values.Look(ref narrativeAidGoal, "narrativeAidGoal", 99);
+            Scribe_Values.Look(ref narrativeBroadcastGoal, "narrativeBroadcastGoal", 3);
+            Scribe_Values.Look(ref narrativeDriveLimit, "narrativeDriveLimit", 3);
+            Scribe_Values.Look(ref narrativeAdultGoal, "narrativeAdultGoal", 100);
             Scribe_Values.Look(ref enableFamineYearSystem, "enableFamineYearSystem", false);
             Scribe_Values.Look(ref famineYearChancePercent, "famineYearChancePercent", 40f);
             Scribe_Values.Look(ref famineYearDisasterBonusPercent, "famineYearDisasterBonusPercent", 20f);
@@ -207,6 +274,19 @@ namespace MouseDisaster
                 .Where(MouseDisasterIncidentCatalog.IsKnownIncident)
                 .OrderBy(defName => defName)
                 .ToList();
+        }
+
+        public bool IsNarrativeEnabled(string id)
+        {
+            return enableNarrative && MouseDisasterNarrativePolicy.Enabled(id, disabledNarrativeIds);
+        }
+
+        public void SetNarrativeEnabled(string id, bool enabled)
+        {
+            if (!MouseDisasterNarrativePolicy.SettingIds.Contains(id)) return;
+            disabledNarrativeIds ??= new List<string>();
+            disabledNarrativeIds.RemoveAll(item => item == id);
+            if (!enabled) disabledNarrativeIds.Add(id);
         }
     }
 }

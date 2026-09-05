@@ -35,6 +35,8 @@ namespace MouseDisaster
             ExposeN005Data();
             ExposeN006Data();
             ExposeN007Data();
+            ExposeJournalData();
+            ExposeStoryTaskData();
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
@@ -68,7 +70,7 @@ namespace MouseDisaster
             }
         }
 
-        public void RecordIncidentExecuted(IncidentDef incidentDef, IncidentParms parms)
+        public void RecordIncidentExecuted(IncidentDef incidentDef, IncidentParms parms, List<Pawn> participants = null)
         {
             if (!MouseDisasterRuntime.AllowsNewContent || incidentDef == null || !MouseDisasterIncidentCatalog.IsKnownIncident(incidentDef.defName))
             {
@@ -76,21 +78,25 @@ namespace MouseDisaster
             }
 
             NotifyN006TheftIncident(incidentDef, parms);
-            NotifyN007PlagueIncident(incidentDef, parms);
-            if (ContainsObservedIncident(incidentDef.defName))
-            {
-                return;
-            }
+            NotifyN007PlagueIncident(incidentDef, parms, participants);
+            TrackNarrativeVisit(MouseDisasterNarrativePolicy.Scene(incidentDef.defName), parms?.target as Map, participants);
+            if (incidentDef.defName == "MouseDisaster_ChildExchange" && NarrativeEnabled("N005") && participants != null)
+                foreach (Pawn pawn in participants)
+                    if (MouseDisasterUtility.IsChildExchangeTrader(pawn) && !n005StartedTraderIds.Contains(pawn.thingIDNumber))
+                        n005StartedTraderIds.Add(pawn.thingIDNumber);
+            if (!ContainsObservedIncident(incidentDef.defName)) observedIncidentDefNames.Add(incidentDef.defName);
+            ProcessOpeningNarrative(ResolvePlayerHomeMap(parms));
+        }
 
-            observedIncidentDefNames.Add(incidentDef.defName);
+        private void ProcessOpeningNarrative(Map map)
+        {
+            if (observedIncidentDefNames.Count == 0) return;
             if (!IsNarratorActive())
             {
                 return;
             }
 
-            Map map = ResolvePlayerHomeMap(parms);
-
-            if (!openingLetterSent)
+            if (!openingLetterSent && NarrativeEnabled("N001"))
             {
                 openingLetterSent = true;
                 narrativeChapter = Math.Max(narrativeChapter, 1);
@@ -100,7 +106,7 @@ namespace MouseDisaster
                     map);
             }
 
-            if (!progressLetterSent && observedIncidentDefNames.Count >= ChapterProgressEventCount)
+            if (!progressLetterSent && NarrativeEnabled("N002") && observedIncidentDefNames.Count >= (MouseDisasterMod.Settings?.narrativeProgressGoal ?? ChapterProgressEventCount))
             {
                 progressLetterSent = true;
                 narrativeChapter = Math.Max(narrativeChapter, 2);
@@ -111,7 +117,7 @@ namespace MouseDisaster
                     observedIncidentDefNames.Count);
             }
 
-            if (!hiddenRewardClaimed && observedIncidentDefNames.Count >= HiddenRewardEventCount)
+            if (!hiddenRewardClaimed && NarrativeEnabled("N003") && observedIncidentDefNames.Count >= (MouseDisasterMod.Settings?.narrativeRewardGoal ?? HiddenRewardEventCount))
             {
                 TryGrantHiddenReward(map);
             }
@@ -119,7 +125,7 @@ namespace MouseDisaster
 
         private static bool IsNarratorActive()
         {
-            return Find.Storyteller?.def?.defName == NarratorDefName;
+            return DebugForcing || Find.Storyteller?.def?.defName == NarratorDefName;
         }
 
         private bool ContainsObservedIncident(string defName)
@@ -182,7 +188,7 @@ namespace MouseDisaster
             }
 
             Thing reward = ThingMaker.MakeThing(ThingDefOf.Silver);
-            reward.stackCount = HiddenRewardSilverCount;
+            reward.stackCount = NarrativeReward(HiddenRewardSilverCount);
             List<Thing> payload = new List<Thing> { reward };
             DropPodUtility.DropThingsNear(
                 DropCellFinder.TradeDropSpot(map),
@@ -200,7 +206,7 @@ namespace MouseDisaster
             narrativeChapter = Math.Max(narrativeChapter, 3);
             Find.LetterStack.ReceiveLetter(
                 "MouseDisaster_Narrative_RewardLabel".Translate(),
-                "MouseDisaster_Narrative_RewardText".Translate(HiddenRewardSilverCount),
+                "MouseDisaster_Narrative_RewardText".Translate(reward.stackCount),
                 LetterDefOf.PositiveEvent,
                 reward);
             return true;

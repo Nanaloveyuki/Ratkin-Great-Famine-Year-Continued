@@ -164,6 +164,7 @@ namespace MouseDisaster
 
             eventCount = triggerCount;
             initialDelayHours = delayTicks / (float)GenDate.TicksPerHour;
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeBroadcast();
             return true;
         }
 

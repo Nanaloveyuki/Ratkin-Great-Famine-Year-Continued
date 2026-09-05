@@ -107,6 +107,8 @@ namespace MouseDisaster
                 return existing;
             }
 
+            if (!NarrativeEnabled("N004")) return null;
+
             MouseDisasterN004Record record = new MouseDisasterN004Record
             {
                 mother = mother,
@@ -149,6 +151,8 @@ namespace MouseDisaster
 
         public override void GameComponentTick()
         {
+            if (Find.TickManager != null && Find.TickManager.TicksGame % MouseDisasterNarrativePolicy.CheckTicks == 0)
+                ProcessNarrativeJournal();
             if (Find.TickManager == null || Find.TickManager.TicksGame % N004CheckIntervalTicks != 0)
             {
                 return;
@@ -286,6 +290,7 @@ namespace MouseDisaster
             }
 
             record.outcome = outcome;
+            CompleteNarrativeFlag("N004");
             ApplyN004OutcomeEffects(record);
             ChangeNarratorTrust(TrustDeltaForOutcome(outcome));
             if (!IsNarratorActive())

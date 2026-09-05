@@ -84,6 +84,13 @@
     <Compile Include="GameComponent_MouseDisasterNarrative_N005.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_N006.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_N007.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_Journal.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_Debug.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_Tasks.cs" />
+    <Compile Include="MouseDisasterNarrativePolicy.cs" />
+    <Compile Include="MouseDisasterNarrativePatches.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterStory.cs" />
+    <Compile Include="Building_MouseDisasterNarrative.cs" />
     <Compile Include="GameComponent_MouseDisasterPendingState.cs" />
     <Compile Include="MouseDisasterGuanyinTu.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />

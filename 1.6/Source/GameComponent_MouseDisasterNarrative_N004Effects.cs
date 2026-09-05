@@ -200,6 +200,7 @@ namespace MouseDisaster
 
         public void TryTriggerN004Revisit(Caravan caravan)
         {
+            if (!NarrativeEnabled("N004Return")) return;
             if (caravan == null || !caravan.Spawned || !caravan.IsPlayerControlled || n004Records == null)
             {
                 return;
@@ -212,7 +213,8 @@ namespace MouseDisaster
                 !candidate.revisitTriggered &&
                 candidate.revisitDeadlineTick > now &&
                 GetN004RevisitPawns(candidate).Count > 0);
-            if (record == null || !Rand.Chance(Mathf.Clamp01(N004RevisitBaseChance * caravan.Visibility)))
+            if (record == null || (!narrativeDebugForce && !Rand.Chance(MouseDisasterNarrativePolicy.ScaledChance(
+                Mathf.Clamp01(N004RevisitBaseChance * caravan.Visibility), MouseDisasterMod.Settings?.narrativeN004ReturnChancePercent ?? 100f))))
             {
                 return;
             }

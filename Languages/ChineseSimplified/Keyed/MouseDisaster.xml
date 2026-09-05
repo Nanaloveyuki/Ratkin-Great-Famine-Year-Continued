@@ -16,12 +16,12 @@
   <MouseDisaster_Settings_EnableNewContent_Tooltip>可在游戏运行期间即时切换。关闭后不再触发新的鼠灾事件、生成新的鼠灾 Pawn 或建立新的鼠灾受孕；已经存在的 Pawn、工作、信件、区域和状态不受影响并继续运行。</MouseDisaster_Settings_EnableNewContent_Tooltip>
   <MouseDisaster_Settings_NewContentDisabledHint>新内容生成已关闭。现有 Pawn 与事件状态仍会继续正常工作。</MouseDisaster_Settings_NewContentDisabledHint>
   <MouseDisaster_Settings_NewContentDisabledDebugMessage>鼠灾新内容生成已关闭，无法触发新事件。</MouseDisaster_Settings_NewContentDisabledDebugMessage>
-  <MouseDisaster_Narrative_OpeningLabel>穗音：一份记录</MouseDisaster_Narrative_OpeningLabel>
-  <MouseDisaster_Narrative_OpeningText>你可能已经注意到最近的鼠灾了。我叫穗音。我在记录这些鼠族的来去。先不用急着判断它们，看看它们从哪里来、需要什么，又会去哪。有些事情不会留下答案，但会留下结果。</MouseDisaster_Narrative_OpeningText>
-  <MouseDisaster_Narrative_ProgressLabel>记录继续</MouseDisaster_Narrative_ProgressLabel>
-  <MouseDisaster_Narrative_ProgressText>你已经见证了 {0} 个不同的鼠灾事件。我还在整理这些记录。它们看起来互不相干，但有些名字会再次出现，有些事情会留下后果。继续看下去，你会知道这场灾荒留下了什么。</MouseDisaster_Narrative_ProgressText>
-  <MouseDisaster_Narrative_RewardLabel>穗音的谢礼</MouseDisaster_Narrative_RewardLabel>
-  <MouseDisaster_Narrative_RewardText>你已经见证了 8 个不同的鼠灾事件。我送来了一批白银，共 {0} 份，已经放在殖民地的交易地点。把它当作谢礼，也可以把它当作我对下一次记录的预付。记录还没有结束。</MouseDisaster_Narrative_RewardText>
+  <MouseDisaster_Narrative_OpeningLabel>穗音的来信</MouseDisaster_Narrative_OpeningLabel>
+  <MouseDisaster_Narrative_OpeningText>“我叫穗音。你那边的消息，我能收到一些。慢，有时还不准。\n\n最近路上多了很多鼠族。有人找吃的，有人做买卖，也有人会抢。别因为我写了这封信就放他们进门，我不替他们担保。\n\n等事情有了下文，我还会来信。”</MouseDisaster_Narrative_OpeningText>
+  <MouseDisaster_Narrative_ProgressLabel>又收到一些消息</MouseDisaster_Narrative_ProgressLabel>
+  <MouseDisaster_Narrative_ProgressText>“已经有 {0} 类来客的消息送到我这里。\n\n来过和安顿下来，我会分开记。有人进门时好好的，走的时候未必；也有人来抢东西，最后留了下来。\n\n你不用专门给我写回信。我会等后面的消息。”</MouseDisaster_Narrative_ProgressText>
+  <MouseDisaster_Narrative_RewardLabel>一笔路费</MouseDisaster_Narrative_RewardLabel>
+  <MouseDisaster_Narrative_RewardText>“送来的白银是我出的，一共 {0} 份。\n\n我请人绕了路。他抱怨运这么一点东西不划算，回来又问下次什么时候走。我还没答应他。\n\n钱已经送到了，你按眼下的需要用吧。不必为了回这份礼接下谁。”</MouseDisaster_Narrative_RewardText>
   <MouseDisaster_GuanyinTuSatiety_Status>观音土饱腹：{0}/{1} 次，本轮剩余 {2} 天。</MouseDisaster_GuanyinTuSatiety_Status>
   <!-- N-004 以下文本为临时版本，待 narrative-draft.md 精修后替换。 -->
   <MouseDisaster_N004_Label>穗音：鼠疫托孤</MouseDisaster_N004_Label>
@@ -57,25 +57,25 @@
   <MouseDisaster_N004_Revisit_RewardText>四年前的承诺有了结果。穗音送来 {0} 份白银，已经投放在殖民地的交易地点。</MouseDisaster_N004_Revisit_RewardText>
   <!-- N-005 runtime wording remains short until the narrative draft is finalized. -->
   <MouseDisaster_N005_Reject>拒绝交换</MouseDisaster_N005_Reject>
-  <MouseDisaster_N005_Accepted_Label>穗音：给孩子一个名字</MouseDisaster_N005_Accepted_Label>
-  <MouseDisaster_N005_Accepted_Text>交换完成了。留下的孩子留在了殖民地，新的名字还没有写进记录。</MouseDisaster_N005_Accepted_Text>
-  <MouseDisaster_N005_Rejected_Label>穗音：空篮子</MouseDisaster_N005_Rejected_Label>
-  <MouseDisaster_N005_Rejected_Text>你拒绝了交换。商人带着孩子离开了。</MouseDisaster_N005_Rejected_Text>
-  <MouseDisaster_N005_TimedOut_Label>穗音：没有等到答案</MouseDisaster_N005_TimedOut_Label>
-  <MouseDisaster_N005_TimedOut_Text>你没有在规定时间内作出决定。商人带着孩子离开了。</MouseDisaster_N005_TimedOut_Text>
-  <MouseDisaster_N005_Broken_Label>穗音：两边都没有拿到</MouseDisaster_N005_Broken_Label>
-  <MouseDisaster_N005_Broken_Text>交易中断了。双方都没有按原计划完成交接。</MouseDisaster_N005_Broken_Text>
+  <MouseDisaster_N005_Accepted_Label>先安顿下来</MouseDisaster_N005_Accepted_Label>
+  <MouseDisaster_N005_Accepted_Text>孩子已经交到你这里。商人又确认了一遍交接的东西，像是怕临走时有人叫住他。\n\n先前争论的价格没人再提。接下来还要有人喂饭、找地方睡觉。那些事没有写在交易里。</MouseDisaster_N005_Accepted_Text>
+  <MouseDisaster_N005_Rejected_Label>空篮子</MouseDisaster_N005_Rejected_Label>
+  <MouseDisaster_N005_Rejected_Text>商人收起了交换用的东西。你没有改口，他也就没有再等。</MouseDisaster_N005_Rejected_Text>
+  <MouseDisaster_N005_TimedOut_Label>没有等到答案</MouseDisaster_N005_TimedOut_Label>
+  <MouseDisaster_N005_TimedOut_Text>商人等到了约定的时间，还是没有收到答复。他带着孩子走了。晚到的决定已经赶不上这次交接。</MouseDisaster_N005_TimedOut_Text>
+  <MouseDisaster_N005_Broken_Label>交易破裂</MouseDisaster_N005_Broken_Label>
+  <MouseDisaster_N005_Broken_Text>原定的交接没有完成。先前谈好的条件已经作废，活着的人也不再按那份约定行事。</MouseDisaster_N005_Broken_Text>
   <!-- N-006 runtime wording remains short until narrative-draft.md is finalized. -->
-  <MouseDisaster_N006_EntryLabel>穗音：粮仓下面</MouseDisaster_N006_EntryLabel>
-  <MouseDisaster_N006_EntryText>同一张地图上已经发生了两次鼠族偷窃。储粮处的缺口没有对上，墙后传来抓挠声。你要现在处理，还是先留一点食物看看它们去了哪里？</MouseDisaster_N006_EntryText>
-  <MouseDisaster_N006_Seal>封住洞口</MouseDisaster_N006_Seal>
-  <MouseDisaster_N006_LeaveBait>留下诱饵</MouseDisaster_N006_LeaveBait>
-  <MouseDisaster_N006_ForceClean>强行清理</MouseDisaster_N006_ForceClean>
-  <MouseDisaster_N006_Ignore>先不管</MouseDisaster_N006_Ignore>
-  <MouseDisaster_N006_Bait_Message>你留下一份食物，等它们把路线暴露出来。</MouseDisaster_N006_Bait_Message>
+  <MouseDisaster_N006_EntryLabel>墙根漏粮</MouseDisaster_N006_EntryLabel>
+  <MouseDisaster_N006_EntryText>储粮附近发现了一个小洞，边上挂着碎屑。\n\n有人想现在就填上，也有人觉得，跟着看看也许能把丢掉的东西找回来。\n\n洞口未处理时每天最多损失一份食物，总计不超过三份。</MouseDisaster_N006_EntryText>
+  <MouseDisaster_N006_Seal>封堵（20 木材）</MouseDisaster_N006_Seal>
+  <MouseDisaster_N006_LeaveBait>留下诱饵（1 份食物，等待 1 天）</MouseDisaster_N006_LeaveBait>
+  <MouseDisaster_N006_ForceClean>强行清理（损失最多 5 份食物）</MouseDisaster_N006_ForceClean>
+  <MouseDisaster_N006_Ignore>暂不处理（3 天后失去线索）</MouseDisaster_N006_Ignore>
+  <MouseDisaster_N006_Bait_Message>食物已经留在洞边。今晚得少吃这一份。</MouseDisaster_N006_Bait_Message>
   <MouseDisaster_N006_Bait_NoFood>没有可以留下的食物。</MouseDisaster_N006_Bait_NoFood>
-  <MouseDisaster_N006_BaitReadyLabel>穗音：诱饵不见了</MouseDisaster_N006_BaitReadyLabel>
-  <MouseDisaster_N006_BaitReadyText>诱饵不见了，墙后多了一道新的划痕。现在可以沿着痕迹追踪，也可以停在这里。</MouseDisaster_N006_BaitReadyText>
+  <MouseDisaster_N006_BaitReadyLabel>拖出去的痕迹</MouseDisaster_N006_BaitReadyLabel>
+  <MouseDisaster_N006_BaitReadyText>诱饵不在了，洞外有一段新痕迹。现在可以追踪，也可以到此停下。</MouseDisaster_N006_BaitReadyText>
   <MouseDisaster_N006_Trace>沿着痕迹追踪</MouseDisaster_N006_Trace>
   <MouseDisaster_N006_Stop>停止追踪</MouseDisaster_N006_Stop>
   <MouseDisaster_N006_ActionFailed>这条粮仓记录已经不能继续处理。</MouseDisaster_N006_ActionFailed>
@@ -84,16 +84,16 @@
   <MouseDisaster_N006_ForceCleaned_Message>你强行清理了粮仓附近的洞口。</MouseDisaster_N006_ForceCleaned_Message>
   <MouseDisaster_N006_BaitLost_Message>你停止了追踪，诱饵的去向没有留下结果。</MouseDisaster_N006_BaitLost_Message>
   <MouseDisaster_N006_BaitTraced_Message>你沿着诱饵留下的痕迹找到了一个新地点。</MouseDisaster_N006_BaitTraced_Message>
-  <MouseDisaster_N006_Sealed_Label>穗音：墙重新长出来</MouseDisaster_N006_Sealed_Label>
-  <MouseDisaster_N006_Sealed_Text>你封住了粮仓附近的洞口。损失暂时停在这里，洞的另一端没有留下记录。</MouseDisaster_N006_Sealed_Text>
-  <MouseDisaster_N006_BaitTraced_Label>穗音：一条更远的路</MouseDisaster_N006_BaitTraced_Label>
-  <MouseDisaster_N006_BaitTraced_Text>你沿着粮屑找到了一个新的地点。至少这条粮路不再只是猜测。</MouseDisaster_N006_BaitTraced_Text>
-  <MouseDisaster_N006_BaitLost_Label>穗音：诱饵没有回来</MouseDisaster_N006_BaitLost_Label>
-  <MouseDisaster_N006_BaitLost_Text>诱饵消失了，但没有留下足够的痕迹。记录在这里停下，路线仍然在墙后。</MouseDisaster_N006_BaitLost_Text>
-  <MouseDisaster_N006_ForceCleaned_Label>穗音：里面的回声</MouseDisaster_N006_ForceCleaned_Label>
-  <MouseDisaster_N006_ForceCleaned_Text>你清理了粮仓附近的洞口。出来的只有碎粮和灰，里面更远的声音没有等到你确认。</MouseDisaster_N006_ForceCleaned_Text>
-  <MouseDisaster_N006_LostClue_Label>穗音：没有洞</MouseDisaster_N006_LostClue_Label>
-  <MouseDisaster_N006_LostClue_Text>你再去看时，墙角只剩下一层灰。没有洞，也没有足够大的缝隙能解释粮食去了哪里。</MouseDisaster_N006_LostClue_Text>
+  <MouseDisaster_N006_Sealed_Label>洞口填好了</MouseDisaster_N006_Sealed_Label>
+  <MouseDisaster_N006_Sealed_Text>洞口填好了。这个缺口不再损失食物。\n\n谁在另一头，没人再去看。</MouseDisaster_N006_Sealed_Text>
+  <MouseDisaster_N006_BaitTraced_Label>更远的位置</MouseDisaster_N006_BaitTraced_Label>
+  <MouseDisaster_N006_BaitTraced_Text>你沿着痕迹标出了一个地方。里面有什么，还得有人走过去看。</MouseDisaster_N006_BaitTraced_Text>
+  <MouseDisaster_N006_BaitLost_Label>到此停下</MouseDisaster_N006_BaitLost_Label>
+  <MouseDisaster_N006_BaitLost_Text>这次没有继续追踪。洞口已经处理，原先那条路不再往下查了。</MouseDisaster_N006_BaitLost_Text>
+  <MouseDisaster_N006_ForceCleaned_Label>翻了一遍</MouseDisaster_N006_ForceCleaned_Label>
+  <MouseDisaster_N006_ForceCleaned_Text>你们把洞边能藏东西的地方翻了一遍。碎粮扫出来，没法再吃了。\n\n至少今晚不用守着这个缺口。</MouseDisaster_N006_ForceCleaned_Text>
+  <MouseDisaster_N006_LostClue_Label>找不到洞口了</MouseDisaster_N006_LostClue_Label>
+  <MouseDisaster_N006_LostClue_Text>洞口或原来的储粮位置已经无法继续追踪。这一条线索到此结束。</MouseDisaster_N006_LostClue_Text>
   <MouseDisaster_N006_BaitTraced_SiteLabel>粮仓情报</MouseDisaster_N006_BaitTraced_SiteLabel>
   <MouseDisaster_N006_BaitTraced_SiteText>你沿着粮屑找到了一个地点。它可能是藏粮处，也可能只是另一条路的入口。</MouseDisaster_N006_BaitTraced_SiteText>
   <MouseDisaster_Settings_EnableAgeCap>启用鼠族年龄上限修正</MouseDisaster_Settings_EnableAgeCap>
@@ -197,9 +197,9 @@
   <MouseDisaster_FoodGive_Fail>当前无法为这些鼠灾单位安排食物给予。</MouseDisaster_FoodGive_Fail>
   <MouseDisaster_Letter_Ignore>先不管，别再提醒</MouseDisaster_Letter_Ignore>
   <MouseDisaster_N007_EntryLabel>封锁线</MouseDisaster_N007_EntryLabel>
-  <MouseDisaster_N007_EntryText>来客中发现了鼠疫感染者。你可以让他们留在原地隔离观察，也可以放行，或暂时不干预。隔离不会自动治疗；病情仍将继续发展。</MouseDisaster_N007_EntryText>
+  <MouseDisaster_N007_EntryText>来客中有人得了鼠疫。他们还在这里，去留却不能再按普通访客处理。\n\n可以先让他们留下观察，也可以放他们走。病不会因为作了决定就停下来。</MouseDisaster_N007_EntryText>
   <MouseDisaster_N007_RecoveryLabel>封锁线后的去向</MouseDisaster_N007_RecoveryLabel>
-  <MouseDisaster_N007_RecoveryText>仍在地图上的感染来客已经康复。你可以让他们离开，也可以接纳他们加入殖民地。</MouseDisaster_N007_RecoveryText>
+  <MouseDisaster_N007_RecoveryText>还留在这里的病人已经没有鼠疫症状。现在可以谈谈以后了。\n\n可以让他们离开，也可以接纳当前已经康复的访客。</MouseDisaster_N007_RecoveryText>
   <MouseDisaster_N007_Quarantine>隔离观察</MouseDisaster_N007_Quarantine>
   <MouseDisaster_N007_Release>放行</MouseDisaster_N007_Release>
   <MouseDisaster_N007_Defer>暂不处理</MouseDisaster_N007_Defer>
@@ -207,22 +207,22 @@
   <MouseDisaster_N007_RecoveredAccept>接纳康复者</MouseDisaster_N007_RecoveredAccept>
   <MouseDisaster_N007_ActionFailed>来客状态已经变化，当前无法执行这项处理。</MouseDisaster_N007_ActionFailed>
   <MouseDisaster_N007_VisitorControlBlocked>这些来客正在检疫流程中，请先处理检疫信件。</MouseDisaster_N007_VisitorControlBlocked>
-  <MouseDisaster_N007_Quarantine_Message>已让 {0} 名感染来客留在原地隔离观察。</MouseDisaster_N007_Quarantine_Message>
-  <MouseDisaster_N007_Release_Message>已安排 {0} 名感染来客离开。</MouseDisaster_N007_Release_Message>
+  <MouseDisaster_N007_Quarantine_Message>病人暂时留下了，共 {0} 名。这里还需要照料，不能只靠留守安排。</MouseDisaster_N007_Quarantine_Message>
+  <MouseDisaster_N007_Release_Message>已安排 {0} 名病人离开。不能行走的人仍需等待，实际离场后才结算。</MouseDisaster_N007_Release_Message>
   <MouseDisaster_N007_Defer_Message>暂不干预，继续记录感染来客的状况。</MouseDisaster_N007_Defer_Message>
   <MouseDisaster_N007_Recovered_Message>康复者已经不在原地，检疫记录已结算。</MouseDisaster_N007_Recovered_Message>
   <MouseDisaster_N007_RecoveredRelease_Message>已安排 {0} 名康复者离开。</MouseDisaster_N007_RecoveredRelease_Message>
   <MouseDisaster_N007_RecoveredAccept_Message>已接纳 {0} 名康复者。</MouseDisaster_N007_RecoveredAccept_Message>
-  <MouseDisaster_N007_Recovered_Label>痊愈后离开</MouseDisaster_N007_Recovered_Label>
-  <MouseDisaster_N007_Recovered_Text>活下来的病人已经康复并离开。封锁线撤下了，这一次，路上多了几个幸存者。</MouseDisaster_N007_Recovered_Text>
-  <MouseDisaster_N007_RecoveredStayed_Label>留下的人</MouseDisaster_N007_RecoveredStayed_Label>
-  <MouseDisaster_N007_RecoveredStayed_Text>康复者留在了殖民地。病人的记录到这里结束，新成员的生活才刚开始。</MouseDisaster_N007_RecoveredStayed_Text>
+  <MouseDisaster_N007_Recovered_Label>可以赶路了</MouseDisaster_N007_Recovered_Label>
+  <MouseDisaster_N007_Recovered_Text>康复的人已经离开。这一次，他们不必带着鼠疫上路。</MouseDisaster_N007_Recovered_Text>
+  <MouseDisaster_N007_RecoveredStayed_Label>住下来</MouseDisaster_N007_RecoveredStayed_Label>
+  <MouseDisaster_N007_RecoveredStayed_Text>康复的人留在了殖民地。病床空出来了，他们还需要自己的住处。</MouseDisaster_N007_RecoveredStayed_Text>
   <MouseDisaster_N007_Released_Label>回到路上</MouseDisaster_N007_Released_Label>
-  <MouseDisaster_N007_Released_Text>获准放行的感染来客已经离开地图。他们此后的病情不再由这里的检疫记录追踪。</MouseDisaster_N007_Released_Text>
+  <MouseDisaster_N007_Released_Text>获准放行的病人已经离开地图。地图外的病情暂时无法确认。</MouseDisaster_N007_Released_Text>
   <MouseDisaster_N007_QuarantineBroken_Label>封锁失守</MouseDisaster_N007_QuarantineBroken_Label>
-  <MouseDisaster_N007_QuarantineBroken_Text>有人在鼠疫尚未消退时离开了地图。隔离没有维持到最后，剩余来客已解除留守安排。</MouseDisaster_N007_QuarantineBroken_Text>
+  <MouseDisaster_N007_QuarantineBroken_Text>还有感染者在病好以前离开了地图。其余人的留守安排也已经解除。\n\n封锁没有维持住。离开的人走到了哪里，这里看不见。</MouseDisaster_N007_QuarantineBroken_Text>
   <MouseDisaster_N007_Died_Label>未能走出封锁线</MouseDisaster_N007_Died_Label>
-  <MouseDisaster_N007_Died_Text>这批感染来客无人存活。检疫记录已经结束。</MouseDisaster_N007_Died_Text>
+  <MouseDisaster_N007_Died_Text>这批病人没有活下来的人。留守安排已经结束。</MouseDisaster_N007_Died_Text>
   <MouseDisaster_N007_Handled_Label>中止的检疫记录</MouseDisaster_N007_Handled_Label>
-  <MouseDisaster_N007_Handled_Text>感染来客已经离开或脱离原有访客管理。此处不再继续检疫追踪，也不将去向不明记为康复。</MouseDisaster_N007_Handled_Text>
+  <MouseDisaster_N007_Handled_Text>感染来客已经脱离原有的访客管理，或无法继续确认去向。这次检疫结束，去向不明保留为去向不明。</MouseDisaster_N007_Handled_Text>
 </LanguageData>

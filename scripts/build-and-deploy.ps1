@@ -113,7 +113,7 @@ foreach ($relativePath in @("LoadFolders.xml", "NOTICE", "README.md")) {
 }
 
 $sourceFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
-foreach ($relativeDirectory in @("About", "Defs", "Languages", "Patches")) {
+foreach ($relativeDirectory in @("About", "Defs", "Languages", "Patches", "Textures")) {
     $sourceDirectory = Join-Path $repoRoot $relativeDirectory
     if (-not (Test-Path -LiteralPath $sourceDirectory -PathType Container)) {
         throw "Required content directory not found: $sourceDirectory"

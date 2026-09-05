@@ -121,6 +121,7 @@ namespace MouseDisaster
             give.action = delegate
             {
                 MouseDisasterPhase3CaravanUtility.TakeDemandFromCaravan(caravan, demands);
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordCaravanNarrative(true);
                 for (int i = 0; i < attackers.Count; i++)
                 {
                     Find.WorldPawns.PassToWorld(attackers[i], PawnDiscardDecideMode.Discard);
@@ -133,6 +134,7 @@ namespace MouseDisaster
             fight.action = delegate
             {
                 TaleRecorder.RecordTale(TaleDefOf.CaravanAmbushedByHumanlike, caravan.RandomOwner());
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordCaravanNarrative(false);
                 LongEventHandler.QueueLongEvent(delegate
                 {
                     Map map = CaravanIncidentUtility.SetupCaravanAttackMap(caravan, attackers, sendLetterIfRelatedPawns: true);

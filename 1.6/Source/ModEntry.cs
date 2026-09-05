@@ -22,7 +22,8 @@ namespace MouseDisaster
         public override void DoSettingsWindowContents(Rect inRect)
         {
             float incidentSectionHeight = MouseDisasterIncidentCatalog.AllEntries.Count * 30f;
-            Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, Mathf.Max(1640f + incidentSectionHeight, inRect.height + 620f + incidentSectionHeight));
+            float narrativeSectionHeight = MouseDisasterNarrativePolicy.SettingIds.Length * 30f + 950f;
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, Mathf.Max(1920f + incidentSectionHeight + narrativeSectionHeight, inRect.height + 900f + incidentSectionHeight + narrativeSectionHeight));
             Widgets.BeginScrollView(inRect, ref settingsScrollPosition, viewRect);
 
             Listing_Standard listing = new Listing_Standard();
@@ -42,6 +43,16 @@ namespace MouseDisaster
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
             DrawDaysSlider(listing, "MouseDisaster_Settings_BroadcastHopeCooldown", ref Settings.broadcastHopeCooldownDays, 0, 10);
             DrawIncidentSection(listing);
+            DrawNarrativeControls(listing);
+            DrawSectionTitle(listing, "MouseDisaster_Story_Settings");
+            listing.Label("MouseDisaster_Story_AidGoal".Translate(Settings.narrativeAidGoal));
+            Settings.narrativeAidGoal = Mathf.RoundToInt(listing.Slider(Settings.narrativeAidGoal, 1, 999));
+            listing.Label("MouseDisaster_Story_BroadcastGoal".Translate(Settings.narrativeBroadcastGoal));
+            Settings.narrativeBroadcastGoal = Mathf.RoundToInt(listing.Slider(Settings.narrativeBroadcastGoal, 1, 99));
+            listing.Label("MouseDisaster_Story_DriveLimit".Translate(Settings.narrativeDriveLimit));
+            Settings.narrativeDriveLimit = Mathf.RoundToInt(listing.Slider(Settings.narrativeDriveLimit, 0, 99));
+            listing.Label("MouseDisaster_Story_AdultGoal".Translate(Settings.narrativeAdultGoal));
+            Settings.narrativeAdultGoal = Mathf.RoundToInt(listing.Slider(Settings.narrativeAdultGoal, 1, 500));
 
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_FamineYear");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableFamineYearSystem", ref Settings.enableFamineYearSystem, "MouseDisaster_Settings_EnableFamineYearSystem_Tooltip");
@@ -156,6 +167,42 @@ namespace MouseDisaster
         {
             listing.Label(labelKey.Translate(value.ToString("0")));
             value = listing.Slider(value, min, max);
+        }
+
+        private static void DrawNarrativeControls(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_Story_ControlSection");
+            DrawCheckbox(listing, "MouseDisaster_Story_EnableNarrative", ref Settings.enableNarrative, "MouseDisaster_Story_EnableNarrativeTip");
+            foreach (string id in MouseDisasterNarrativePolicy.SettingIds)
+            {
+                bool enabled = MouseDisasterNarrativePolicy.Enabled(id, Settings.disabledNarrativeIds);
+                bool changed = enabled;
+                listing.CheckboxLabeled(("MouseDisaster_Story_Toggle" + id).Translate(), ref changed,
+                    "MouseDisaster_Story_ToggleTip".Translate());
+                if (changed != enabled) Settings.SetNarrativeEnabled(id, changed);
+                listing.Gap(2f);
+            }
+            DrawSectionTitle(listing, "MouseDisaster_Story_TriggerSection");
+            DrawNarrativeInteger(listing, "MouseDisaster_Story_ProgressGoal", ref Settings.narrativeProgressGoal, 1, 50);
+            DrawNarrativeInteger(listing, "MouseDisaster_Story_RewardGoal", ref Settings.narrativeRewardGoal, 1, 50);
+            DrawNarrativeInteger(listing, "MouseDisaster_Story_TheftGoal", ref Settings.narrativeTheftGoal, 1, 20);
+            DrawNarrativeInteger(listing, "MouseDisaster_Story_EnvoyGoal", ref Settings.narrativeEnvoyGoal, 1, 50);
+            DrawNarrativeInteger(listing, "MouseDisaster_Story_RelicGoal", ref Settings.narrativeRelicGoal, 1, 50);
+            DrawDaysSlider(listing, "MouseDisaster_Story_EndingDelay", ref Settings.narrativeEndingDelayDays, 0, 120);
+            DrawSectionTitle(listing, "MouseDisaster_Story_FrequencySection");
+            DrawPercentSlider(listing, "MouseDisaster_Story_N004ReturnChance", ref Settings.narrativeN004ReturnChancePercent, 0, 100);
+            DrawPercentSlider(listing, "MouseDisaster_Story_ReturnChance", ref Settings.narrativeReturnChancePercent, 0, 100);
+            DrawDaysSlider(listing, "MouseDisaster_Story_ReturnDelay", ref Settings.narrativeReturnDelayDays, 1, 120);
+            DrawPercentSlider(listing, "MouseDisaster_Story_EchoChance", ref Settings.narrativeEchoChancePercent, 0, 100);
+            DrawDaysSlider(listing, "MouseDisaster_Story_EchoCooldown", ref Settings.narrativeEchoCooldownDays, 1, 60);
+            if (Prefs.DevMode && Current.Game != null && listing.ButtonText("MouseDisaster_Story_DebugMenu".Translate()))
+                GameComponent_MouseDisasterNarrative.OpenNarrativeDebugMenu();
+        }
+
+        private static void DrawNarrativeInteger(Listing_Standard listing, string key, ref int value, int min, int max)
+        {
+            listing.Label(key.Translate(value));
+            value = Mathf.RoundToInt(listing.Slider(value, min, max));
         }
 
         private static void DrawDecimalSlider(Listing_Standard listing, string labelKey, ref float value, float min, float max, string format)

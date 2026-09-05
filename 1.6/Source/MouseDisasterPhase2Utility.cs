@@ -588,10 +588,17 @@ namespace MouseDisaster
                 return false;
             }
 
-            if (baby.Spawned)
-            {
-                baby.Destroy();
-            }
+            if (!MouseDisasterUtility.TryFindFormerFaction(out Faction faction))
+            { failureReason = "MouseDisaster_Story_Stale".Translate(); return false; }
+            var narrative = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
+            narrative?.TrackNarrativeVisit("S14", map, new[] { baby });
+            baby.guest?.SetGuestStatus(null, GuestStatus.Guest);
+            baby.SetFaction(faction);
+            baby.GetLord()?.RemovePawn(baby);
+            baby.jobs?.StopAll();
+            if (baby.Spawned) baby.DeSpawn();
+            if (!Find.WorldPawns.Contains(baby)) Find.WorldPawns.PassToWorld(baby);
+            narrative?.NotifyNarrativeDelivery(new[] { baby });
             return true;
         }
 
@@ -715,6 +722,7 @@ namespace MouseDisaster
             }
             else
             {
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeDelivery(state.trackedPawns);
                 Messages.Message("你满足了这次鼠灾请求，对方带着物资离开了。", targetPawn, MessageTypeDefOf.PositiveEvent, historical: false);
             }
         }

@@ -47,8 +47,9 @@ namespace MouseDisaster
     [HarmonyPatch(typeof(IncidentWorker), nameof(IncidentWorker.TryExecute))]
     public static class MouseDisasterIncidentExecuteTogglePatch
     {
-        public static bool Prefix(IncidentWorker __instance, ref bool __result)
+        public static bool Prefix(IncidentWorker __instance, IncidentParms parms, ref bool __result, out System.Collections.Generic.HashSet<Pawn> __state)
         {
+            __state = null;
             string defName = __instance?.def?.defName;
             if (!MouseDisasterIncidentCatalog.IsKnownIncident(defName))
             {
@@ -56,8 +57,9 @@ namespace MouseDisaster
             }
 
             if (MouseDisasterRuntime.AllowsNewContent &&
-                MouseDisasterIncidentCatalog.IsIncidentEnabled(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames))
+                (GameComponent_MouseDisasterNarrative.DebugForcing || MouseDisasterIncidentCatalog.IsIncidentEnabled(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames)))
             {
+                if (parms?.target is Map map) __state = new System.Collections.Generic.HashSet<Pawn>(map.mapPawns.AllPawns);
                 return true;
             }
 
@@ -65,14 +67,18 @@ namespace MouseDisaster
             return false;
         }
 
-        public static void Postfix(IncidentWorker __instance, IncidentParms parms, bool __result)
+        public static void Postfix(IncidentWorker __instance, IncidentParms parms, bool __result, System.Collections.Generic.HashSet<Pawn> __state)
         {
             if (!__result || !MouseDisasterIncidentCatalog.IsKnownIncident(__instance?.def?.defName))
             {
                 return;
             }
 
-            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordIncidentExecuted(__instance.def, parms);
+            var participants = new System.Collections.Generic.List<Pawn>();
+            if (__state != null && parms?.target is Map map)
+                foreach (Pawn pawn in map.mapPawns.AllPawns)
+                    if (!__state.Contains(pawn)) participants.Add(pawn);
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordIncidentExecuted(__instance.def, parms, participants);
         }
     }
 
