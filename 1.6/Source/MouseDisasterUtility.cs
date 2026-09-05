@@ -3950,7 +3950,45 @@ namespace MouseDisaster
 
             for (int i = 0; i < ReusableIntList.Count; i++)
             {
-                ActiveChildExchangeByTraderId.Remove(ReusableIntList[i]);
+                int traderId = ReusableIntList[i];
+                if (!ActiveChildExchangeByTraderId.TryGetValue(traderId, out ChildExchangeState state) || state == null)
+                {
+                    continue;
+                }
+
+                Pawn trader = state.trader;
+                Map map = trader?.Map;
+                List<Pawn> exchangedChildren = state.childPawns?.Where(child => child != null).Distinct().ToList() ?? new List<Pawn>();
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
+                    traderId,
+                    trader,
+                    exchangedChildren,
+                    null,
+                    map,
+                    MouseDisasterN005Outcome.Broken);
+                ActiveChildExchangeByTraderId.Remove(traderId);
+
+                if (map == null)
+                {
+                    continue;
+                }
+
+                ReusablePawnList.Clear();
+                if (trader != null && trader.Spawned && !trader.Dead)
+                {
+                    ReusablePawnList.Add(trader);
+                }
+
+                if (state.escortPawns != null)
+                {
+                    ReusablePawnList.AddRange(state.escortPawns.Where(escort => escort != null && escort.Spawned && !escort.Dead && !ReusablePawnList.Contains(escort)));
+                }
+
+                if (ReusablePawnList.Count > 0)
+                {
+                    MakeTravelAndExitLord(map, ReusablePawnList, map.Center);
+                    EnsureMouseDisasterFactionNeutralOnMap(map, trader?.Faction);
+                }
             }
         }
 
@@ -3993,6 +4031,53 @@ namespace MouseDisaster
             return TryResolveChildExchange(trader, offeredBaby, out message);
         }
 
+        public static bool TryRejectChildExchange(Pawn trader, out string message)
+        {
+            message = "\u62d2\u7edd\u4ea4\u6613\u5931\u8d25\u3002";
+            if (trader?.Map == null || !ActiveChildExchangeByTraderId.TryGetValue(trader.thingIDNumber, out ChildExchangeState state) || !IsChildExchangeTrader(trader))
+            {
+                return false;
+            }
+
+            Map map = trader.Map;
+            Dictionary<int, Pawn> pawnLookup = BuildSpawnedPawnLookup(map.mapPawns.AllPawnsSpawned);
+            List<Pawn> exchangeChildren = ResolveChildExchangeChildren(trader, pawnLookup).Where(child => child.Spawned && !child.Dead).ToList();
+            List<Pawn> exchangeEscorts = ResolveChildExchangeEscorts(trader, pawnLookup).Where(escort => escort.Spawned && !escort.Dead).ToList();
+            if (exchangeChildren.Count == 0)
+            {
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
+                    trader.thingIDNumber,
+                    trader,
+                    state.childPawns,
+                    null,
+                    map,
+                    MouseDisasterN005Outcome.Broken);
+                ActiveChildExchangeByTraderId.Remove(trader.thingIDNumber);
+                List<Pawn> failedLeaving = new List<Pawn> { trader };
+                failedLeaving.AddRange(exchangeEscorts);
+                MakeTravelAndExitLord(map, failedLeaving, map.Center);
+                EnsureMouseDisasterFactionNeutralOnMap(map, trader.Faction);
+                message = "\u4ea4\u6613\u5931\u8d25\uff1a\u53ef\u4ea4\u6362\u9f20\u86cb\u5df2\u4e0d\u5b58\u5728\u3002";
+                return false;
+            }
+
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
+                trader.thingIDNumber,
+                trader,
+                exchangeChildren,
+                null,
+                map,
+                MouseDisasterN005Outcome.Rejected);
+            ActiveChildExchangeByTraderId.Remove(trader.thingIDNumber);
+            List<Pawn> leaving = new List<Pawn> { trader };
+            leaving.AddRange(exchangeEscorts);
+            leaving.AddRange(exchangeChildren);
+            MakeTravelAndExitLord(map, leaving, map.Center);
+            EnsureMouseDisasterFactionNeutralOnMap(map, trader.Faction);
+            message = "\u4f60\u62d2\u7edd\u4e86\u4ea4\u6362\uff0c\u5546\u4eba\u5e26\u7740\u9f20\u86cb\u79bb\u5f00\u4e86\u3002";
+            return true;
+        }
+
         public static Pawn FindExchangeOfferBaby(Map map, int mode)
         {
             if (map == null)
@@ -4030,7 +4115,18 @@ namespace MouseDisaster
             List<Pawn> exchangeEscorts = ResolveChildExchangeEscorts(trader, pawnLookup).Where(escort => escort.Spawned && !escort.Dead).ToList();
             if (exchangeChildren.Count == 0)
             {
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
+                    trader.thingIDNumber,
+                    trader,
+                    null,
+                    offeredBaby,
+                    trader.Map,
+                    MouseDisasterN005Outcome.Broken);
                 ActiveChildExchangeByTraderId.Remove(trader.thingIDNumber);
+                List<Pawn> failedLeaving = new List<Pawn> { trader };
+                failedLeaving.AddRange(exchangeEscorts);
+                MakeTravelAndExitLord(trader.Map, failedLeaving, trader.Map.Center);
+                EnsureMouseDisasterFactionNeutralOnMap(trader.Map, trader.Faction);
                 message = "\u4ea4\u6613\u5931\u8d25\uff1a\u53ef\u4ea4\u6362\u9f20\u86cb\u5df2\u4e0d\u5b58\u5728\u3002";
                 return false;
             }
@@ -4052,6 +4148,13 @@ namespace MouseDisaster
                 child.guest?.SetGuestStatus(Faction.OfPlayer, GuestStatus.Prisoner);
             }
 
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
+                trader.thingIDNumber,
+                trader,
+                exchangeChildren,
+                offeredBaby,
+                trader.Map,
+                MouseDisasterN005Outcome.Accepted);
             ActiveChildExchangeByTraderId.Remove(trader.thingIDNumber);
             List<Pawn> leaving = new List<Pawn> { trader };
             leaving.AddRange(exchangeEscorts);
@@ -4103,10 +4206,20 @@ namespace MouseDisaster
 
             int now = Find.TickManager.TicksGame;
             int mapId = map.uniqueID;
+            Dictionary<int, Pawn> pawnLookup = BuildSpawnedPawnLookup(map.mapPawns.AllPawnsSpawned);
             ReusableIntList.Clear();
             foreach (KeyValuePair<int, ChildExchangeState> pair in ActiveChildExchangeByTraderId)
             {
-                if (pair.Value != null && pair.Value.mapId == mapId && now >= pair.Value.expireTick)
+                ChildExchangeState state = pair.Value;
+                if (state == null || state.mapId != mapId)
+                {
+                    continue;
+                }
+
+                bool traderMissing = state.trader == null || state.trader.Dead || state.trader.Map == null || state.trader.Map.uniqueID != mapId;
+                bool childrenMissing = state.childPawnIds == null || state.childPawnIds.Count == 0 ||
+                    !state.childPawnIds.Any(childId => pawnLookup.TryGetValue(childId, out Pawn child) && child != null && !child.Dead);
+                if (traderMissing || childrenMissing || now >= state.expireTick)
                 {
                     ReusableIntList.Add(pair.Key);
                 }
@@ -4117,26 +4230,63 @@ namespace MouseDisaster
                 return;
             }
 
-            IReadOnlyList<Pawn> mapPawns = map.mapPawns.AllPawnsSpawned;
-            Dictionary<int, Pawn> pawnLookup = BuildSpawnedPawnLookup(mapPawns);
             for (int i = 0; i < ReusableIntList.Count; i++)
             {
                 int traderId = ReusableIntList[i];
-                Pawn trader = ResolvePawnById(pawnLookup, traderId);
-                if (trader == null)
+                if (!ActiveChildExchangeByTraderId.TryGetValue(traderId, out ChildExchangeState state) || state == null || state.mapId != mapId)
                 {
-                    ActiveChildExchangeByTraderId.Remove(traderId);
                     continue;
                 }
 
-                ReusablePawnList.Clear();
-                ReusablePawnList.Add(trader);
-                ResolveChildExchangeEscortsInto(trader, pawnLookup, ReusablePawnList);
-                ResolveChildExchangeChildrenInto(trader, pawnLookup, ReusablePawnList);
+                Pawn trader = state.trader;
+                bool traderMissing = trader == null || trader.Dead || trader.Map == null || trader.Map.uniqueID != mapId;
+                bool childrenMissing = state.childPawnIds == null || state.childPawnIds.Count == 0 ||
+                    !state.childPawnIds.Any(childId => pawnLookup.TryGetValue(childId, out Pawn child) && child != null && !child.Dead);
+                bool broken = traderMissing || childrenMissing;
+                List<Pawn> exchangeChildren = ResolveChildExchangeStatePawns(state.childPawnIds, pawnLookup);
+                List<Pawn> exchangeEscorts = ResolveChildExchangeStatePawns(state.escortPawnIds, pawnLookup);
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
+                    traderId,
+                    trader,
+                    exchangeChildren,
+                    null,
+                    map,
+                    broken ? MouseDisasterN005Outcome.Broken : MouseDisasterN005Outcome.TimedOut);
                 ActiveChildExchangeByTraderId.Remove(traderId);
+                ReusablePawnList.Clear();
+                if (trader != null && trader.Spawned && !trader.Dead)
+                {
+                    ReusablePawnList.Add(trader);
+                }
+
+                ReusablePawnList.AddRange(exchangeEscorts.Where(escort => escort != null && escort.Spawned && !escort.Dead && !ReusablePawnList.Contains(escort)));
+                ReusablePawnList.AddRange(exchangeChildren.Where(child => child != null && child.Spawned && !child.Dead && !ReusablePawnList.Contains(child)));
                 MakeTravelAndExitLord(map, ReusablePawnList, map.Center);
-                Messages.Message("\u6613\u5b50\u800c\u98df\u5546\u4eba\u7b49\u5f85\u8d85\u65f6\uff0c\u5df2\u5e26\u7740\u9f20\u86cb\u79bb\u5f00\u3002", trader, MessageTypeDefOf.NeutralEvent, historical: false);
+                if (!broken)
+                {
+                    Messages.Message("\u6613\u5b50\u800c\u98df\u5546\u4eba\u7b49\u5f85\u8d85\u65f6\uff0c\u5df2\u5e26\u7740\u9f20\u86cb\u79bb\u5f00\u3002", trader, MessageTypeDefOf.NeutralEvent, historical: false);
+                }
             }
+        }
+
+        private static List<Pawn> ResolveChildExchangeStatePawns(List<int> pawnIds, Dictionary<int, Pawn> pawnLookup)
+        {
+            List<Pawn> result = new List<Pawn>();
+            if (pawnIds == null || pawnLookup == null)
+            {
+                return result;
+            }
+
+            for (int i = 0; i < pawnIds.Count; i++)
+            {
+                Pawn pawn = ResolvePawnById(pawnLookup, pawnIds[i]);
+                if (pawn != null && !result.Contains(pawn))
+                {
+                    result.Add(pawn);
+                }
+            }
+
+            return result;
         }
 
         private static List<Pawn> ResolveChildExchangeEscorts(Pawn trader, Dictionary<int, Pawn> pawnLookup)

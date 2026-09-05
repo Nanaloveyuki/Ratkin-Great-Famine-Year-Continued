@@ -79,6 +79,7 @@
     <Compile Include="GameComponent_MouseDisasterNarrative.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_N004.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_N004Effects.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_N005.cs" />
     <Compile Include="GameComponent_MouseDisasterPendingState.cs" />
     <Compile Include="MouseDisasterGuanyinTu.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />

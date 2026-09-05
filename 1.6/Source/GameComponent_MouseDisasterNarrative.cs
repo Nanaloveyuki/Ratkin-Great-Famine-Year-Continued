@@ -32,6 +32,7 @@ namespace MouseDisaster
             Scribe_Collections.Look(ref observedIncidentDefNames, "mouseDisaster_narrativeObservedIncidentDefNames", LookMode.Value);
             Scribe_Values.Look(ref narratorTrust, "mouseDisaster_narrativeTrust", 0);
             Scribe_Collections.Look(ref n004Records, "mouseDisaster_narrativeN004Records", LookMode.Deep);
+            ExposeN005Data();
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {

@@ -39,6 +39,7 @@ namespace MouseDisaster
                 yield return BuildOption(MouseDisasterUtility.ChildExchangeModeColonist, "\u7528\u6b96\u6c11\u8005\u5a74\u513f\u4ea4\u6362");
                 yield return BuildOption(MouseDisasterUtility.ChildExchangeModeSlave, "\u7528\u5974\u96b6\u5a74\u513f\u4ea4\u6362");
                 yield return BuildOption(MouseDisasterUtility.ChildExchangeModePrisoner, "\u7528\u56da\u72af\u5a74\u513f\u4ea4\u6362");
+                yield return BuildRejectOption();
 
                 if (lookTargets.IsValid())
                 {
@@ -86,6 +87,26 @@ namespace MouseDisaster
                 if (MouseDisasterUtility.TryExecuteChildExchange(trader, mode, out string message))
                 {
                     Messages.Message(message, trader, MessageTypeDefOf.PositiveEvent, historical: false);
+                }
+                else
+                {
+                    Messages.Message(message, trader, MessageTypeDefOf.RejectInput, historical: false);
+                }
+
+                Find.LetterStack.RemoveLetter(this);
+            };
+            option.resolveTree = true;
+            return option;
+        }
+
+        private DiaOption BuildRejectOption()
+        {
+            DiaOption option = new DiaOption("MouseDisaster_N005_Reject".Translate());
+            option.action = delegate
+            {
+                if (MouseDisasterUtility.TryRejectChildExchange(trader, out string message))
+                {
+                    Messages.Message(message, trader, MessageTypeDefOf.NeutralEvent, historical: false);
                 }
                 else
                 {

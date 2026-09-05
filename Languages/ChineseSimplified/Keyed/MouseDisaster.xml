@@ -55,6 +55,16 @@
   <MouseDisaster_N004_Revisit_KillMessage>这只是故事……不是吗？</MouseDisaster_N004_Revisit_KillMessage>
   <MouseDisaster_N004_Revisit_RewardLabel>穗音的回礼</MouseDisaster_N004_Revisit_RewardLabel>
   <MouseDisaster_N004_Revisit_RewardText>四年前的承诺有了结果。穗音送来 {0} 份白银，已经投放在殖民地的交易地点。</MouseDisaster_N004_Revisit_RewardText>
+  <!-- N-005 runtime wording remains short until the narrative draft is finalized. -->
+  <MouseDisaster_N005_Reject>拒绝交换</MouseDisaster_N005_Reject>
+  <MouseDisaster_N005_Accepted_Label>穗音：给孩子一个名字</MouseDisaster_N005_Accepted_Label>
+  <MouseDisaster_N005_Accepted_Text>交换完成了。留下的孩子留在了殖民地，新的名字还没有写进记录。</MouseDisaster_N005_Accepted_Text>
+  <MouseDisaster_N005_Rejected_Label>穗音：空篮子</MouseDisaster_N005_Rejected_Label>
+  <MouseDisaster_N005_Rejected_Text>你拒绝了交换。商人带着孩子离开了。</MouseDisaster_N005_Rejected_Text>
+  <MouseDisaster_N005_TimedOut_Label>穗音：没有等到答案</MouseDisaster_N005_TimedOut_Label>
+  <MouseDisaster_N005_TimedOut_Text>你没有在规定时间内作出决定。商人带着孩子离开了。</MouseDisaster_N005_TimedOut_Text>
+  <MouseDisaster_N005_Broken_Label>穗音：两边都没有拿到</MouseDisaster_N005_Broken_Label>
+  <MouseDisaster_N005_Broken_Text>交易中断了。双方都没有按原计划完成交接。</MouseDisaster_N005_Broken_Text>
   <MouseDisaster_Settings_EnableAgeCap>启用鼠族年龄上限修正</MouseDisaster_Settings_EnableAgeCap>
   <MouseDisaster_Settings_EnableAgeCap_Tooltip>关闭后，鼠族年龄与老年病强化将按原版与种族设定处理。</MouseDisaster_Settings_EnableAgeCap_Tooltip>
   <MouseDisaster_Settings_EnableGnawing>启用啃食行为</MouseDisaster_Settings_EnableGnawing>
