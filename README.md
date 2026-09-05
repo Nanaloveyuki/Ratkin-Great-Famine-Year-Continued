@@ -9,3 +9,7 @@ RimWorld 1.6 的“鼠灾-大荒年”延续维护版本。
 - 生成队列写入存档，完成后再统一建立队伍关系、Lord 与事件信件。
 
 原项目归属及维护授权状态见 [NOTICE](NOTICE)。
+
+## 构建与部署
+
+退出 RimWorld 后运行 `powershell -ExecutionPolicy Bypass -File .\scripts\build-and-deploy.ps1`，脚本会构建 Release DLL、同步运行所需文件并逐文件校验 SHA-256。

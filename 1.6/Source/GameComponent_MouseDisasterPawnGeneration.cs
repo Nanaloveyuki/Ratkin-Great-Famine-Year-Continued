@@ -28,6 +28,7 @@ namespace MouseDisaster
         public int childrenRemaining;
         public int remainingCount;
         public int nextSpawnTick;
+        public int deadlineTick;
         public int intervalTicks = 1;
         public int randomSeed;
         public int generatedSlots;
@@ -50,6 +51,7 @@ namespace MouseDisaster
             Scribe_Values.Look(ref childrenRemaining, "childrenRemaining", 0);
             Scribe_Values.Look(ref remainingCount, "remainingCount", 0);
             Scribe_Values.Look(ref nextSpawnTick, "nextSpawnTick", 0);
+            Scribe_Values.Look(ref deadlineTick, "deadlineTick", 0);
             Scribe_Values.Look(ref intervalTicks, "intervalTicks", 1);
             Scribe_Values.Look(ref randomSeed, "randomSeed", 0);
             Scribe_Values.Look(ref generatedSlots, "generatedSlots", 0);
@@ -69,6 +71,8 @@ namespace MouseDisaster
     public class GameComponent_MouseDisasterPawnGeneration : GameComponent
     {
         private const int TargetGenerationTicks = 100;
+        private const int MaxBatchLifetimeTicks = 10000;
+        private const int MaxGeneratedSlots = 64;
 
         private List<MouseDisasterPawnBatch> batches = new List<MouseDisasterPawnBatch>();
 
@@ -78,11 +82,21 @@ namespace MouseDisaster
 
         public override void ExposeData()
         {
+            if (Scribe.mode == LoadSaveMode.Saving && batches != null)
+            {
+                batches.RemoveAll(batch => !IsBatchMapAvailable(batch));
+            }
+
             Scribe_Collections.Look(ref batches, "mouseDisaster_pawnGenerationBatches", LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 batches ??= new List<MouseDisasterPawnBatch>();
-                batches.RemoveAll(batch => batch == null || batch.Complete);
+                batches.RemoveAll(batch => batch == null);
+                int nowTick = Find.TickManager?.TicksGame ?? 0;
+                for (int i = 0; i < batches.Count; i++)
+                {
+                    NormalizeLoadedBatch(batches[i], nowTick);
+                }
             }
         }
 
@@ -100,9 +114,31 @@ namespace MouseDisaster
                 MouseDisasterPawnBatch batch = batches[i];
                 if (!IsBatchMapAvailable(batch))
                 {
+                    Log.Warning("[MouseDisaster] Discarding staged pawn generation because its map was removed: " + (batch?.kind.ToString() ?? "unknown") + ".");
                     batches.RemoveAt(i);
                     i--;
                     continue;
+                }
+
+                if (!HasRequiredState(batch))
+                {
+                    TryTruncateBatch(batch, "required saved state is missing");
+                    batches.RemoveAt(i);
+                    return;
+                }
+
+                if (batch.Complete)
+                {
+                    FinalizeBatch(batch);
+                    batches.RemoveAt(i);
+                    return;
+                }
+
+                if (batch.generatedSlots >= MaxGeneratedSlots || nowTick >= batch.deadlineTick)
+                {
+                    TryTruncateBatch(batch, "generation limit or deadline reached");
+                    batches.RemoveAt(i);
+                    return;
                 }
 
                 if (nowTick < batch.nextSpawnTick)
@@ -110,11 +146,13 @@ namespace MouseDisaster
                     continue;
                 }
 
+                bool finalizing = false;
                 try
                 {
                     ProcessNextPawn(batch);
                     if (batch.Complete)
                     {
+                        finalizing = true;
                         FinalizeBatch(batch);
                         batches.RemoveAt(i);
                     }
@@ -126,7 +164,10 @@ namespace MouseDisaster
                 catch (Exception exception)
                 {
                     Log.Error("[MouseDisaster] Staged pawn generation failed for " + batch.kind + ": " + exception);
-                    TryFinalizePartialBatch(batch);
+                    if (!finalizing)
+                    {
+                        TryTruncateBatch(batch, "an exception interrupted generation");
+                    }
                     batches.RemoveAt(i);
                 }
 
@@ -195,7 +236,18 @@ namespace MouseDisaster
 
             batch.intervalTicks = Mathf.Max(1, Mathf.RoundToInt(TargetGenerationTicks / (float)totalCount));
             batch.randomSeed = Rand.Int;
-            ProcessNextPawn(batch);
+            batch.deadlineTick = Find.TickManager.TicksGame + MaxBatchLifetimeTicks;
+            try
+            {
+                ProcessNextPawn(batch);
+            }
+            catch (Exception exception)
+            {
+                Log.Error("[MouseDisaster] Could not start staged pawn generation for " + batch.kind + ": " + exception);
+                TryTruncateBatch(batch, "the initial generation step failed");
+                return false;
+            }
+
             if (batch.pawns.Count == 0)
             {
                 return false;
@@ -216,7 +268,48 @@ namespace MouseDisaster
 
         private static bool IsBatchMapAvailable(MouseDisasterPawnBatch batch)
         {
-            return batch?.map != null && Find.Maps != null && Find.Maps.Contains(batch.map);
+            return batch?.map != null && !batch.map.Disposed && Find.Maps != null && Find.Maps.Contains(batch.map);
+        }
+
+        private static bool HasRequiredState(MouseDisasterPawnBatch batch)
+        {
+            return batch != null &&
+                   Enum.IsDefined(typeof(MouseDisasterPawnBatchKind), batch.kind) &&
+                   batch.incidentDef != null &&
+                   batch.parms != null &&
+                   batch.entryCell.IsValid;
+        }
+
+        private static void NormalizeLoadedBatch(MouseDisasterPawnBatch batch, int nowTick)
+        {
+            batch.intervalTicks = Mathf.Clamp(batch.intervalTicks, 1, TargetGenerationTicks);
+            batch.generatedSlots = Mathf.Clamp(batch.generatedSlots, 0, MaxGeneratedSlots);
+            batch.pawns ??= new List<Pawn>();
+            batch.pawns.RemoveAll(pawn => pawn == null);
+
+            switch (batch.kind)
+            {
+                case MouseDisasterPawnBatchKind.LargeRefugeeWave:
+                    batch.adultsRemaining = Mathf.Clamp(batch.adultsRemaining, 0, 50);
+                    batch.childrenRemaining = Mathf.Clamp(batch.childrenRemaining, 0, 50 - batch.adultsRemaining);
+                    batch.remainingCount = 0;
+                    break;
+                case MouseDisasterPawnBatchKind.GreatFamine:
+                    batch.adultsRemaining = 0;
+                    batch.childrenRemaining = 0;
+                    batch.remainingCount = Mathf.Clamp(batch.remainingCount, 0, 28);
+                    break;
+                case MouseDisasterPawnBatchKind.TraderCaravan:
+                    batch.adultsRemaining = 0;
+                    batch.childrenRemaining = 0;
+                    batch.remainingCount = Mathf.Clamp(batch.remainingCount, 0, 32);
+                    break;
+            }
+
+            if (batch.deadlineTick <= 0)
+            {
+                batch.deadlineTick = nowTick + MaxBatchLifetimeTicks;
+            }
         }
 
         private static void ProcessNextPawn(MouseDisasterPawnBatch batch)
@@ -236,6 +329,8 @@ namespace MouseDisaster
                     case MouseDisasterPawnBatchKind.TraderCaravan:
                         GenerateTraderCaravanPawn(batch, slot);
                         break;
+                    default:
+                        throw new InvalidOperationException("Unknown pawn batch kind: " + batch.kind);
                 }
             }
             finally
@@ -268,13 +363,13 @@ namespace MouseDisaster
             }
 
             GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(batch.entryCell, batch.map, 6), batch.map);
+            batch.pawns.Add(pawn);
             MouseDisasterUtility.StripRatEggInventory(pawn);
             pawn.jobs?.StartJob(MouseDisasterUtility.CreateGotoJob(batch.map.Center), JobCondition.InterruptForced);
             pawn.health.AddHediff(stage == DevelopmentalStage.Adult
                 ? MouseDisasterDefOf.MouseDisaster_LargeRefugeeAdult
                 : MouseDisasterDefOf.MouseDisaster_LargeRefugeeChild);
             pawn.mindState?.mentalStateHandler?.Reset();
-            batch.pawns.Add(pawn);
         }
 
         private static void GenerateGreatFaminePawn(MouseDisasterPawnBatch batch)
@@ -287,11 +382,11 @@ namespace MouseDisaster
             }
 
             GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(batch.entryCell, batch.map, 7), batch.map);
+            batch.pawns.Add(pawn);
             pawn.health.AddHediff(pawn.DevelopmentalStage == DevelopmentalStage.Adult
                 ? MouseDisasterDefOf.MouseDisaster_GreatFamineAdult
                 : MouseDisasterDefOf.MouseDisaster_GreatFamineChild);
             pawn.mindState?.mentalStateHandler?.Reset();
-            batch.pawns.Add(pawn);
         }
 
         private static void GenerateTraderCaravanPawn(MouseDisasterPawnBatch batch, int slot)
@@ -321,6 +416,7 @@ namespace MouseDisaster
             }
 
             GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(batch.entryCell, batch.map, 6), batch.map);
+            batch.pawns.Add(pawn);
             if (slot == 0)
             {
                 batch.traderPawn = pawn;
@@ -338,8 +434,6 @@ namespace MouseDisaster
                 IncidentWorker_RatkinTraderCaravan.PrepareChattelChild(pawn, batch.faction);
                 pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_TraderCaravanChild);
             }
-
-            batch.pawns.Add(pawn);
         }
 
         private static void FinalizeBatch(MouseDisasterPawnBatch batch)
@@ -358,16 +452,54 @@ namespace MouseDisaster
                     FinalizeAssaultBatch(batch, pawns);
                     break;
                 case MouseDisasterPawnBatchKind.TraderCaravan:
-                    FinalizeTraderCaravan(batch, pawns);
+                    if (!FinalizeTraderCaravan(batch, pawns))
+                    {
+                        SendIncompleteTraderCaravanAway(batch, pawns);
+                    }
                     break;
             }
         }
 
-        private static void TryFinalizePartialBatch(MouseDisasterPawnBatch batch)
+        private static void TruncateBatch(MouseDisasterPawnBatch batch, string reason)
         {
-            if (batch.kind != MouseDisasterPawnBatchKind.TraderCaravan)
+            Log.Warning("[MouseDisaster] Truncating staged pawn generation for " + batch.kind + ": " + reason + ".");
+            List<Pawn> pawns = ActivePawns(batch);
+            if (pawns.Count == 0 || !IsBatchMapAvailable(batch))
             {
-                FinalizeBatch(batch);
+                return;
+            }
+
+            if (batch.kind == MouseDisasterPawnBatchKind.TraderCaravan)
+            {
+                if (!HasRequiredState(batch) || !FinalizeTraderCaravan(batch, pawns))
+                {
+                    SendIncompleteTraderCaravanAway(batch, pawns);
+                }
+                return;
+            }
+
+            Faction faction = batch.faction ?? pawns[0].Faction;
+            if (faction != null)
+            {
+                MouseDisasterUtility.MakeFactionHostileToPlayer(faction, explicitDriveAway: true);
+                LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: false, canTimeoutOrFlee: false, canSteal: true, breachers: true), batch.map, pawns);
+            }
+
+            if (HasRequiredState(batch))
+            {
+                SendBatchLetter(batch, pawns);
+            }
+        }
+
+        private static void TryTruncateBatch(MouseDisasterPawnBatch batch, string reason)
+        {
+            try
+            {
+                TruncateBatch(batch, reason);
+            }
+            catch (Exception exception)
+            {
+                Log.Error("[MouseDisaster] Could not finish truncating staged pawn generation for " + (batch?.kind.ToString() ?? "unknown") + ": " + exception);
             }
         }
 
@@ -380,10 +512,10 @@ namespace MouseDisaster
                 LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: false, canTimeoutOrFlee: false, canSteal: true, breachers: true), batch.map, pawns);
             }
 
-            IncidentWorker.SendIncidentLetter(batch.incidentDef.letterLabel, batch.incidentDef.letterText, batch.incidentDef.letterDef, batch.parms, pawns, batch.incidentDef);
+            SendBatchLetter(batch, pawns);
         }
 
-        private static void FinalizeTraderCaravan(MouseDisasterPawnBatch batch, List<Pawn> pawns)
+        private static bool FinalizeTraderCaravan(MouseDisasterPawnBatch batch, List<Pawn> pawns)
         {
             Pawn traderPawn = batch.traderPawn;
             Pawn escortPawn = batch.escortPawn;
@@ -391,7 +523,7 @@ namespace MouseDisaster
             if (traderPawn == null || escortPawn == null || children.Count == 0 || !pawns.Contains(traderPawn) || !pawns.Contains(escortPawn))
             {
                 Log.Warning("[MouseDisaster] Trader caravan generation did not produce its required members.");
-                return;
+                return false;
             }
 
             MouseDisasterUtility.MarkChildExchangeMoodChildren(children);
@@ -420,6 +552,18 @@ namespace MouseDisaster
             {
                 IncidentWorker.SendIncidentLetter(batch.incidentDef.letterLabel, batch.incidentDef.letterText, batch.incidentDef.letterDef, batch.parms, pawns, batch.incidentDef);
             }
+            return true;
+        }
+
+        private static void SendIncompleteTraderCaravanAway(MouseDisasterPawnBatch batch, List<Pawn> pawns)
+        {
+            MouseDisasterUtility.EnsureMouseDisasterFactionNeutralOnMap(batch.map, batch.faction);
+            MouseDisasterUtility.MakeTravelAndExitLord(batch.map, pawns, batch.map.Center);
+        }
+
+        private static void SendBatchLetter(MouseDisasterPawnBatch batch, List<Pawn> pawns)
+        {
+            IncidentWorker.SendIncidentLetter(batch.incidentDef.letterLabel, batch.incidentDef.letterText, batch.incidentDef.letterDef, batch.parms, pawns, batch.incidentDef);
         }
 
         private static List<Pawn> ActivePawns(MouseDisasterPawnBatch batch)
