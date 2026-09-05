@@ -18,8 +18,14 @@ $ErrorActionPreference = "Stop"
 
 $expectedPackageId = "nanaloveyuki.mouse.disaster.famine.continued"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$projectPath = Join-Path $repoRoot "1.6\Source\MouseDisasterYear.csproj"
-$sourceAssembly = Join-Path $repoRoot "1.6\Assemblies\MouseDisaster.dll"
+$projectPaths = @(
+    (Join-Path $repoRoot "1.6\Source\MouseDisasterYear.csproj"),
+    (Join-Path $repoRoot "Guard\Source\MouseDisasterContinuedGuard.csproj")
+)
+$sourceAssemblies = @(
+    (Join-Path $repoRoot "1.6\Assemblies\MouseDisaster.dll"),
+    (Join-Path $repoRoot "Guard\Assemblies\MouseDisasterContinuedGuard.dll")
+)
 $modsRootFull = [System.IO.Path]::GetFullPath($GameModsRoot).TrimEnd([char[]]"\/")
 if ([string]::IsNullOrWhiteSpace($GameModPath)) {
     $GameModPath = Join-Path $modsRootFull "RatkinGreatFamineYearContinued"
@@ -35,8 +41,10 @@ if (Get-Process -Name "RimWorldWin64" -ErrorAction SilentlyContinue) {
     throw "RimWorld is running. Exit the game before deploying."
 }
 
-if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
-    throw "Project file not found: $projectPath"
+foreach ($projectPath in $projectPaths) {
+    if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
+        throw "Project file not found: $projectPath"
+    }
 }
 if (-not (Test-Path -LiteralPath $RimWorldManagedDir -PathType Container)) {
     throw "RimWorld Managed directory not found: $RimWorldManagedDir"
@@ -66,28 +74,31 @@ if (Test-Path -LiteralPath $targetFull) {
 
 if (-not $SkipBuild) {
     Write-Host "Building $Configuration..."
-    $buildArguments = @(
-        "build",
-        $projectPath,
-        "--configuration", $Configuration,
-        "--nologo",
-        "--no-restore",
-        "-p:RimWorldManagedDir=$RimWorldManagedDir",
-        "-p:HarmonyAssembliesDir=$HarmonyAssembliesDir"
-    )
-    & dotnet @buildArguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "Build failed with exit code $LASTEXITCODE."
+    foreach ($projectPath in $projectPaths) {
+        $buildArguments = @(
+            "build",
+            $projectPath,
+            "--configuration", $Configuration,
+            "--nologo",
+            "-p:RimWorldManagedDir=$RimWorldManagedDir",
+            "-p:HarmonyAssembliesDir=$HarmonyAssembliesDir"
+        )
+        & dotnet @buildArguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "Build failed for $projectPath with exit code $LASTEXITCODE."
+        }
     }
 }
 
-if (-not (Test-Path -LiteralPath $sourceAssembly -PathType Leaf)) {
-    throw "Build output not found: $sourceAssembly"
+foreach ($sourceAssembly in $sourceAssemblies) {
+    if (-not (Test-Path -LiteralPath $sourceAssembly -PathType Leaf)) {
+        throw "Build output not found: $sourceAssembly"
+    }
 }
 
 New-Item -ItemType Directory -Force -Path $modsRootFull, $targetFull | Out-Null
 
-$managedDirectories = @("About", "Defs", "Languages", "Patches", "1.6")
+$managedDirectories = @("About", "Defs", "Languages", "Patches", "Guard", "1.6")
 foreach ($relativePath in $managedDirectories) {
     $path = Join-Path $targetFull $relativePath
     if (Test-Path -LiteralPath $path) {
@@ -103,6 +114,15 @@ foreach ($relativePath in @("LoadFolders.xml", "NOTICE", "README.md")) {
 
 $sourceFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 foreach ($relativeDirectory in @("About", "Defs", "Languages", "Patches")) {
+    $sourceDirectory = Join-Path $repoRoot $relativeDirectory
+    if (-not (Test-Path -LiteralPath $sourceDirectory -PathType Container)) {
+        throw "Required content directory not found: $sourceDirectory"
+    }
+    foreach ($file in Get-ChildItem -LiteralPath $sourceDirectory -File -Recurse) {
+        $sourceFiles.Add($file)
+    }
+}
+foreach ($relativeDirectory in @("Guard\Assemblies", "Guard\Languages")) {
     $sourceDirectory = Join-Path $repoRoot $relativeDirectory
     if (-not (Test-Path -LiteralPath $sourceDirectory -PathType Container)) {
         throw "Required content directory not found: $sourceDirectory"

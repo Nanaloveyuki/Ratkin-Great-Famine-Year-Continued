@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisasterContinued_DuplicateMod_Title>Duplicate Ratkin Great Famine Year mods</MouseDisasterContinued_DuplicateMod_Title>
+  <MouseDisasterContinued_DuplicateMod_Body>The original Ratkin Great Famine Year and the Continued version are both enabled. To prevent duplicate assemblies, Defs, and patches, the Continued gameplay content has been disabled for this session. Disable either the original mod or the Continued version, then restart RimWorld before loading or saving a game.</MouseDisasterContinued_DuplicateMod_Body>
+</LanguageData>

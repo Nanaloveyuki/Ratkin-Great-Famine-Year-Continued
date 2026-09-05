@@ -27,6 +27,9 @@
       <displayName>Biotech</displayName>
     </li>
   </modDependencies>
+  <incompatibleWith>
+    <li>lezhizhong.mouse.disaster.famine</li>
+  </incompatibleWith>
   <loadAfter>
     <li>brrainz.harmony</li>
     <li>Ludeon.RimWorld</li>
