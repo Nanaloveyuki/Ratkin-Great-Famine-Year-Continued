@@ -97,8 +97,8 @@ namespace MouseDisaster
         private static readonly HashSet<int> ForcePrisonerOnPurchasePawnIds = new HashSet<int>();
         private static readonly HashSet<int> TradableChattelPawnIds = new HashSet<int>();
         private static readonly HashSet<int> ChildExchangeMoodPawnIds = new HashSet<int>();
-        private static readonly Dictionary<int, ChildExchangeState> ActiveChildExchangeByTraderId = new Dictionary<int, ChildExchangeState>();
-        private static readonly Dictionary<int, AbandonedDeliveryState> ActiveAbandonedDeliveryByAdultId = new Dictionary<int, AbandonedDeliveryState>();
+        private static Dictionary<int, ChildExchangeState> ActiveChildExchangeByTraderId = new Dictionary<int, ChildExchangeState>();
+        private static Dictionary<int, AbandonedDeliveryState> ActiveAbandonedDeliveryByAdultId = new Dictionary<int, AbandonedDeliveryState>();
         private static readonly Dictionary<int, MapPawnClassificationCache> MapPawnCaches = new Dictionary<int, MapPawnClassificationCache>();
         private static readonly Dictionary<int, int> PrisonerScavengeDelayStateByPawnId = new Dictionary<int, int>();
         private static readonly Dictionary<int, int> PrisonerScavengeBurstRemainingByPawnId = new Dictionary<int, int>();
@@ -300,21 +300,139 @@ namespace MouseDisaster
         private static MethodInfo leadYourPetAnchorLeashedPetsToCellMethod;
         private static MethodInfo leadYourPetEndLeashForPetMethod;
         private static MethodInfo gameGetComponentMethod;
-        private sealed class ChildExchangeState
+        private sealed class ChildExchangeState : IExposable
         {
+            public Pawn trader;
+            public List<Pawn> escortPawns = new List<Pawn>();
+            public List<Pawn> childPawns = new List<Pawn>();
             public int mapId;
             public int expireTick;
             public List<int> escortPawnIds;
             public List<int> childPawnIds;
+
+            public void ExposeData()
+            {
+                Scribe_References.Look(ref trader, "trader");
+                Scribe_Collections.Look(ref escortPawns, "escortPawns", LookMode.Reference);
+                Scribe_Collections.Look(ref childPawns, "childPawns", LookMode.Reference);
+                Scribe_Values.Look(ref mapId, "mapId", -1);
+                Scribe_Values.Look(ref expireTick, "expireTick", 0);
+                Scribe_Collections.Look(ref escortPawnIds, "escortPawnIds", LookMode.Value);
+                Scribe_Collections.Look(ref childPawnIds, "childPawnIds", LookMode.Value);
+
+                if (Scribe.mode == LoadSaveMode.PostLoadInit)
+                {
+                    escortPawns ??= new List<Pawn>();
+                    childPawns ??= new List<Pawn>();
+                    escortPawnIds ??= new List<int>();
+                    childPawnIds ??= new List<int>();
+                    escortPawns.RemoveAll(pawn => pawn == null);
+                    childPawns.RemoveAll(pawn => pawn == null);
+                    escortPawnIds = escortPawnIds
+                        .Concat(escortPawns.Select(pawn => pawn.thingIDNumber))
+                        .Distinct()
+                        .ToList();
+                    childPawnIds = childPawnIds
+                        .Concat(childPawns.Select(pawn => pawn.thingIDNumber))
+                        .Distinct()
+                        .ToList();
+                }
+            }
         }
 
-        private sealed class AbandonedDeliveryState
+        private sealed class AbandonedDeliveryState : IExposable
         {
+            public Pawn adult;
+            public List<Pawn> childPawns = new List<Pawn>();
             public int mapId;
             public IntVec3 foodCell;
             public List<int> childPawnIds;
             public bool adultHasLeft;
             public int adultArrivedAtDropoffTick = -1;
+
+            public void ExposeData()
+            {
+                Scribe_References.Look(ref adult, "adult");
+                Scribe_Collections.Look(ref childPawns, "childPawns", LookMode.Reference);
+                Scribe_Values.Look(ref mapId, "mapId", -1);
+                Scribe_Values.Look(ref foodCell, "foodCell", IntVec3.Invalid);
+                Scribe_Collections.Look(ref childPawnIds, "childPawnIds", LookMode.Value);
+                Scribe_Values.Look(ref adultHasLeft, "adultHasLeft", false);
+                Scribe_Values.Look(ref adultArrivedAtDropoffTick, "adultArrivedAtDropoffTick", -1);
+
+                if (Scribe.mode == LoadSaveMode.PostLoadInit)
+                {
+                    childPawns ??= new List<Pawn>();
+                    childPawnIds ??= new List<int>();
+                    childPawns.RemoveAll(pawn => pawn == null);
+                    childPawnIds = childPawnIds
+                        .Concat(childPawns.Select(pawn => pawn.thingIDNumber))
+                        .Distinct()
+                        .ToList();
+                }
+            }
+        }
+
+        internal static void ExposePendingStateData()
+        {
+            Scribe_Collections.Look(ref ActiveChildExchangeByTraderId, "mouseDisaster_activeChildExchange", LookMode.Value, LookMode.Deep);
+            Scribe_Collections.Look(ref ActiveAbandonedDeliveryByAdultId, "mouseDisaster_activeAbandonedDelivery", LookMode.Value, LookMode.Deep);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                ActiveChildExchangeByTraderId ??= new Dictionary<int, ChildExchangeState>();
+                ActiveAbandonedDeliveryByAdultId ??= new Dictionary<int, AbandonedDeliveryState>();
+
+                List<int> invalidChildExchangeIds = ActiveChildExchangeByTraderId
+                    .Where(pair => pair.Value == null || pair.Value.trader == null || pair.Value.childPawnIds.NullOrEmpty())
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < invalidChildExchangeIds.Count; i++)
+                {
+                    ActiveChildExchangeByTraderId.Remove(invalidChildExchangeIds[i]);
+                }
+
+                List<int> invalidAbandonedDeliveryIds = ActiveAbandonedDeliveryByAdultId
+                    .Where(pair => pair.Value == null || pair.Value.childPawnIds.NullOrEmpty())
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < invalidAbandonedDeliveryIds.Count; i++)
+                {
+                    ActiveAbandonedDeliveryByAdultId.Remove(invalidAbandonedDeliveryIds[i]);
+                }
+            }
+        }
+
+        internal static void ResetPendingState()
+        {
+            ActiveChildExchangeByTraderId.Clear();
+            ActiveAbandonedDeliveryByAdultId.Clear();
+        }
+
+        internal static void CleanupLoadedPendingState()
+        {
+            if (ActiveChildExchangeByTraderId != null)
+            {
+                List<int> invalidChildExchangeIds = ActiveChildExchangeByTraderId
+                    .Where(pair => pair.Value == null || pair.Value.trader == null || pair.Value.trader.Destroyed || pair.Value.childPawnIds.NullOrEmpty())
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < invalidChildExchangeIds.Count; i++)
+                {
+                    ActiveChildExchangeByTraderId.Remove(invalidChildExchangeIds[i]);
+                }
+            }
+
+            if (ActiveAbandonedDeliveryByAdultId != null)
+            {
+                List<int> invalidAbandonedDeliveryIds = ActiveAbandonedDeliveryByAdultId
+                    .Where(pair => pair.Value == null || pair.Value.childPawnIds.NullOrEmpty())
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < invalidAbandonedDeliveryIds.Count; i++)
+                {
+                    ActiveAbandonedDeliveryByAdultId.Remove(invalidAbandonedDeliveryIds[i]);
+                }
+            }
         }
 
         private sealed class MapPawnClassificationCache
@@ -665,11 +783,13 @@ namespace MouseDisaster
 
         public static bool IsMouseDisasterIncidentVisitor(Pawn pawn)
         {
+            // A Ratkin child's age alone is not an incident marker; external Ratkin children must remain untouched.
             return IsBeggarPawn(pawn) ||
                    IsThiefPawn(pawn) ||
                    IsWildMouseDisasterKind(pawn) ||
                    IsMouseDisasterTraderAdult(pawn) ||
-                   IsMouseEggOrChild(pawn);
+                   MouseDisasterVisitorUtility.IsManagedVisitor(pawn) ||
+                   IsMouseDisasterIncidentChild(pawn);
         }
 
         public static bool IsInBeggarMentalState(Pawn pawn)
@@ -3663,6 +3783,15 @@ namespace MouseDisaster
 
             ActiveChildExchangeByTraderId[trader.thingIDNumber] = new ChildExchangeState
             {
+                trader = trader,
+                escortPawns = escorts?
+                    .Where(escort => escort != null && !escort.Dead)
+                    .Distinct()
+                    .ToList() ?? new List<Pawn>(),
+                childPawns = children?
+                    .Where(child => child != null && !child.Dead)
+                    .Distinct()
+                    .ToList() ?? new List<Pawn>(),
                 mapId = trader.Map.uniqueID,
                 expireTick = Find.TickManager.TicksGame + Mathf.Max(600, durationTicks),
                 escortPawnIds = escortIds,
@@ -3963,6 +4092,8 @@ namespace MouseDisaster
 
             ActiveAbandonedDeliveryByAdultId[adult.thingIDNumber] = new AbandonedDeliveryState
             {
+                adult = adult,
+                childPawns = childPawns,
                 mapId = adult.Map.uniqueID,
                 foodCell = foodCell,
                 childPawnIds = childIds,

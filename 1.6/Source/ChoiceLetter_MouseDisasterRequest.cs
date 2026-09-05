@@ -28,22 +28,27 @@ namespace MouseDisaster
                 DiaOption accept = new DiaOption("\u4ea4\u4ed8");
                 accept.action = delegate
                 {
+                    Site site = null;
+                    if (createsIntelSite && !MouseDisasterPhase2Utility.TryCreateIntelSite(map, intelSiteKind, out site, out string intelFailure))
+                    {
+                        Messages.Message(intelFailure, MessageTypeDefOf.RejectInput);
+                        return;
+                    }
+
                     if (!MouseDisasterPhase2Utility.TryConsumeRequest(map, requestKind, amount, out string failure))
                     {
+                        if (site != null)
+                        {
+                            Find.WorldObjects.Remove(site);
+                        }
+
                         Messages.Message(failure, MessageTypeDefOf.RejectInput);
                         return;
                     }
 
                     if (createsIntelSite)
                     {
-                        if (MouseDisasterPhase2Utility.TryCreateIntelSite(map, intelSiteKind, out Site site, out string intelFailure))
-                        {
-                            Find.LetterStack.ReceiveLetter("\u9f20\u707e\u60c5\u62a5", "\u9f20\u707e\u63d0\u4f9b\u4e86\u4e00\u4e2a\u65b0\u5730\u70b9\u7684\u60c5\u62a5\u3002", LetterDefOf.PositiveEvent, site);
-                        }
-                        else
-                        {
-                            Messages.Message(intelFailure, MessageTypeDefOf.RejectInput);
-                        }
+                        Find.LetterStack.ReceiveLetter("\u9f20\u707e\u60c5\u62a5", "\u9f20\u707e\u63d0\u4f9b\u4e86\u4e00\u4e2a\u65b0\u5730\u70b9\u7684\u60c5\u62a5\u3002", LetterDefOf.PositiveEvent, site);
                     }
                     else
                     {

@@ -49,7 +49,14 @@ namespace MouseDisaster
     {
         public static bool Prefix(IncidentWorker __instance, ref bool __result)
         {
-            if (MouseDisasterRuntime.AllowsNewContent || !MouseDisasterIncidentCatalog.IsKnownIncident(__instance?.def?.defName))
+            string defName = __instance?.def?.defName;
+            if (!MouseDisasterIncidentCatalog.IsKnownIncident(defName))
+            {
+                return true;
+            }
+
+            if (MouseDisasterRuntime.AllowsNewContent &&
+                MouseDisasterIncidentCatalog.IsIncidentEnabled(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames))
             {
                 return true;
             }

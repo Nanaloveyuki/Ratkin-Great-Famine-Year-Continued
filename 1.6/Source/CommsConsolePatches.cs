@@ -26,7 +26,12 @@ namespace MouseDisaster
 
         private static FloatMenuOption BuildBroadcastHopeOption(Building_CommsConsole console, Pawn pawn)
         {
-            if (console == null || pawn == null || pawn.Dead)
+            if (!MouseDisasterRuntime.AllowsNewContent ||
+                console == null ||
+                console.Map == null ||
+                !console.Map.IsPlayerHome ||
+                pawn == null ||
+                pawn.Dead)
             {
                 return null;
             }

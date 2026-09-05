@@ -122,7 +122,11 @@ namespace MouseDisaster
             eventCount = 0;
             initialDelayHours = 0f;
 
-            if (!MouseDisasterRuntime.AllowsNewContent || map == null || Current.Game == null || Find.TickManager == null)
+            if (!MouseDisasterRuntime.AllowsNewContent ||
+                map == null ||
+                !map.IsPlayerHome ||
+                Current.Game == null ||
+                Find.TickManager == null)
             {
                 return false;
             }

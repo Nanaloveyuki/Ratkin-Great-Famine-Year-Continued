@@ -32,8 +32,10 @@ namespace MouseDisaster
         private const float PlagueStartSeverityMax = 0.1f;
         private const int AidRequestVisitDurationTicks = 60000;
 
-        private sealed class AidRequestState
+        private sealed class AidRequestState : IExposable
         {
+            public Pawn targetPawn;
+            public List<Pawn> trackedPawns = new List<Pawn>();
             public int mapId;
             public int targetPawnId;
             public List<int> pawnIds;
@@ -42,9 +44,77 @@ namespace MouseDisaster
             public bool createsIntelSite;
             public MouseDisasterIntelSiteKind intelSiteKind;
             public int expireTick;
+
+            public void ExposeData()
+            {
+                Scribe_References.Look(ref targetPawn, "targetPawn");
+                Scribe_Collections.Look(ref trackedPawns, "trackedPawns", LookMode.Reference);
+                Scribe_Values.Look(ref mapId, "mapId", -1);
+                Scribe_Values.Look(ref targetPawnId, "targetPawnId", -1);
+                Scribe_Collections.Look(ref pawnIds, "pawnIds", LookMode.Value);
+                Scribe_Values.Look(ref requestKind, "requestKind", MouseDisasterRequestKind.SimpleMeal);
+                Scribe_Values.Look(ref amount, "amount", 0);
+                Scribe_Values.Look(ref createsIntelSite, "createsIntelSite", false);
+                Scribe_Values.Look(ref intelSiteKind, "intelSiteKind", MouseDisasterIntelSiteKind.Treasure);
+                Scribe_Values.Look(ref expireTick, "expireTick", 0);
+
+                if (Scribe.mode == LoadSaveMode.PostLoadInit)
+                {
+                    trackedPawns ??= new List<Pawn>();
+                    pawnIds ??= new List<int>();
+                    trackedPawns.RemoveAll(pawn => pawn == null);
+                    pawnIds = pawnIds
+                        .Concat(trackedPawns.Where(pawn => pawn != null).Select(pawn => pawn.thingIDNumber))
+                        .Distinct()
+                        .ToList();
+                    if (targetPawn != null)
+                    {
+                        targetPawnId = targetPawn.thingIDNumber;
+                    }
+                }
+            }
         }
 
-        private static readonly Dictionary<int, AidRequestState> ActiveAidRequestsByTargetPawnId = new Dictionary<int, AidRequestState>();
+        private static Dictionary<int, AidRequestState> ActiveAidRequestsByTargetPawnId = new Dictionary<int, AidRequestState>();
+
+        internal static void ExposePendingStateData()
+        {
+            Scribe_Collections.Look(ref ActiveAidRequestsByTargetPawnId, "mouseDisaster_activeAidRequests", LookMode.Value, LookMode.Deep);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                ActiveAidRequestsByTargetPawnId ??= new Dictionary<int, AidRequestState>();
+                List<int> invalidTargetIds = ActiveAidRequestsByTargetPawnId
+                    .Where(pair => pair.Value == null || pair.Value.targetPawn == null || pair.Value.pawnIds.NullOrEmpty())
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < invalidTargetIds.Count; i++)
+                {
+                    ActiveAidRequestsByTargetPawnId.Remove(invalidTargetIds[i]);
+                }
+            }
+        }
+
+        internal static void ResetPendingState()
+        {
+            ActiveAidRequestsByTargetPawnId.Clear();
+        }
+
+        internal static void CleanupLoadedPendingState()
+        {
+            if (ActiveAidRequestsByTargetPawnId == null || ActiveAidRequestsByTargetPawnId.Count == 0)
+            {
+                return;
+            }
+
+            List<int> invalidTargetIds = ActiveAidRequestsByTargetPawnId
+                .Where(pair => pair.Value == null || pair.Value.targetPawn == null || pair.Value.targetPawn.Destroyed || pair.Value.pawnIds.NullOrEmpty())
+                .Select(pair => pair.Key)
+                .ToList();
+            for (int i = 0; i < invalidTargetIds.Count; i++)
+            {
+                ActiveAidRequestsByTargetPawnId.Remove(invalidTargetIds[i]);
+            }
+        }
 
         public static float GetCurrentColonyWealth(Map map)
         {
@@ -532,6 +602,11 @@ namespace MouseDisaster
 
             ActiveAidRequestsByTargetPawnId[targetPawn.thingIDNumber] = new AidRequestState
             {
+                targetPawn = targetPawn,
+                trackedPawns = pawns?
+                    .Where(pawn => pawn != null && !pawn.Dead)
+                    .Distinct()
+                    .ToList() ?? new List<Pawn>(),
                 mapId = targetPawn.Map.uniqueID,
                 targetPawnId = targetPawn.thingIDNumber,
                 pawnIds = pawnIds,
