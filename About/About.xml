@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <name>鼠灾-大荒年</name>
-  <author>乐织终</author>
-  <packageId>lezhizhong.mouse.disaster.famine</packageId>
+  <name>鼠灾-大荒年 (Continued)</name>
+  <author>乐织终；Continued by Nanaloveyuki</author>
+  <packageId>nanaloveyuki.mouse.disaster.famine.continued</packageId>
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>

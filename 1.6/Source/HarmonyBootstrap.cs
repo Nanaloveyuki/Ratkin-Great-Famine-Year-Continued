@@ -21,7 +21,7 @@ namespace MouseDisaster
             }
 
             patched = true;
-            Harmony harmony = new Harmony("lezhizhong.mouse.disaster.famine");
+            Harmony harmony = new Harmony("nanaloveyuki.mouse.disaster.famine.continued");
             harmony.PatchAll();
         }
     }

@@ -12,7 +12,9 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
+    <RimWorldManagedDir Condition=" '$(RimWorldManagedDir)' == '' ">..\..\..\Assemblies</RimWorldManagedDir>
+    <HarmonyAssembliesDir Condition=" '$(HarmonyAssembliesDir)' == '' ">..\..\..\Assemblies</HarmonyAssembliesDir>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,22 +37,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\Assemblies\0Harmony.dll</HintPath>
+      <HintPath>$(HarmonyAssembliesDir)\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\Assemblies\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(RimWorldManagedDir)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\Assemblies\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(RimWorldManagedDir)\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\Assemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(RimWorldManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -74,6 +76,7 @@
     <Compile Include="GameComponent_MouseDisasterFamineYear.cs" />
     <Compile Include="GameComponent_MouseDisasterGeneRestoreState.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />
+    <Compile Include="GameComponent_MouseDisasterPawnGeneration.cs" />
     <Compile Include="GameComponent_MouseDisasterVisitorControl.cs" />
     <Compile Include="MouseDisasterBroadcastHopePolicy.cs" />
     <Compile Include="MouseDisasterAbandonedDeliveryPolicy.cs" />

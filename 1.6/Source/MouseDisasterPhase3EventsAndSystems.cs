@@ -213,41 +213,7 @@ namespace MouseDisaster
             }
 
             int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 8, 28, 55f);
-            List<Pawn> pawns = new List<Pawn>();
-            for (int i = 0; i < count; i++)
-            {
-                Pawn pawn = MouseDisasterPhase3Utility.CreateAnyAgeFaminePawn(faction, InfectsWithPlague);
-                if (pawn == null)
-                {
-                    continue;
-                }
-
-                GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(entryCell, map, 7), map);
-                if (pawn.DevelopmentalStage == DevelopmentalStage.Adult)
-                {
-                    pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_GreatFamineAdult);
-                }
-                else
-                {
-                    pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_GreatFamineChild);
-                }
-
-                pawn.mindState?.mentalStateHandler?.Reset();
-                pawns.Add(pawn);
-            }
-
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            if (faction != null)
-            {
-                LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: false, canTimeoutOrFlee: false, canSteal: true, breachers: true), map, pawns);
-            }
-
-            SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartGreatFamine(def, parms, map, entryCell, faction, count, InfectsWithPlague);
         }
     }
 

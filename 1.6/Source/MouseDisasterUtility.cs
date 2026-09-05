@@ -968,7 +968,7 @@ namespace MouseDisaster
             return CellFinder.TryFindRandomEdgeCellWith(c => map.reachability.CanReachColony(c), map, CellFinder.EdgeRoadChance_Ignore, out cell);
         }
 
-        private static Pawn GenerateRatkinPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false)
+        private static Pawn GenerateRatkinPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false, Gender? fixedGender = null)
         {
             if (kindDef == null)
             {
@@ -987,7 +987,7 @@ namespace MouseDisaster
             for (int attempt = 0; attempt < 4; attempt++)
             {
                 Faction requestFaction = attempt == 0 ? formerFaction : null;
-                Pawn generated = PawnGenerator.GeneratePawn(CreateRatkinGenerationRequest(generationKindDef, requestFaction, stage, allowViolenceDisabledTraits));
+                Pawn generated = PawnGenerator.GeneratePawn(CreateRatkinGenerationRequest(generationKindDef, requestFaction, stage, allowViolenceDisabledTraits, fixedGender));
                 if (generated != null && (expectedRace == null || generated.def == expectedRace))
                 {
                     pawn = generated;
@@ -1029,7 +1029,7 @@ namespace MouseDisaster
             return pawn;
         }
 
-        private static PawnGenerationRequest CreateRatkinGenerationRequest(PawnKindDef kindDef, Faction faction, DevelopmentalStage stage, bool allowViolenceDisabledTraits)
+        private static PawnGenerationRequest CreateRatkinGenerationRequest(PawnKindDef kindDef, Faction faction, DevelopmentalStage stage, bool allowViolenceDisabledTraits, Gender? fixedGender)
         {
             return new PawnGenerationRequest(
                 kindDef,
@@ -1037,6 +1037,7 @@ namespace MouseDisaster
                 canGeneratePawnRelations: false,
                 mustBeCapableOfViolence: !allowViolenceDisabledTraits && stage != DevelopmentalStage.Baby,
                 developmentalStages: stage,
+                fixedGender: fixedGender,
                 forceBaselinerChance: 0f,
                 allowedXenotypes: ResolveAllowedRatkinXenotypes());
         }
@@ -2162,7 +2163,12 @@ namespace MouseDisaster
 
         public static Pawn GenerateFactionRatkinPawn(PawnKindDef kindDef, Faction faction, DevelopmentalStage stage, float foodPercentage = 0.35f, bool allowViolenceDisabledTraits = false)
         {
-            Pawn pawn = GenerateRatkinPawn(kindDef, faction, stage, allowViolenceDisabledTraits);
+            return GenerateFactionRatkinPawn(kindDef, faction, stage, foodPercentage, allowViolenceDisabledTraits, null);
+        }
+
+        public static Pawn GenerateFactionRatkinPawn(PawnKindDef kindDef, Faction faction, DevelopmentalStage stage, float foodPercentage, bool allowViolenceDisabledTraits, Gender? fixedGender)
+        {
+            Pawn pawn = GenerateRatkinPawn(kindDef, faction, stage, allowViolenceDisabledTraits, fixedGender);
             if (pawn == null)
             {
                 return null;
