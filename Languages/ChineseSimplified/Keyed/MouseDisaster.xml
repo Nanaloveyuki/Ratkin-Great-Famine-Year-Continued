@@ -65,6 +65,37 @@
   <MouseDisaster_N005_TimedOut_Text>你没有在规定时间内作出决定。商人带着孩子离开了。</MouseDisaster_N005_TimedOut_Text>
   <MouseDisaster_N005_Broken_Label>穗音：两边都没有拿到</MouseDisaster_N005_Broken_Label>
   <MouseDisaster_N005_Broken_Text>交易中断了。双方都没有按原计划完成交接。</MouseDisaster_N005_Broken_Text>
+  <!-- N-006 runtime wording remains short until narrative-draft.md is finalized. -->
+  <MouseDisaster_N006_EntryLabel>穗音：粮仓下面</MouseDisaster_N006_EntryLabel>
+  <MouseDisaster_N006_EntryText>同一张地图上已经发生了两次鼠族偷窃。储粮处的缺口没有对上，墙后传来抓挠声。你要现在处理，还是先留一点食物看看它们去了哪里？</MouseDisaster_N006_EntryText>
+  <MouseDisaster_N006_Seal>封住洞口</MouseDisaster_N006_Seal>
+  <MouseDisaster_N006_LeaveBait>留下诱饵</MouseDisaster_N006_LeaveBait>
+  <MouseDisaster_N006_ForceClean>强行清理</MouseDisaster_N006_ForceClean>
+  <MouseDisaster_N006_Ignore>先不管</MouseDisaster_N006_Ignore>
+  <MouseDisaster_N006_Bait_Message>你留下一份食物，等它们把路线暴露出来。</MouseDisaster_N006_Bait_Message>
+  <MouseDisaster_N006_Bait_NoFood>没有可以留下的食物。</MouseDisaster_N006_Bait_NoFood>
+  <MouseDisaster_N006_BaitReadyLabel>穗音：诱饵不见了</MouseDisaster_N006_BaitReadyLabel>
+  <MouseDisaster_N006_BaitReadyText>诱饵不见了，墙后多了一道新的划痕。现在可以沿着痕迹追踪，也可以停在这里。</MouseDisaster_N006_BaitReadyText>
+  <MouseDisaster_N006_Trace>沿着痕迹追踪</MouseDisaster_N006_Trace>
+  <MouseDisaster_N006_Stop>停止追踪</MouseDisaster_N006_Stop>
+  <MouseDisaster_N006_ActionFailed>这条粮仓记录已经不能继续处理。</MouseDisaster_N006_ActionFailed>
+  <MouseDisaster_N006_Ignore_Message>你暂时没有处理粮仓下面的动静。</MouseDisaster_N006_Ignore_Message>
+  <MouseDisaster_N006_Sealed_Message>你封住了粮仓附近的洞口。</MouseDisaster_N006_Sealed_Message>
+  <MouseDisaster_N006_ForceCleaned_Message>你强行清理了粮仓附近的洞口。</MouseDisaster_N006_ForceCleaned_Message>
+  <MouseDisaster_N006_BaitLost_Message>你停止了追踪，诱饵的去向没有留下结果。</MouseDisaster_N006_BaitLost_Message>
+  <MouseDisaster_N006_BaitTraced_Message>你沿着诱饵留下的痕迹找到了一个新地点。</MouseDisaster_N006_BaitTraced_Message>
+  <MouseDisaster_N006_Sealed_Label>穗音：墙重新长出来</MouseDisaster_N006_Sealed_Label>
+  <MouseDisaster_N006_Sealed_Text>你封住了粮仓附近的洞口。损失暂时停在这里，洞的另一端没有留下记录。</MouseDisaster_N006_Sealed_Text>
+  <MouseDisaster_N006_BaitTraced_Label>穗音：一条更远的路</MouseDisaster_N006_BaitTraced_Label>
+  <MouseDisaster_N006_BaitTraced_Text>你沿着粮屑找到了一个新的地点。至少这条粮路不再只是猜测。</MouseDisaster_N006_BaitTraced_Text>
+  <MouseDisaster_N006_BaitLost_Label>穗音：诱饵没有回来</MouseDisaster_N006_BaitLost_Label>
+  <MouseDisaster_N006_BaitLost_Text>诱饵消失了，但没有留下足够的痕迹。记录在这里停下，路线仍然在墙后。</MouseDisaster_N006_BaitLost_Text>
+  <MouseDisaster_N006_ForceCleaned_Label>穗音：里面的回声</MouseDisaster_N006_ForceCleaned_Label>
+  <MouseDisaster_N006_ForceCleaned_Text>你清理了粮仓附近的洞口。出来的只有碎粮和灰，里面更远的声音没有等到你确认。</MouseDisaster_N006_ForceCleaned_Text>
+  <MouseDisaster_N006_LostClue_Label>穗音：没有洞</MouseDisaster_N006_LostClue_Label>
+  <MouseDisaster_N006_LostClue_Text>你再去看时，墙角只剩下一层灰。没有洞，也没有足够大的缝隙能解释粮食去了哪里。</MouseDisaster_N006_LostClue_Text>
+  <MouseDisaster_N006_BaitTraced_SiteLabel>粮仓情报</MouseDisaster_N006_BaitTraced_SiteLabel>
+  <MouseDisaster_N006_BaitTraced_SiteText>你沿着粮屑找到了一个地点。它可能是藏粮处，也可能只是另一条路的入口。</MouseDisaster_N006_BaitTraced_SiteText>
   <MouseDisaster_Settings_EnableAgeCap>启用鼠族年龄上限修正</MouseDisaster_Settings_EnableAgeCap>
   <MouseDisaster_Settings_EnableAgeCap_Tooltip>关闭后，鼠族年龄与老年病强化将按原版与种族设定处理。</MouseDisaster_Settings_EnableAgeCap_Tooltip>
   <MouseDisaster_Settings_EnableGnawing>启用啃食行为</MouseDisaster_Settings_EnableGnawing>
@@ -94,7 +125,7 @@
   <MouseDisaster_Settings_RatEggTraitChance>兼容特性生成概率：{0}%</MouseDisaster_Settings_RatEggTraitChance>
   <MouseDisaster_Settings_CompatDisabledHint>特性桥接已关闭：不再注入鼠蛋特性拓展兼容逻辑。</MouseDisaster_Settings_CompatDisabledHint>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>
-  <MouseDisaster_Settings_ImplNote>当前内容包含野生鼠族、偷窃、乞讨、啃食、尾巴与耳朵交互、特殊事件、繁殖基因、50 岁后老年病强化，以及穗音的第一批叙事和隐藏奖励。后续将继续扩展婴儿囚犯、鼠疫和灾鼠派系相关内容。</MouseDisaster_Settings_ImplNote>
+  <MouseDisaster_Settings_ImplNote>当前内容包含野生鼠族、偷窃、乞讨、啃食、尾巴与耳朵交互、特殊事件、繁殖基因、50 岁后老年病强化、穗音的第一批叙事和隐藏奖励，以及粮仓鼠洞任务。后续将继续扩展婴儿囚犯、鼠疫和灾鼠派系相关内容。</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>窝趴趴舔灰灰，肚肚咕咕叫，脏脏也系饭饭。</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_2>泥泥土土糊一嘴，窝还要叠着舌头舔。</MouseDisaster_PrisonerScavenge_Text_FloorDust_2>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_3>地缝缝里抠灰灰，窝小嘴最会刮渣渣。</MouseDisaster_PrisonerScavenge_Text_FloorDust_3>

@@ -155,6 +155,7 @@ namespace MouseDisaster
             }
 
             ProcessN004RescueRewards();
+            ProcessN006();
             if (n004Records == null || n004Records.Count == 0)
             {
                 return;
