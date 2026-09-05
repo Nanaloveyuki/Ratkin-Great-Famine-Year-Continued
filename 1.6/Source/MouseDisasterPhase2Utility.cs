@@ -84,7 +84,7 @@ namespace MouseDisaster
             {
                 ActiveAidRequestsByTargetPawnId ??= new Dictionary<int, AidRequestState>();
                 List<int> invalidTargetIds = ActiveAidRequestsByTargetPawnId
-                    .Where(pair => pair.Value == null || pair.Value.targetPawn == null || pair.Value.pawnIds.NullOrEmpty())
+                    .Where(pair => pair.Value == null || pair.Value.pawnIds.NullOrEmpty() || pair.Value.mapId < 0)
                     .Select(pair => pair.Key)
                     .ToList();
                 for (int i = 0; i < invalidTargetIds.Count; i++)
@@ -107,7 +107,7 @@ namespace MouseDisaster
             }
 
             List<int> invalidTargetIds = ActiveAidRequestsByTargetPawnId
-                .Where(pair => pair.Value == null || pair.Value.targetPawn == null || pair.Value.targetPawn.Destroyed || pair.Value.pawnIds.NullOrEmpty())
+                .Where(pair => pair.Value == null || pair.Value.pawnIds.NullOrEmpty() || pair.Value.mapId < 0)
                 .Select(pair => pair.Key)
                 .ToList();
             for (int i = 0; i < invalidTargetIds.Count; i++)

@@ -383,7 +383,7 @@ namespace MouseDisaster
                 ActiveAbandonedDeliveryByAdultId ??= new Dictionary<int, AbandonedDeliveryState>();
 
                 List<int> invalidChildExchangeIds = ActiveChildExchangeByTraderId
-                    .Where(pair => pair.Value == null || pair.Value.trader == null || pair.Value.childPawnIds.NullOrEmpty())
+                    .Where(pair => pair.Value == null || pair.Value.childPawnIds.NullOrEmpty() || pair.Value.mapId < 0)
                     .Select(pair => pair.Key)
                     .ToList();
                 for (int i = 0; i < invalidChildExchangeIds.Count; i++)
@@ -540,7 +540,7 @@ namespace MouseDisaster
             if (ActiveChildExchangeByTraderId != null)
             {
                 List<int> invalidChildExchangeIds = ActiveChildExchangeByTraderId
-                    .Where(pair => pair.Value == null || pair.Value.trader == null || pair.Value.trader.Destroyed || pair.Value.childPawnIds.NullOrEmpty())
+                    .Where(pair => pair.Value == null || pair.Value.childPawnIds.NullOrEmpty() || pair.Value.mapId < 0)
                     .Select(pair => pair.Key)
                     .ToList();
                 for (int i = 0; i < invalidChildExchangeIds.Count; i++)
