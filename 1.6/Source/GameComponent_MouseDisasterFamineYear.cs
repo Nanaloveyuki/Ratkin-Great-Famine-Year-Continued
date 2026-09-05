@@ -40,7 +40,7 @@ namespace MouseDisaster
         public override void GameComponentTick()
         {
             MouseDisasterSettings settings = MouseDisasterMod.Settings;
-            if (settings == null || !settings.enableFamineYearSystem || Find.TickManager == null)
+            if (!MouseDisasterRuntime.AllowsNewContent || settings == null || !settings.enableFamineYearSystem || Find.TickManager == null)
             {
                 return;
             }

@@ -30,6 +30,13 @@ namespace MouseDisaster
 
             DrawHeader(listing);
 
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnableNewContent", ref Settings.enableNewContent, "MouseDisaster_Settings_EnableNewContent_Tooltip");
+            if (!Settings.enableNewContent)
+            {
+                listing.Label("MouseDisaster_Settings_NewContentDisabledHint".Translate());
+            }
+            listing.GapLine();
+
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_General");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
@@ -106,11 +113,14 @@ namespace MouseDisaster
 
         private static void DrawHeader(Listing_Standard listing)
         {
-            int enabledIncidentCount = MouseDisasterIncidentCatalog.CountEnabledIncidents(Settings.disabledIncidentDefNames);
+            int enabledIncidentCount = Settings.enableNewContent
+                ? MouseDisasterIncidentCatalog.CountEnabledIncidents(Settings.disabledIncidentDefNames)
+                : 0;
             int totalIncidentCount = MouseDisasterIncidentCatalog.AllEntries.Count;
+            string newContentStatus = Settings.enableNewContent ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             string gnawingStatus = Settings.enableGnawing ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             string tailBiteStatus = Settings.enableExperimentalTailBite ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
-            listing.Label("事件: " + enabledIncidentCount + "/" + totalIncidentCount + "  啃食: " + gnawingStatus + "  咬尾巴: " + tailBiteStatus);
+            listing.Label("新事件/Pawn: " + newContentStatus + "  事件: " + enabledIncidentCount + "/" + totalIncidentCount + "  啃食: " + gnawingStatus + "  咬尾巴: " + tailBiteStatus);
             listing.GapLine();
         }
 

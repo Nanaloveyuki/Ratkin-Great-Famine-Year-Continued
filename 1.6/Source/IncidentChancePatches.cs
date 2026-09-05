@@ -11,6 +11,12 @@ namespace MouseDisaster
     {
         public static bool Prefix(IncidentWorker __instance, IncidentParms parms, ref bool __result)
         {
+            if (!MouseDisasterRuntime.AllowsNewContent && MouseDisasterIncidentCatalog.IsKnownIncident(__instance?.def?.defName))
+            {
+                __result = false;
+                return false;
+            }
+
             if (!MouseDisasterIncidentTargetPolicy.ShouldBlockCanFireNowForInvalidTarget(
                     __instance?.def?.defName,
                     parms?.target != null,
@@ -35,6 +41,21 @@ namespace MouseDisaster
             {
                 __result = false;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(IncidentWorker), nameof(IncidentWorker.TryExecute))]
+    public static class MouseDisasterIncidentExecuteTogglePatch
+    {
+        public static bool Prefix(IncidentWorker __instance, ref bool __result)
+        {
+            if (MouseDisasterRuntime.AllowsNewContent || !MouseDisasterIncidentCatalog.IsKnownIncident(__instance?.def?.defName))
+            {
+                return true;
+            }
+
+            __result = false;
+            return false;
         }
     }
 

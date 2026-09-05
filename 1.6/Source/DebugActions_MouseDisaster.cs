@@ -42,6 +42,12 @@ namespace MouseDisaster
 
         private static void TryExecuteCatalogIncident(MouseDisasterIncidentEntry entry)
         {
+            if (!MouseDisasterRuntime.AllowsNewContent)
+            {
+                Messages.Message("MouseDisaster_Settings_NewContentDisabledDebugMessage".Translate(), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
             if (entry == null)
             {
                 return;

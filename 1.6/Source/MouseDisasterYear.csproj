@@ -83,6 +83,7 @@
     <Compile Include="MouseDisasterBabyLeashPolicy.cs" />
     <Compile Include="MouseDisasterBirthPolicy.cs" />
     <Compile Include="MouseDisasterReliefAreaPolicy.cs" />
+    <Compile Include="MouseDisasterRuntime.cs" />
     <Compile Include="MouseDisasterGeneRestorePolicy.cs" />
     <Compile Include="MouseDisasterIncidentCatalog.cs" />
     <Compile Include="MouseDisasterIncidentTargetPolicy.cs" />

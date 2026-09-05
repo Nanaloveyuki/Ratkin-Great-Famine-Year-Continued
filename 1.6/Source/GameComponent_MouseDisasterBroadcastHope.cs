@@ -66,7 +66,7 @@ namespace MouseDisaster
 
         public override void GameComponentTick()
         {
-            if (Find.TickManager == null || queuedBroadcasts == null || queuedBroadcasts.Count == 0)
+            if (!MouseDisasterRuntime.AllowsNewContent || Find.TickManager == null || queuedBroadcasts == null || queuedBroadcasts.Count == 0)
             {
                 return;
             }
@@ -122,7 +122,7 @@ namespace MouseDisaster
             eventCount = 0;
             initialDelayHours = 0f;
 
-            if (map == null || Current.Game == null || Find.TickManager == null)
+            if (!MouseDisasterRuntime.AllowsNewContent || map == null || Current.Game == null || Find.TickManager == null)
             {
                 return false;
             }

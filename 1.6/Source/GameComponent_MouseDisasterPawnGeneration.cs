@@ -108,6 +108,16 @@ namespace MouseDisaster
                 return;
             }
 
+            if (!MouseDisasterRuntime.AllowsNewContent)
+            {
+                for (int i = batches.Count - 1; i >= 0; i--)
+                {
+                    TryTruncateBatch(batches[i], "new content generation was disabled in Mod settings");
+                }
+                batches.Clear();
+                return;
+            }
+
             int nowTick = tickManager.TicksGame;
             for (int i = 0; i < batches.Count; i++)
             {
@@ -229,7 +239,7 @@ namespace MouseDisaster
         private static bool TryStartBatch(MouseDisasterPawnBatch batch, int totalCount)
         {
             GameComponent_MouseDisasterPawnGeneration component = Current.Game?.GetComponent<GameComponent_MouseDisasterPawnGeneration>();
-            if (component == null || !IsBatchMapAvailable(batch) || batch.incidentDef == null || batch.parms == null || totalCount <= 0)
+            if (!MouseDisasterRuntime.AllowsNewContent || component == null || !IsBatchMapAvailable(batch) || batch.incidentDef == null || batch.parms == null || totalCount <= 0)
             {
                 return false;
             }

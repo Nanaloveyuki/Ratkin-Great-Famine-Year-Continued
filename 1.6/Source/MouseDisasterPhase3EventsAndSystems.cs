@@ -285,7 +285,7 @@ namespace MouseDisaster
 
         public void RecordAirdroppedEggs(Faction faction, int eggCount, bool plague)
         {
-            if (faction == null || eggCount <= 0)
+            if (!MouseDisasterRuntime.AllowsNewContent || faction == null || eggCount <= 0)
             {
                 return;
             }

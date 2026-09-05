@@ -12,6 +12,10 @@
   <MouseDisaster_Settings_Section_Compat>联动兼容</MouseDisaster_Settings_Section_Compat>
   <MouseDisaster_Settings_Status_On>开启</MouseDisaster_Settings_Status_On>
   <MouseDisaster_Settings_Status_Off>关闭</MouseDisaster_Settings_Status_Off>
+  <MouseDisaster_Settings_EnableNewContent>允许生成新的鼠灾事件与 Pawn</MouseDisaster_Settings_EnableNewContent>
+  <MouseDisaster_Settings_EnableNewContent_Tooltip>可在游戏运行期间即时切换。关闭后不再触发新的鼠灾事件、生成新的鼠灾 Pawn 或建立新的鼠灾受孕；已经存在的 Pawn、工作、信件、区域和状态不受影响并继续运行。</MouseDisaster_Settings_EnableNewContent_Tooltip>
+  <MouseDisaster_Settings_NewContentDisabledHint>新内容生成已关闭。现有 Pawn 与事件状态仍会继续正常工作。</MouseDisaster_Settings_NewContentDisabledHint>
+  <MouseDisaster_Settings_NewContentDisabledDebugMessage>鼠灾新内容生成已关闭，无法触发新事件。</MouseDisaster_Settings_NewContentDisabledDebugMessage>
   <MouseDisaster_Settings_EnableAgeCap>启用鼠族年龄上限修正</MouseDisaster_Settings_EnableAgeCap>
   <MouseDisaster_Settings_EnableAgeCap_Tooltip>关闭后，鼠族年龄与老年病强化将按原版与种族设定处理。</MouseDisaster_Settings_EnableAgeCap_Tooltip>
   <MouseDisaster_Settings_EnableGnawing>启用啃食行为</MouseDisaster_Settings_EnableGnawing>

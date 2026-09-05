@@ -32,6 +32,7 @@ namespace MouseDisaster
         public const float ScavengeToxicBuildupNormal = 0.02f;
         public const float ScavengeToxicBuildupAbuse = 0.05f;
 
+        public bool enableNewContent = true;
         public bool enableAgeCapAdjustment = true;
         public bool enableWildRatkinIncidents = true;
         public bool enableThiefIncidents = true;
@@ -60,6 +61,7 @@ namespace MouseDisaster
 
         public void ResetToDefaults()
         {
+            enableNewContent = true;
             enableAgeCapAdjustment = true;
             enableWildRatkinIncidents = true;
             enableThiefIncidents = true;
@@ -141,6 +143,7 @@ namespace MouseDisaster
 
         public override void ExposeData()
         {
+            Scribe_Values.Look(ref enableNewContent, "enableNewContent", true);
             Scribe_Values.Look(ref enableAgeCapAdjustment, "enableAgeCapAdjustment", true);
             Scribe_Values.Look(ref enableWildRatkinIncidents, "enableWildRatkinIncidents", true);
             Scribe_Values.Look(ref enableThiefIncidents, "enableThiefIncidents", true);

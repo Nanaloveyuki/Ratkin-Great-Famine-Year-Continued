@@ -1353,7 +1353,7 @@ namespace MouseDisaster
         private static void TryApplyRatEggExtendedTrait(Pawn pawn, DevelopmentalStage stage)
         {
             MouseDisasterSettings settings = MouseDisasterMod.Settings;
-            if ((settings != null && !settings.enableRatEggTraitsBridge) || pawn?.story?.traits == null || !IsRatkin(pawn))
+            if (!MouseDisasterRuntime.AllowsNewContent || (settings != null && !settings.enableRatEggTraitsBridge) || pawn?.story?.traits == null || !IsRatkin(pawn))
             {
                 return;
             }
@@ -4233,7 +4233,7 @@ namespace MouseDisaster
         public static void ProcessChaosPregnancies(Map map)
         {
             MouseDisasterSettings settings = MouseDisasterMod.Settings;
-            if (!ModsConfig.BiotechActive || map == null || !Find.Storyteller.difficulty.ChildrenAllowed || (settings != null && !settings.enableChaosRoomPregnancy))
+            if (!MouseDisasterRuntime.AllowsNewContent || !ModsConfig.BiotechActive || map == null || !Find.Storyteller.difficulty.ChildrenAllowed || (settings != null && !settings.enableChaosRoomPregnancy))
             {
                 return;
             }
