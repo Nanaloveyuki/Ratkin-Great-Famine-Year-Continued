@@ -29,6 +29,13 @@
     <flashColor>(0.68, 0.76, 0.56)</flashColor>
   </LetterDef>
   <LetterDef>
+    <defName>MouseDisaster_N007Letter</defName>
+    <label>检疫封锁</label>
+    <letterClass>MouseDisaster.ChoiceLetter_MouseDisasterN007</letterClass>
+    <color>(0.76, 0.84, 0.58)</color>
+    <flashColor>(0.76, 0.84, 0.58)</flashColor>
+  </LetterDef>
+  <LetterDef>
     <defName>MouseDisaster_VisitorControlLetter</defName>
     <label>鼠灾访客</label>
     <letterClass>MouseDisaster.ChoiceLetter_MouseDisasterVisitorControl</letterClass>

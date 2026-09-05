@@ -34,6 +34,7 @@ namespace MouseDisaster
             Scribe_Collections.Look(ref n004Records, "mouseDisaster_narrativeN004Records", LookMode.Deep);
             ExposeN005Data();
             ExposeN006Data();
+            ExposeN007Data();
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
@@ -75,6 +76,7 @@ namespace MouseDisaster
             }
 
             NotifyN006TheftIncident(incidentDef, parms);
+            NotifyN007PlagueIncident(incidentDef, parms);
             if (ContainsObservedIncident(incidentDef.defName))
             {
                 return;

@@ -701,17 +701,17 @@ namespace MouseDisaster
 
         public static bool CanHire(Pawn pawn)
         {
-            return Component?.CanHire(pawn) ?? false;
+            return !IsN007ControlBlocked(new[] { pawn }) && (Component?.CanHire(pawn) ?? false);
         }
 
         public static bool CanEndHire(Pawn pawn)
         {
-            return Component?.CanEndHire(pawn) ?? false;
+            return !IsN007ControlBlocked(new[] { pawn }) && (Component?.CanEndHire(pawn) ?? false);
         }
 
         public static bool CanJoin(Pawn pawn)
         {
-            return Component?.CanJoin(pawn) ?? false;
+            return !IsN007ControlBlocked(new[] { pawn }) && (Component?.CanJoin(pawn) ?? false);
         }
 
         public static bool HasShelterMood(Pawn pawn)
@@ -732,34 +732,34 @@ namespace MouseDisaster
         public static bool TryTemporaryRecruitAll(IEnumerable<Pawn> pawns, out int recruitedCount)
         {
             recruitedCount = 0;
-            return Component != null && Component.TryTemporaryRecruit(pawns, TemporaryRecruitDurationTicks, out recruitedCount);
+            return !IsN007ControlBlocked(pawns) && Component != null && Component.TryTemporaryRecruit(pawns, TemporaryRecruitDurationTicks, out recruitedCount);
         }
 
         public static bool TryHire(Pawn pawn)
         {
-            return Component != null && Component.TryHire(pawn);
+            return !IsN007ControlBlocked(new[] { pawn }) && Component != null && Component.TryHire(pawn);
         }
 
         public static bool TryHireAll(IEnumerable<Pawn> pawns, out int hiredCount)
         {
             hiredCount = 0;
-            return Component != null && Component.TryHire(pawns, out hiredCount);
+            return !IsN007ControlBlocked(pawns) && Component != null && Component.TryHire(pawns, out hiredCount);
         }
 
         public static bool TryEndHire(Pawn pawn)
         {
-            return Component != null && Component.TryEndHire(pawn);
+            return !IsN007ControlBlocked(new[] { pawn }) && Component != null && Component.TryEndHire(pawn);
         }
 
         public static bool TryJoin(Pawn pawn)
         {
-            return Component != null && Component.TryJoin(pawn);
+            return !IsN007ControlBlocked(new[] { pawn }) && Component != null && Component.TryJoin(pawn);
         }
 
         public static bool TryJoinAll(IEnumerable<Pawn> pawns, out int joinedCount)
         {
             joinedCount = 0;
-            return Component != null && Component.TryJoin(pawns, out joinedCount);
+            return !IsN007ControlBlocked(pawns) && Component != null && Component.TryJoin(pawns, out joinedCount);
         }
 
         public static bool HasAvailablePrisonArea(Map map)
@@ -776,13 +776,25 @@ namespace MouseDisaster
         {
             imprisonedCount = 0;
             failureMessage = "MouseDisaster_VisitorControl_NoValidTarget".Translate();
+            if (IsN007ControlBlocked(pawns))
+            {
+                failureMessage = "MouseDisaster_N007_VisitorControlBlocked".Translate();
+                return false;
+            }
             return Component != null && Component.TrySendToPrison(pawns, map, out imprisonedCount, out failureMessage);
         }
 
         public static bool TryMakeHostile(IEnumerable<Pawn> pawns, out int hostileCount)
         {
             hostileCount = 0;
-            return Component != null && Component.TryMakeHostile(pawns, out hostileCount);
+            return !IsN007ControlBlocked(pawns) && Component != null && Component.TryMakeHostile(pawns, out hostileCount);
+        }
+
+        public static bool IsN007ControlBlocked(IEnumerable<Pawn> pawns)
+        {
+            GameComponent_MouseDisasterNarrative narrative = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
+            return narrative != null && pawns != null && pawns.Any(pawn => pawn != null &&
+                narrative.IsN007VisitorControlBlocked(pawn.MapHeld, new[] { pawn }));
         }
 
         public static bool SendVisitorChoiceLetter(IncidentDef incidentDef, IncidentParms parms, Map map, IEnumerable<Pawn> pawns)

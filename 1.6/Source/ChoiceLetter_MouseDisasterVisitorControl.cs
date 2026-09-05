@@ -152,6 +152,16 @@ namespace MouseDisaster
                 };
                 ignore.resolveTree = true;
 
+                bool quarantineBlocked = MouseDisasterVisitorUtility.IsN007ControlBlocked(validVisitors);
+                if (quarantineBlocked)
+                {
+                    string reason = "MouseDisaster_N007_VisitorControlBlocked".Translate();
+                    temporaryRecruit.Disable(reason);
+                    hireAll.Disable(reason);
+                    joinAll.Disable(reason);
+                    attackAll.Disable(reason);
+                }
+
                 yield return temporaryRecruit;
                 yield return hireAll;
                 yield return joinAll;
@@ -164,7 +174,11 @@ namespace MouseDisaster
                     MouseDisasterVisitorUtility.IsPrisonIntegrationEnabled()))
                 {
                     DiaOption sendToPrison = new DiaOption("MouseDisaster_VisitorControl_SendToPrison".Translate());
-                    if (!MouseDisasterVisitorUtility.HasAvailablePrisonArea(map))
+                    if (quarantineBlocked)
+                    {
+                        sendToPrison.Disable("MouseDisaster_N007_VisitorControlBlocked".Translate());
+                    }
+                    else if (!MouseDisasterVisitorUtility.HasAvailablePrisonArea(map))
                     {
                         sendToPrison.Disable(null);
                     }

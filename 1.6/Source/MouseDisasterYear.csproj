@@ -62,6 +62,7 @@
     <Compile Include="BeggarSiegePatches.cs" />
     <Compile Include="ChoiceLetter_ChildExchange.cs" />
     <Compile Include="ChoiceLetter_MouseDisasterN006.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterN007.cs" />
     <Compile Include="ChoiceLetter_MouseDisasterAbandonedChildren.cs" />
     <Compile Include="ChoiceLetter_FamineRefugees.cs" />
     <Compile Include="ChoiceLetter_MouseDisasterFoodGive.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="GameComponent_MouseDisasterNarrative_N004Effects.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_N005.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_N006.cs" />
+    <Compile Include="GameComponent_MouseDisasterNarrative_N007.cs" />
     <Compile Include="GameComponent_MouseDisasterPendingState.cs" />
     <Compile Include="MouseDisasterGuanyinTu.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />

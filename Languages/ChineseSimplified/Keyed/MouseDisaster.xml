@@ -196,4 +196,33 @@
   <MouseDisaster_FoodGive_NoFood>当前没有可立即交付的食物，或没有合适的殖民者能执行这项工作。</MouseDisaster_FoodGive_NoFood>
   <MouseDisaster_FoodGive_Fail>当前无法为这些鼠灾单位安排食物给予。</MouseDisaster_FoodGive_Fail>
   <MouseDisaster_Letter_Ignore>先不管，别再提醒</MouseDisaster_Letter_Ignore>
+  <MouseDisaster_N007_EntryLabel>封锁线</MouseDisaster_N007_EntryLabel>
+  <MouseDisaster_N007_EntryText>来客中发现了鼠疫感染者。你可以让他们留在原地隔离观察，也可以放行，或暂时不干预。隔离不会自动治疗；病情仍将继续发展。</MouseDisaster_N007_EntryText>
+  <MouseDisaster_N007_RecoveryLabel>封锁线后的去向</MouseDisaster_N007_RecoveryLabel>
+  <MouseDisaster_N007_RecoveryText>仍在地图上的感染来客已经康复。你可以让他们离开，也可以接纳他们加入殖民地。</MouseDisaster_N007_RecoveryText>
+  <MouseDisaster_N007_Quarantine>隔离观察</MouseDisaster_N007_Quarantine>
+  <MouseDisaster_N007_Release>放行</MouseDisaster_N007_Release>
+  <MouseDisaster_N007_Defer>暂不处理</MouseDisaster_N007_Defer>
+  <MouseDisaster_N007_RecoveredRelease>让康复者离开</MouseDisaster_N007_RecoveredRelease>
+  <MouseDisaster_N007_RecoveredAccept>接纳康复者</MouseDisaster_N007_RecoveredAccept>
+  <MouseDisaster_N007_ActionFailed>来客状态已经变化，当前无法执行这项处理。</MouseDisaster_N007_ActionFailed>
+  <MouseDisaster_N007_VisitorControlBlocked>这些来客正在检疫流程中，请先处理检疫信件。</MouseDisaster_N007_VisitorControlBlocked>
+  <MouseDisaster_N007_Quarantine_Message>已让 {0} 名感染来客留在原地隔离观察。</MouseDisaster_N007_Quarantine_Message>
+  <MouseDisaster_N007_Release_Message>已安排 {0} 名感染来客离开。</MouseDisaster_N007_Release_Message>
+  <MouseDisaster_N007_Defer_Message>暂不干预，继续记录感染来客的状况。</MouseDisaster_N007_Defer_Message>
+  <MouseDisaster_N007_Recovered_Message>康复者已经不在原地，检疫记录已结算。</MouseDisaster_N007_Recovered_Message>
+  <MouseDisaster_N007_RecoveredRelease_Message>已安排 {0} 名康复者离开。</MouseDisaster_N007_RecoveredRelease_Message>
+  <MouseDisaster_N007_RecoveredAccept_Message>已接纳 {0} 名康复者。</MouseDisaster_N007_RecoveredAccept_Message>
+  <MouseDisaster_N007_Recovered_Label>痊愈后离开</MouseDisaster_N007_Recovered_Label>
+  <MouseDisaster_N007_Recovered_Text>活下来的病人已经康复并离开。封锁线撤下了，这一次，路上多了几个幸存者。</MouseDisaster_N007_Recovered_Text>
+  <MouseDisaster_N007_RecoveredStayed_Label>留下的人</MouseDisaster_N007_RecoveredStayed_Label>
+  <MouseDisaster_N007_RecoveredStayed_Text>康复者留在了殖民地。病人的记录到这里结束，新成员的生活才刚开始。</MouseDisaster_N007_RecoveredStayed_Text>
+  <MouseDisaster_N007_Released_Label>回到路上</MouseDisaster_N007_Released_Label>
+  <MouseDisaster_N007_Released_Text>获准放行的感染来客已经离开地图。他们此后的病情不再由这里的检疫记录追踪。</MouseDisaster_N007_Released_Text>
+  <MouseDisaster_N007_QuarantineBroken_Label>封锁失守</MouseDisaster_N007_QuarantineBroken_Label>
+  <MouseDisaster_N007_QuarantineBroken_Text>有人在鼠疫尚未消退时离开了地图。隔离没有维持到最后，剩余来客已解除留守安排。</MouseDisaster_N007_QuarantineBroken_Text>
+  <MouseDisaster_N007_Died_Label>未能走出封锁线</MouseDisaster_N007_Died_Label>
+  <MouseDisaster_N007_Died_Text>这批感染来客无人存活。检疫记录已经结束。</MouseDisaster_N007_Died_Text>
+  <MouseDisaster_N007_Handled_Label>中止的检疫记录</MouseDisaster_N007_Handled_Label>
+  <MouseDisaster_N007_Handled_Text>感染来客已经离开或脱离原有访客管理。此处不再继续检疫追踪，也不将去向不明记为康复。</MouseDisaster_N007_Handled_Text>
 </LanguageData>
