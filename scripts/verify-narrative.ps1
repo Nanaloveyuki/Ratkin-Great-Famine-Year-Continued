@@ -102,7 +102,49 @@ public class Harness {
     }
 '@
 Add-Type -TypeDefinition ($stub + $scan + "`n}}" + [regex]::Replace((Get-Content (Join-Path $root '1.6/Source/MouseDisasterNarrativePolicy.cs') -Raw), '(?m)^using [^;]+;\r?$', ''))
+foreach ($case in @(@(-1000,1.25),@(-100,1.25),@(0,1.0),@(100,0.75),@(1000,0.75))) {
+    Assert-Narrative ([Math]::Abs([MouseDisaster.MouseDisasterNarrativePolicy]::ThreatFrequencyFactor($case[0]) - $case[1]) -lt 0.0001) 'Trust threat frequency bounds or neutral baseline changed'
+}
 $checks += [NarrativeTests.Harness]::Run()
+
+# Run the real neutralization method against controlled pawns with existing duties.
+$utility = Get-Content (Join-Path $root '1.6/Source/MouseDisasterUtility.cs') -Raw
+$start = $utility.IndexOf('        public static void EnsureMouseDisasterFactionNeutralOnMap(')
+$end = $utility.IndexOf('        private static void EnsureFactionRelationWithPlayer(', $start)
+$neutral = $utility.Substring($start, $end - $start)
+$neutralStub = @'
+using System;
+using System.Collections.Generic;
+namespace NeutralDutyTests {
+public class Faction { public bool neutral; }
+public class Mental { public int resets; public void Reset() { resets++; } }
+public class Mind { public object duty = new object(); public Mental mentalStateHandler = new Mental(); }
+public class Pawn { public bool Dead, InAggroMentalState, ratkin = true; public Faction Faction; public Mind mindState = new Mind(); }
+public class Pawns { public List<Pawn> AllPawnsSpawned = new List<Pawn>(); }
+public class Map { public Pawns mapPawns = new Pawns(); }
+public static class Harness {
+static bool IsRatkin(Pawn p) { return p.ratkin; }
+static void MakeFactionNeutralToPlayer(Faction f, bool force) { f.neutral = true; }
+public static int Run() {
+    var f = new Faction(); var map = new Map();
+    var visitor = new Pawn { Faction = f, InAggroMentalState = true };
+    var other = new Pawn { Faction = new Faction(), InAggroMentalState = true };
+    map.mapPawns.AllPawnsSpawned.Add(visitor); map.mapPawns.AllPawnsSpawned.Add(other);
+    object duty = visitor.mindState.duty;
+    EnsureMouseDisasterFactionNeutralOnMap(map, f);
+    if (!ReferenceEquals(duty, visitor.mindState.duty)) throw new Exception("Neutralization erased Lord duty");
+    if (!f.neutral || visitor.mindState.mentalStateHandler.resets != 1) throw new Exception("Neutralization behavior lost");
+    if (other.mindState.mentalStateHandler.resets != 0) throw new Exception("Other faction affected");
+    EnsureMouseDisasterFactionNeutralOnMap(null, f); EnsureMouseDisasterFactionNeutralOnMap(map, null);
+    return 4;
+}
+'@
+Add-Type -TypeDefinition ($neutralStub + $neutral + "`n}}")
+$checks += [NeutralDutyTests.Harness]::Run()
+Assert-Narrative ($utility -match 'allowDowned: stage == DevelopmentalStage.Baby') 'Baby generation rejects naturally downed life stage'
+[xml]$clay = Get-Content (Join-Path $root 'Defs/ThingDefs/ThingDefs_MouseDisaster_GuanyinTu.xml') -Raw
+Assert-Narrative ($clay.Defs.ThingDef.graphicData.graphicClass -eq 'Graphic_Single') 'Clay graphic expects a collection directory'
+Assert-Narrative (Test-Path (Join-Path $root ('Textures/' + $clay.Defs.ThingDef.graphicData.texPath + '.png'))) 'Clay texture missing'
 
 $policy = [MouseDisaster.MouseDisasterNarrativePolicy]
 foreach ($id in $policy::SettingIds) {
@@ -167,6 +209,23 @@ $release = $n007.Substring($n007.IndexOf('case MouseDisasterN007Phase.ReleasePen
 $release = $release.Substring(0, $release.IndexOf('case MouseDisasterN007Phase.RecoveryDecision:'))
 Assert-Narrative (!$release.Contains('StartN007Release')) 'Departure Lord reset in scanner'
 Assert-Narrative (!$allCode.Contains('baby.Destroy();')) 'Baby aid still destroys its recipient'
+
+Assert-Narrative ($utility.Contains('forceGenerateNewPawn: true')) 'Generation may rewrite existing world pawns'
+Assert-Narrative ($utility.Contains('prohibitedTraits: MouseDisasterGenerationPolicy.ProhibitedTraits')) 'Generation trait gate missing'
+Assert-Narrative ($utility.Contains('Scribe_Collections.Look(ref deliveredChildIds')) 'Dropoff completion is not saved'
+Assert-Narrative ($utility.Contains('!state.deliveredChildIds.Contains(child.thingIDNumber)).ToList(), state.foodCell)')) 'Delivered children may be collected repeatedly'
+Assert-Narrative ($utility.Contains('if (!allChildrenArrived && !state.adultHasLeft)')) 'Orphaned delivery cannot settle'
+$group = Get-Content (Join-Path $root '1.6/Source/MouseDisasterPawnGroupUtility.cs') -Raw
+Assert-Narrative ($group.Contains('child.jobs?.StopAll();')) 'Loaded dropoff leaves old exit job running'
+$alerts = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNarrative_Alerts.cs') -Raw
+Assert-Narrative ($alerts.Contains('"mouseDisaster_journalEntries", LookMode.Deep')) 'Journal entries are not saved'
+Assert-Narrative ($alerts.Contains('Narrative.PendingNarrativeCount > 0')) 'Read journal hides unfinished work'
+Assert-Narrative ($alerts.Contains('exitToMainMenu: false')) 'Story ending exits the running colony'
+$debug = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNarrative_Debug.cs') -Raw
+Assert-Narrative ($debug.Contains('childGetter = () => IncidentDebugEntries')) 'Event debug groups are not lazy'
+$catalog = Get-Content (Join-Path $root '1.6/Source/MouseDisasterIncidentCatalog.cs') -Raw
+$eventIds = @([regex]::Matches($catalog, 'new MouseDisasterIncidentEntry\("([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+Assert-Narrative ($eventIds.Count -eq 50 -and $eventIds[13] -eq 'MouseDisaster_BeggarSiege') 'Debug original/continued group boundary changed'
 
 
 if ($Build) {

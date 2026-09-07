@@ -6,7 +6,7 @@
     <description>经过简单处理的白垩土块，能暂时填饱肚子，但不能替代正常食物。</description>
     <graphicData>
       <texPath>Things/Item/MouseDisaster_GuanyinTu</texPath>
-      <graphicClass>Graphic_StackCount</graphicClass>
+      <graphicClass>Graphic_Single</graphicClass>
     </graphicData>
     <statBases>
       <MarketValue>0.2</MarketValue>

@@ -197,6 +197,8 @@ namespace MouseDisaster
             DrawDaysSlider(listing, "MouseDisaster_Story_EchoCooldown", ref Settings.narrativeEchoCooldownDays, 1, 60);
             if (Prefs.DevMode && Current.Game != null && listing.ButtonText("MouseDisaster_Story_DebugMenu".Translate()))
                 GameComponent_MouseDisasterNarrative.OpenNarrativeDebugMenu();
+            if (Current.Game != null && listing.ButtonText("MouseDisaster_Story_AlertLabel".Translate()))
+                Current.Game.GetComponent<GameComponent_MouseDisasterNarrative>()?.OpenNarrativeJournal();
         }
 
         private static void DrawNarrativeInteger(Listing_Standard listing, string key, ref int value, int min, int max)

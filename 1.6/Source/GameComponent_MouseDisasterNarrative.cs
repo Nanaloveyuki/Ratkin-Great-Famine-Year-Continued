@@ -36,6 +36,7 @@ namespace MouseDisaster
             ExposeN006Data();
             ExposeN007Data();
             ExposeJournalData();
+            ExposeNarrativeAlerts();
             ExposeStoryTaskData();
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
@@ -170,14 +171,10 @@ namespace MouseDisaster
 
         private static void ReceiveNarrativeLetterText(string label, string text, Map map)
         {
-            if (map != null)
-            {
-                Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, new TargetInfo(map.Center, map));
-            }
-            else
-            {
-                Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent);
-            }
+            var component = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
+            if (component == null) return;
+            component.journalEntries.Add(new MouseDisasterJournalEntry { label = label, text = text });
+            component.nextAlertRefresh = -1;
         }
 
         private bool TryGrantHiddenReward(Map map)

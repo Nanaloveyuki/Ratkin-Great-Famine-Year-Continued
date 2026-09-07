@@ -9,6 +9,7 @@ namespace MouseDisaster
     {
         protected override Job TryGiveJob(Pawn pawn)
         {
+            if (MouseDisasterUtility.IsPendingAbandonedChild(pawn)) return null;
             if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||
                 !MouseDisasterUtility.IsBeggarPawn(pawn) ||
                 !MouseDisasterUtility.IsInBeggarMentalState(pawn) ||

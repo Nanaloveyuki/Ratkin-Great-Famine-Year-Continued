@@ -36,6 +36,11 @@ namespace MouseDisaster
             return trust <= -75 ? 0f : Math.Min(0.75f, Math.Max(0.05f, (trust + 100) / 250f));
         }
 
+        public static float ThreatFrequencyFactor(int trust)
+        {
+            return 1f - Math.Max(-100, Math.Min(100, trust)) / 400f;
+        }
+
         public static bool IsAidComplete(bool delivered, bool driven, int count, int left, int settled)
         {
             return count > 0 && !driven && left + settled == count && (delivered || settled == count);

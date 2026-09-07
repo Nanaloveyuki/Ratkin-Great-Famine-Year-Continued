@@ -283,8 +283,8 @@ namespace MouseDisaster
                 {
                     CompleteNarrativeFlag(ending);
                     string key = IsNarratorActive() ? ending : "PublicEnding";
-                    ReceiveNarrativeLetterText(("MouseDisaster_Story_" + key + "_Label").Translate(),
-                        ("MouseDisaster_Story_" + key + "_Text").Translate(aidCompleted, successfulBroadcasts, adultRatkinCount), Find.AnyPlayerHomeMap);
+                    ShowNarrativeEnding(("MouseDisaster_Story_" + key + "_Label").Translate(),
+                        ("MouseDisaster_Story_" + key + "_Text").Translate(aidCompleted, successfulBroadcasts, adultRatkinCount));
                 }
             }
         }

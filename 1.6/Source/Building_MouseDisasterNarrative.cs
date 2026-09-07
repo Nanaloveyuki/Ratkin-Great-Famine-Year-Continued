@@ -26,6 +26,8 @@ namespace MouseDisaster
                 int captured = choice;
                 yield return new Command_Action
                 {
+                    icon = choice == 1 ? TexCommand.Install : choice == 2 ? TexCommand.ForbidOn :
+                        choice == 3 ? TexCommand.SelectCarriedThing : choice == 4 ? TexCommand.OpenLinkedQuestTex : TexCommand.Attack,
                     defaultLabel = ("MouseDisaster_Story_RelicChoice" + choice).Translate(),
                     defaultDesc = "MouseDisaster_Story_RelicCost".Translate(choice == 1 ? narrative.NarrativeReward(200) : choice == 3 ? narrative.NarrativeReward(100) : 0),
                     action = () => Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(

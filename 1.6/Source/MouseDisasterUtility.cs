@@ -347,6 +347,7 @@ namespace MouseDisaster
             public int mapId;
             public IntVec3 foodCell;
             public List<int> childPawnIds;
+            public List<int> deliveredChildIds = new List<int>();
             public bool adultHasLeft;
             public int adultArrivedAtDropoffTick = -1;
 
@@ -357,12 +358,14 @@ namespace MouseDisaster
                 Scribe_Values.Look(ref mapId, "mapId", -1);
                 Scribe_Values.Look(ref foodCell, "foodCell", IntVec3.Invalid);
                 Scribe_Collections.Look(ref childPawnIds, "childPawnIds", LookMode.Value);
+                Scribe_Collections.Look(ref deliveredChildIds, "deliveredChildIds", LookMode.Value);
                 Scribe_Values.Look(ref adultHasLeft, "adultHasLeft", false);
                 Scribe_Values.Look(ref adultArrivedAtDropoffTick, "adultArrivedAtDropoffTick", -1);
 
                 if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 {
                     childPawns ??= new List<Pawn>();
+                    deliveredChildIds ??= new List<int>();
                     childPawnIds ??= new List<int>();
                     childPawns.RemoveAll(pawn => pawn == null);
                     childPawnIds = childPawnIds
@@ -560,6 +563,13 @@ namespace MouseDisaster
                     ActiveAbandonedDeliveryByAdultId.Remove(invalidAbandonedDeliveryIds[i]);
                 }
             }
+        }
+
+        internal static void RestoreAbandonedDeliveryDuties()
+        {
+            foreach (AbandonedDeliveryState state in ActiveAbandonedDeliveryByAdultId.Values)
+                foreach (Pawn child in state.childPawns.Where(p => p != null && p.Spawned && !IsPlayerAffiliatedRatkin(p)))
+                    MouseDisasterPawnGroupUtility.HoldForDropoff(child, state.foodCell);
         }
 
         private sealed class MapPawnClassificationCache
@@ -1281,7 +1291,10 @@ namespace MouseDisaster
             return new PawnGenerationRequest(
                 kindDef,
                 faction,
+                forceGenerateNewPawn: true,
                 canGeneratePawnRelations: false,
+                prohibitedTraits: MouseDisasterGenerationPolicy.ProhibitedTraits,
+                allowDowned: stage == DevelopmentalStage.Baby,
                 mustBeCapableOfViolence: !allowViolenceDisabledTraits && stage != DevelopmentalStage.Baby,
                 developmentalStages: stage,
                 fixedGender: fixedGender,
@@ -1491,16 +1504,11 @@ namespace MouseDisaster
                 return;
             }
 
-            if (pawn.apparel.WornApparel.Count > 0)
+            for (int i = pawn.apparel.WornApparel.Count - 1; i >= 0; i--)
             {
-                for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
-                {
-                    Apparel worn = pawn.apparel.WornApparel[i];
-                    ApplyRandomizedApparelQuality(worn);
-                    ApplyRandomizedApparelDurability(worn);
-                }
-
-                return;
+                Apparel worn = pawn.apparel.WornApparel[i];
+                pawn.apparel.Remove(worn);
+                worn.Destroy();
             }
 
             List<ThingDef> adultPool = GetAdultApparelDefs(pawn);
@@ -1545,6 +1553,7 @@ namespace MouseDisaster
             }
 
             ApplyRandomizedApparelQuality(apparel);
+            apparel.WornByCorpse = Rand.Chance(0.25f);
             pawn.apparel.Wear(apparel, dropReplacedApparel: false);
             ApplyRandomizedApparelDurability(apparel);
             return true;
@@ -1649,6 +1658,9 @@ namespace MouseDisaster
             }
 
             TraitSet traitSet = pawn.story.traits;
+            foreach (Trait trait in traitSet.allTraits.Where(t => t.sourceGene == null &&
+                !MouseDisasterGenerationPolicy.AllowsTrait(t.def)).ToList())
+                traitSet.RemoveTrait(trait);
             List<Trait> generatedTraits = traitSet.allTraits
                 .Where(trait => trait != null && trait.sourceGene == null)
                 .ToList();
@@ -1802,7 +1814,7 @@ namespace MouseDisaster
 
             negativeTraitPoolResolved = true;
             negativeTraitPool = DefDatabase<TraitDef>.AllDefsListForReading
-                .Where(def => def != null && IsNegativeTraitDef(def) &&
+                .Where(def => MouseDisasterGenerationPolicy.AllowsTrait(def) && IsNegativeTraitDef(def) &&
                               def != TraitDefOf.Gay &&
                               def != TraitDefOf.Bisexual &&
                               def != TraitDefOf.Asexual)
@@ -1812,7 +1824,7 @@ namespace MouseDisaster
 
         private static bool CanAssignTraitDef(Pawn pawn, TraitDef candidate)
         {
-            if (pawn?.story?.traits == null || candidate == null || pawn.story.traits.HasTrait(candidate))
+            if (pawn?.story?.traits == null || !MouseDisasterGenerationPolicy.AllowsTrait(candidate) || pawn.story.traits.HasTrait(candidate))
             {
                 return false;
             }
@@ -2094,7 +2106,7 @@ namespace MouseDisaster
 
             ratEggTraitPoolResolved = true;
             ratEggTraitPool = DefDatabase<TraitDef>.AllDefsListForReading
-                .Where(def => def != null &&
+                .Where(def => MouseDisasterGenerationPolicy.AllowsTrait(def) &&
                               !def.degreeDatas.NullOrEmpty() &&
                               def != TraitDefOf.Gay &&
                               def != TraitDefOf.Bisexual &&
@@ -2741,7 +2753,7 @@ namespace MouseDisaster
             leadYourPetAnchorLeashedPetsToCellMethod.Invoke(component, new object[] { master, cell });
         }
 
-        private static void TryEndLeadYourPetLeashForPet(Pawn pet)
+        internal static void TryEndLeadYourPetLeashForPet(Pawn pet)
         {
             if (pet == null || !IsLeadYourPetEnabled || Current.Game == null)
             {
@@ -3338,6 +3350,7 @@ namespace MouseDisaster
 
         public static Job ExitMapJob(Pawn pawn)
         {
+            if (IsPendingAbandonedChild(pawn)) return null;
             if (pawn?.Map == null)
             {
                 return null;
@@ -4072,9 +4085,9 @@ namespace MouseDisaster
             List<Pawn> leaving = new List<Pawn> { trader };
             leaving.AddRange(exchangeEscorts);
             leaving.AddRange(exchangeChildren);
-            MakeTravelAndExitLord(map, leaving, map.Center);
+            MouseDisasterPawnGroupUtility.SendFamilyAway(map, trader, leaving, exchangeChildren);
             EnsureMouseDisasterFactionNeutralOnMap(map, trader.Faction);
-            message = "\u4f60\u62d2\u7edd\u4e86\u4ea4\u6362\uff0c\u5546\u4eba\u5e26\u7740\u9f20\u86cb\u79bb\u5f00\u4e86\u3002";
+            message = "MouseDisaster_Story_ExchangeRejected".Translate();
             return true;
         }
 
@@ -4140,6 +4153,8 @@ namespace MouseDisaster
             for (int i = 0; i < exchangeChildren.Count; i++)
             {
                 Pawn child = exchangeChildren[i];
+                child.GetLord()?.RemovePawn(child);
+                child.jobs?.StopAll();
                 if (child.Faction == Faction.OfPlayer)
                 {
                     child.SetFaction(null);
@@ -4163,9 +4178,9 @@ namespace MouseDisaster
                 leaving.Add(offeredBaby);
             }
 
-            MakeTravelAndExitLord(trader.Map, leaving, trader.Map.Center);
+            MouseDisasterPawnGroupUtility.SendFamilyAway(trader.Map, trader, leaving, new[] { offeredBaby });
             EnsureMouseDisasterFactionNeutralOnMap(trader.Map, trader.Faction);
-            message = "\u6613\u5b50\u800c\u98df\u6210\u4ea4\uff1a\u5bf9\u65b9\u5e26\u8d70\u4e86\u5a74\u513f\uff0c\u7559\u4e0b\u4e86\u5168\u90e8\u9f20\u86cb\u3002";
+            message = "MouseDisaster_Story_ExchangeAccepted".Translate();
             return true;
         }
 
@@ -4184,15 +4199,6 @@ namespace MouseDisaster
             offeredBaby.guest?.SetGuestStatus(null, GuestStatus.Guest);
             offeredBaby.jobs?.StopAll();
             StripRatEggInventory(offeredBaby);
-            if (offeredBaby.Spawned)
-            {
-                offeredBaby.DeSpawnOrDeselect();
-            }
-
-            if (!Find.WorldPawns.Contains(offeredBaby))
-            {
-                Find.WorldPawns.PassToWorld(offeredBaby);
-            }
 
             return true;
         }
@@ -4261,10 +4267,13 @@ namespace MouseDisaster
 
                 ReusablePawnList.AddRange(exchangeEscorts.Where(escort => escort != null && escort.Spawned && !escort.Dead && !ReusablePawnList.Contains(escort)));
                 ReusablePawnList.AddRange(exchangeChildren.Where(child => child != null && child.Spawned && !child.Dead && !ReusablePawnList.Contains(child)));
-                MakeTravelAndExitLord(map, ReusablePawnList, map.Center);
+                if (trader != null && trader.Spawned && !trader.Dead)
+                    MouseDisasterPawnGroupUtility.SendFamilyAway(map, trader, ReusablePawnList, exchangeChildren);
+                else
+                    MakeTravelAndExitLord(map, ReusablePawnList, map.Center);
                 if (!broken)
                 {
-                    Messages.Message("\u6613\u5b50\u800c\u98df\u5546\u4eba\u7b49\u5f85\u8d85\u65f6\uff0c\u5df2\u5e26\u7740\u9f20\u86cb\u79bb\u5f00\u3002", trader, MessageTypeDefOf.NeutralEvent, historical: false);
+                    Messages.Message("MouseDisaster_Story_ExchangeTimedOut".Translate(), trader, MessageTypeDefOf.NeutralEvent, historical: false);
                 }
             }
         }
@@ -4360,6 +4369,7 @@ namespace MouseDisaster
                 }
 
                 childPawns.Add(child);
+                MouseDisasterPawnGroupUtility.HoldForDropoff(child, foodCell);
             }
 
             if (childIds.Count == 0)
@@ -4443,7 +4453,8 @@ namespace MouseDisaster
                 for (int j = 0; j < state.childPawnIds.Count; j++)
                 {
                     Pawn child = ResolvePawnById(pawnLookup, state.childPawnIds[j]);
-                    if (child != null && !child.Dead && (child.Spawned || child.ParentHolder is Pawn_CarryTracker))
+                    if (child != null && !child.Dead && !IsPlayerAffiliatedRatkin(child) &&
+                        (child.Spawned || child.ParentHolder is Pawn_CarryTracker))
                     {
                         ReusablePawnList.Add(child);
                     }
@@ -4451,11 +4462,20 @@ namespace MouseDisaster
 
                 if (ReusablePawnList.Count == 0)
                 {
+                    if (adult != null && adult.Spawned && !adult.Dead && !IsPlayerAffiliatedRatkin(adult))
+                        MakeTravelAndExitLord(map, new[] { adult }, map.Center);
                     ActiveAbandonedDeliveryByAdultId.Remove(adultId);
                     continue;
                 }
 
-                bool allChildrenArrived = AreAllPawnsNearCell(ReusablePawnList, state.foodCell, 3f);
+                foreach (Pawn child in ReusablePawnList)
+                    if (child.Spawned && child.Position.InHorDistOf(state.foodCell, 3f) &&
+                        !state.deliveredChildIds.Contains(child.thingIDNumber))
+                    {
+                        state.deliveredChildIds.Add(child.thingIDNumber);
+                        child.jobs?.StopAll();
+                    }
+                bool allChildrenArrived = ReusablePawnList.All(child => state.deliveredChildIds.Contains(child.thingIDNumber));
                 for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
                 {
                     Pawn child = ReusablePawnList[childIndex];
@@ -4464,7 +4484,7 @@ namespace MouseDisaster
                         continue;
                     }
 
-                    if (child.Position.InHorDistOf(state.foodCell, 3f))
+                    if (state.deliveredChildIds.Contains(child.thingIDNumber))
                     {
                         continue;
                     }
@@ -4493,7 +4513,8 @@ namespace MouseDisaster
                     else
                     {
                         if (MouseDisasterAbandonedDeliveryPolicy.ShouldUseVanillaCarryDelivery(IsLeadYourPetEnabled, allChildrenArrived) &&
-                            TryStartAbandonedDeliveryCarryJob(adult, ReusablePawnList, state.foodCell))
+                            TryStartAbandonedDeliveryCarryJob(adult, ReusablePawnList.Where(child =>
+                                !state.deliveredChildIds.Contains(child.thingIDNumber)).ToList(), state.foodCell))
                         {
                             continue;
                         }
@@ -4559,7 +4580,7 @@ namespace MouseDisaster
                     }
                 }
 
-                if (!allChildrenArrived)
+                if (!allChildrenArrived && !state.adultHasLeft)
                 {
                     continue;
                 }
@@ -4577,6 +4598,12 @@ namespace MouseDisaster
                 ActiveAbandonedDeliveryByAdultId.Remove(adultId);
                 Messages.Message("\u8001\u9f20\u5988\u79bb\u5f00\u540e\uff0c\u8fd9\u4e9b\u9f20\u86cb\u7559\u5728\u7cae\u4ed3\u9644\u8fd1\uff0c\u53d8\u6210\u4e86\u6e38\u8361\u7684\u91ce\u751f\u9f20\u65cf\u3002", ReusablePawnList, MessageTypeDefOf.NeutralEvent, historical: false);
             }
+        }
+
+        public static bool IsPendingAbandonedChild(Pawn pawn)
+        {
+            return pawn != null && ActiveAbandonedDeliveryByAdultId.Values.Any(state =>
+                state != null && state.childPawnIds.Contains(pawn.thingIDNumber));
         }
 
         private static bool TryStartAbandonedDeliveryCarryJob(Pawn adult, IReadOnlyList<Pawn> children, IntVec3 foodCell)
@@ -4633,7 +4660,7 @@ namespace MouseDisaster
 
         private static void ConvertToAbandonedWildChild(Pawn pawn, IntVec3 fallbackCell)
         {
-            if (pawn == null || pawn.Dead)
+            if (pawn == null || pawn.Dead || IsPlayerAffiliatedRatkin(pawn))
             {
                 return;
             }
@@ -4649,6 +4676,8 @@ namespace MouseDisaster
             }
 
             pawn.guest?.SetGuestStatus(null, GuestStatus.Guest);
+            pawn.mindState?.mentalStateHandler?.Reset();
+            if (pawn.mindState != null) pawn.mindState.duty = null;
             ResetBeggarState(pawn);
             SetMouseDisasterFoodLevel(pawn);
             if (pawn.Spawned)
@@ -4971,7 +5000,6 @@ namespace MouseDisaster
                     isIncidentVisitor: IsMouseDisasterIncidentVisitor(pawn),
                     isTraderAdult: IsMouseDisasterTraderAdult(pawn)))
             {
-                pawn.mindState?.duty = null;
                 return;
             }
 
@@ -5384,8 +5412,6 @@ namespace MouseDisaster
                 {
                     pawn.mindState?.mentalStateHandler?.Reset();
                 }
-
-                pawn.mindState?.duty = null;
             }
         }
 
@@ -6111,7 +6137,7 @@ namespace MouseDisaster
                 HashSet<string> restricted = new HashSet<string>(BabyRestrictedApparelDefNames.Concat(ChildRestrictedApparelDefNames));
                 adultApparelDefsCache = DefDatabase<ThingDef>.AllDefsListForReading
                     .Where(def =>
-                        def != null &&
+                        MouseDisasterGenerationPolicy.AllowsApparel(def) &&
                         def.IsApparel &&
                         def.MadeFromStuff &&
                         def.apparel != null &&
@@ -7883,6 +7909,7 @@ namespace MouseDisaster
             Faction faction = pawnList
                 .Select(pawn => pawn.Faction)
                 .FirstOrDefault(currentFaction => currentFaction != null);
+            foreach (Pawn pawn in pawnList) pawn.GetLord()?.RemovePawn(pawn);
             Lord lord = LordMaker.MakeNewLord(faction, new LordJob_TravelAndExit(travelDest), map, pawnList);
             if (lord != null)
             {

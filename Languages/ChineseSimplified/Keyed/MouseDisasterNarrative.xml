@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+  <MouseDisaster_Story_ExchangeRejected>你拒绝了交换。商人开始收拢鼠蛋，准备离开。</MouseDisaster_Story_ExchangeRejected>
+  <MouseDisaster_Story_ExchangeAccepted>交换已确认。留下的鼠蛋成为殖民地囚犯；商人正在带走交出的婴儿。</MouseDisaster_Story_ExchangeAccepted>
+  <MouseDisaster_Story_ExchangeTimedOut>等待时间已到。商人开始收拢鼠蛋，准备离开。</MouseDisaster_Story_ExchangeTimedOut>
+  <MouseDisaster_Story_AlertLabel>鼠灾记录与待办</MouseDisaster_Story_AlertLabel>
+  <MouseDisaster_Story_AlertText>未读记录：{0} 条。\n仍在跟进：{1} 项。</MouseDisaster_Story_AlertText>
+  <MouseDisaster_Story_Progress>当前跟进</MouseDisaster_Story_Progress>
+  <MouseDisaster_Story_AlertProgress>访客观察：{0} 批\n易子而食后续照料：{1} 批\n鼠疫观察：{2} 批\n来使：{3} 位\n旧纪录箱：{4} 处</MouseDisaster_Story_AlertProgress>
+  <MouseDisaster_Story_MarkRead>标为已读</MouseDisaster_Story_MarkRead>
+  <MouseDisaster_Story_DebugOriginal>原作基础事件</MouseDisaster_Story_DebugOriginal>
+  <MouseDisaster_Story_DebugContinued>续作扩展事件</MouseDisaster_Story_DebugContinued>
+  <MouseDisaster_Story_DebugNarratives>剧情与结局</MouseDisaster_Story_DebugNarratives>
   <MouseDisaster_Story_Settings>原版剧情结局</MouseDisaster_Story_Settings>
   <MouseDisaster_Story_AidGoal>广义接济目标：{0} 次</MouseDisaster_Story_AidGoal>
   <MouseDisaster_Story_BroadcastGoal>成功广播目标：{0} 次</MouseDisaster_Story_BroadcastGoal>
@@ -72,15 +83,15 @@
   <MouseDisaster_Story_N007ReturnReceived_Label>再走一程</MouseDisaster_Story_N007ReturnReceived_Label>
   <MouseDisaster_Story_N007ReturnReceived_Text>两份食物已经交出。来客准备再次离开，这一趟没有更多要求。</MouseDisaster_Story_N007ReturnReceived_Text>
   <MouseDisaster_Story_E01_Label>鼠族丰年</MouseDisaster_Story_E01_Label>
-  <MouseDisaster_Story_E01_Text>“我把送来的数目核了两遍。每一次都有各自的难处，真正安顿下来、真正走出去的人，已经有这么多了。\n\n以后还会有人来，也还会有难办的时候。今天这封信不谈那些。\n\n谢谢。至少在你这里，有人熬过了这个灾年。”</MouseDisaster_Story_E01_Text>
+  <MouseDisaster_Story_E01_Text>最后一笔接济记进账簿时，穗音在纸边写下了一个名字。写到一半，她停了很久。\n\n“我曾经答应过，要把她的孩子带到有饭吃的地方。那一次，我没做到。后来每收到一份名单，我都会找那个孩子。一直没有。”\n\n信纸的下一页，列着这段日子里送出食物、照料病人、放行来客的记录。\n\n“这里有许多我没见过的人。他们能继续活下去，你们出了力。这句话，我该好好说一次。”\n\n“谢谢你们。还有正在这里长大的孩子们，吃饭的时候就安心吃饭吧。你们的那一份，已经有人留下了。”\n\n已完成接济 {0} 次，成功广播 {1} 次。灾年尚未结束，这处殖民地已经成了有人能够抵达的地方。</MouseDisaster_Story_E01_Text>
   <MouseDisaster_Story_E02_Label>希望“吱”城</MouseDisaster_Story_E02_Label>
-  <MouseDisaster_Story_E02_Text>“现在再叫这里临时落脚的地方，大概已经不合适了。\n\n这么多人住下来，要吃饭，要做工，也难免吵架。我不指望他们天天念你的好。\n\n能在这里把日子过下去，就很好。”</MouseDisaster_Story_E02_Text>
+  <MouseDisaster_Story_E02_Text>这一年的名册里，同一处殖民地已有 {2} 名成年灾鼠。名单太长，穗音另添了几张纸。曾经跟在队伍后面的孩子，如今也能在自己的名字旁签字了。\n\n“从前我问他们往哪里去，常常只听见一句：再往前走走。”\n\n“现在有人报出这里的名字。有人算着回来的路程，有人托来客捎句话。会有人等他们回去。”\n\n她把最初那张皱破的求援名单夹回信里。\n\n“这张纸交给你们保管。我留了抄本，原件该放在他们住的地方。”\n\n“往后的日子，你们还要一起过。房子会旧，人会争吵，收成也会有好有坏。愿他们老了以后，谈起这一年，身旁还有人接得上话。”</MouseDisaster_Story_E02_Text>
   <MouseDisaster_Story_E03_Label>没有答案的记录</MouseDisaster_Story_E03_Label>
-  <MouseDisaster_Story_E03_Text>“我把这一段先整理完了。还有几件事没弄清楚，空着就空着吧。\n\n以后收到新消息，我还会补。今天先到这里。”</MouseDisaster_Story_E03_Text>
+  <MouseDisaster_Story_E03_Text>穗音寄来了一份阶段记录。有食物送到的日期，也有队伍离开后再无消息的空栏。\n\n“这一段路，我能确认的就到这里。活着离开的人，后来去了哪里；没能留下的人，还有没有别的落脚处，我还在找。”\n\n“有几次你们伸了手。有几次，门没有打开。我都记下了。隔着这么远，我无法知道那天屋里还剩多少粮食。”\n\n信的末尾附着一张空白回执。\n\n“以后有消息，就寄给我。一个名字也好。我想把这些空栏慢慢填完。”\n\n阶段记录暂时合上。殖民地仍在运转，新的来客也仍可能出现在路上。</MouseDisaster_Story_E03_Text>
   <MouseDisaster_Story_E04_Label>失望的旁观者</MouseDisaster_Story_E04_Label>
-  <MouseDisaster_Story_E04_Text>“有些处理我无法赞同。\n\n我想了一阵，没想出这封信该怎么写。那些事我知道了。别的暂时没有。”</MouseDisaster_Story_E04_Text>
+  <MouseDisaster_Story_E04_Text>这一次，穗音没有在信里问候近况。她退回了几页记录，争议最大的几项都作了标记。\n\n“我读过了，也核对过了。你们可能有自己的理由。那些人承受的后果，也已经发生。”\n\n“我不能继续在求援名单旁写上：可以去这里试试。有人会把这几个字当真，带着孩子上路。”\n\n她仍留下了收信地址。\n\n“已经托付给你们的人，愿他们还能得到照料。今后发生的事，我会接着看。至于信任，我现在给不了。”\n\n纸上的地址没有变。来信的语气已经变了。</MouseDisaster_Story_E04_Text>
   <MouseDisaster_Story_E05_Label>记录中止</MouseDisaster_Story_E05_Label>
-  <MouseDisaster_Story_E05_Text>“我已经说了很多。发生的事，你也看到了。\n\n这次就不写了。”</MouseDisaster_Story_E05_Text>
+  <MouseDisaster_Story_E05_Text>这封信很短，署名写得十分清楚。\n\n“我不会继续为这里作保。已经发生的事，我会把记录交给受影响的人。”\n\n“有人问我，当初为什么相信这里。我得亲自去回答。”\n\n“留在你们身边的人，还需要吃饭、治病和睡觉。我不再捎来闲话，他们的日子仍要继续。必要的交接和结果记录会照常送来。”\n\n“穗音。”\n\n信里没有夹新的求援名单。她也没有要求殖民地作答。那些记录将由别的人继续读下去。</MouseDisaster_Story_E05_Text>
   <MouseDisaster_Story_PublicEnding_Label>灾鼠援助纪事</MouseDisaster_Story_PublicEnding_Label>
   <MouseDisaster_Story_PublicEnding_Text>这一阶段已经达到一项灾鼠里程碑。\n\n已完成广义接济：{0} 次。\n成功广播：{1} 次。\n最近年度检查中，同一殖民地成年灾鼠最多：{2} 名。\n\n普通灾鼠事件仍会继续出现。</MouseDisaster_Story_PublicEnding_Text>
   <MouseDisaster_Story_IdentityEntry_Label>你一直没说的事</MouseDisaster_Story_IdentityEntry_Label>

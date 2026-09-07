@@ -36,18 +36,42 @@ namespace MouseDisaster
         public static void OpenNarrativeDebugMenu()
         {
             if (!Prefs.DevMode || Current.Game == null) return;
-            Find.WindowStack.Add(new FloatMenu(NarrativeDebugIds.Select(id => new FloatMenuOption(
-                ("MouseDisaster_Story_Debug" + id).Translate(), () => RunNarrativeDebug(id))).ToList()));
+            Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption> {
+                new FloatMenuOption("MouseDisaster_Story_DebugOriginal".Translate(), () => OpenIncidentDebugMenu(true)),
+                new FloatMenuOption("MouseDisaster_Story_DebugContinued".Translate(), () => OpenIncidentDebugMenu(false)),
+                new FloatMenuOption("MouseDisaster_Story_DebugNarratives".Translate(), () => Find.WindowStack.Add(
+                    new FloatMenu(NarrativeDebugIds.Select(id => new FloatMenuOption(
+                        ("MouseDisaster_Story_Debug" + id).Translate(), () => RunNarrativeDebug(id))).ToList())))
+            }));
+        }
+
+        private static IEnumerable<MouseDisasterIncidentEntry> IncidentDebugEntries(bool original) => original
+            ? MouseDisasterIncidentCatalog.AllEntries.Take(14) : MouseDisasterIncidentCatalog.AllEntries.Skip(14);
+
+        private static void OpenIncidentDebugMenu(bool original)
+        {
+            Find.WindowStack.Add(new FloatMenu(IncidentDebugEntries(original).Select(entry =>
+                new FloatMenuOption(entry.DisplayLabel, () => RunNarrativeDebug(entry.DefName))).ToList()));
         }
 
         [DebugAction("鼠灾事件", "剧情（强制触发）", allowedGameStates = AllowedGameStates.Playing)]
         private static DebugActionNode NarrativeDebugRoot()
         {
             var root = new DebugActionNode();
+            foreach (bool original in new[] { true, false })
+            {
+                bool group = original;
+                root.AddChild(new DebugActionNode((original ? "MouseDisaster_Story_DebugOriginal" : "MouseDisaster_Story_DebugContinued").Translate()) {
+                    childGetter = () => IncidentDebugEntries(group).Select(entry => new DebugActionNode(
+                        entry.DisplayLabel, DebugActionType.Action, () => RunNarrativeDebug(entry.DefName))).ToList()
+                });
+            }
+            var stories = new DebugActionNode("MouseDisaster_Story_DebugNarratives".Translate());
+            root.AddChild(stories);
             foreach (string id in NarrativeDebugIds)
             {
                 string action = id;
-                root.AddChild(new DebugActionNode(("MouseDisaster_Story_Debug" + action).Translate(), DebugActionType.Action,
+                stories.AddChild(new DebugActionNode(("MouseDisaster_Story_Debug" + action).Translate(), DebugActionType.Action,
                     () => RunNarrativeDebug(action)));
             }
             return root;
@@ -84,11 +108,28 @@ namespace MouseDisaster
                 return true;
             }
             Map map = Find.CurrentMap;
+            if (MouseDisasterIncidentCatalog.IsKnownIncident(id))
+            {
+                var entry = MouseDisasterIncidentCatalog.AllEntries.First(e => e.DefName == id);
+                IIncidentTarget eventTarget = entry.TargetKind == MouseDisasterIncidentTargetKind.Caravan
+                    ? (IIncidentTarget)Find.WorldObjects.Caravans.FirstOrDefault(c => c.IsPlayerControlled) : map;
+                var eventDef = DefDatabase<IncidentDef>.GetNamedSilentFail(id);
+                if (eventTarget == null || eventDef == null) { result = "MouseDisaster_Story_DebugSpawnFailed".Translate(); return false; }
+                var eventParms = StorytellerUtility.DefaultParmsNow(eventDef.category, eventTarget);
+                eventParms.points = entry.DebugPoints;
+                bool executed = eventDef.Worker.TryExecute(eventParms);
+                if (!executed) result = "MouseDisaster_Story_DebugSpawnFailed".Translate();
+                return executed;
+            }
             if (id.StartsWith("E") || id == "R01")
             {
                 string key = id == "R01" ? "IdentityFull" : id;
-                ReceiveNarrativeLetterText(("MouseDisaster_Story_" + key + "_Label").Translate(),
-                    ("MouseDisaster_Story_" + key + "_Text").Translate(), map);
+                if (id.StartsWith("E"))
+                    ShowNarrativeEnding(("MouseDisaster_Story_" + key + "_Label").Translate(),
+                        ("MouseDisaster_Story_" + key + "_Text").Translate(aidCompleted, successfulBroadcasts, adultRatkinCount));
+                else
+                    ReceiveNarrativeLetterText(("MouseDisaster_Story_" + key + "_Label").Translate(),
+                        ("MouseDisaster_Story_" + key + "_Text").Translate(), map);
                 result = "MouseDisaster_Story_DebugPreview".Translate(id);
                 return true;
             }

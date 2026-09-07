@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
+using Verse.AI.Group;
 
 namespace MouseDisaster
 {
@@ -76,6 +78,26 @@ namespace MouseDisaster
         {
             MouseDisasterPhase2Utility.CleanupLoadedPendingState();
             MouseDisasterUtility.CleanupLoadedPendingState();
+            MouseDisasterUtility.RestoreAbandonedDeliveryDuties();
+            // Earlier versions cleared duties after creating the child-exchange defend Lord.
+            foreach (Map map in Find.Maps)
+                foreach (Lord lord in map.lordManager.lords.ToList())
+                {
+                    // Upgrade only a still-present exchange family; never recreate a departed trader.
+                    Pawn trader = lord.ownedPawns.FirstOrDefault(p => p?.health?.hediffSet.HasHediff(
+                        MouseDisasterDefOf.MouseDisaster_ChildExchangeTrader) == true && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p));
+                    var children = lord.ownedPawns.Where(p => p != null && p.DevelopmentalStage != DevelopmentalStage.Adult &&
+                        !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p)).ToList();
+                    if (lord.LordJob is LordJob_TravelAndExit && trader != null && children.Count > 0)
+                    {
+                        MouseDisasterPawnGroupUtility.SendFamilyAway(map, trader, lord.ownedPawns.ToList(), children);
+                        continue;
+                    }
+                    if (lord.LordJob is LordJob_DefendPoint && lord.CurLordToil != null &&
+                        lord.ownedPawns.Any(pawn => pawn?.mindState != null && pawn.mindState.duty == null &&
+                            MouseDisasterUtility.IsMouseDisasterIncidentVisitor(pawn)))
+                        lord.CurLordToil.UpdateAllDuties();
+                }
         }
     }
 }

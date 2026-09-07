@@ -62,7 +62,7 @@
   <MouseDisaster_N005_Rejected_Label>空篮子</MouseDisaster_N005_Rejected_Label>
   <MouseDisaster_N005_Rejected_Text>商人收起了交换用的东西。你没有改口，他也就没有再等。</MouseDisaster_N005_Rejected_Text>
   <MouseDisaster_N005_TimedOut_Label>没有等到答案</MouseDisaster_N005_TimedOut_Label>
-  <MouseDisaster_N005_TimedOut_Text>商人等到了约定的时间，还是没有收到答复。他带着孩子走了。晚到的决定已经赶不上这次交接。</MouseDisaster_N005_TimedOut_Text>
+  <MouseDisaster_N005_TimedOut_Text>商人等到了约定的时间，还是没有收到答复。他开始收拢孩子，准备上路。这次交换已经结束。</MouseDisaster_N005_TimedOut_Text>
   <MouseDisaster_N005_Broken_Label>交易破裂</MouseDisaster_N005_Broken_Label>
   <MouseDisaster_N005_Broken_Text>原定的交接没有完成。先前谈好的条件已经作废，活着的人也不再按那份约定行事。</MouseDisaster_N005_Broken_Text>
   <!-- N-006 runtime wording remains short until narrative-draft.md is finalized. -->
@@ -121,7 +121,7 @@
   <MouseDisaster_Settings_ChaosInterval>乱起判定间隔：{0} 秒</MouseDisaster_Settings_ChaosInterval>
   <MouseDisaster_Settings_ChaosDisabledHint>乱起受孕已关闭：不再执行房间内的自发受孕判定。</MouseDisaster_Settings_ChaosDisabledHint>
   <MouseDisaster_Settings_RatEggTraitBridge>启用"鼠蛋特性拓展"兼容赋特</MouseDisaster_Settings_RatEggTraitBridge>
-  <MouseDisaster_Settings_RatEggTraitBridge_Tooltip>开启后，鼠族在特性生成时会尝试桥接兼容鼠蛋相关特性。</MouseDisaster_Settings_RatEggTraitBridge_Tooltip>
+  <MouseDisaster_Settings_RatEggTraitBridge_Tooltip>开启后，幼年灾鼠会尝试获得额外特质。候选池限原版特质及通过 MouseDisasterGenerationExtension 明确授权的扩展特质。</MouseDisaster_Settings_RatEggTraitBridge_Tooltip>
   <MouseDisaster_Settings_RatEggTraitChance>兼容特性生成概率：{0}%</MouseDisaster_Settings_RatEggTraitChance>
   <MouseDisaster_Settings_CompatDisabledHint>特性桥接已关闭：不再注入鼠蛋特性拓展兼容逻辑。</MouseDisaster_Settings_CompatDisabledHint>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>

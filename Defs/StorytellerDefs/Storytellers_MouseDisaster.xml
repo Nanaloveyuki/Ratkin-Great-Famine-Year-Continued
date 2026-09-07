@@ -4,7 +4,7 @@
   <StorytellerDef ParentName="BaseStoryteller">
     <defName>MouseDisaster_Suin</defName>
     <label>穗音</label>
-    <description>穗音是一位关注灾荒中鼠族的鼠族王国公主。她会记录殖民地遇到的鼠族、饥荒和鼠疫，并通过信件回应已经发生的结果。她不会替殖民地做决定。</description>
+    <description>穗音是一位关注灾荒中鼠族的鼠族王国公主。她会记录殖民地遇到的鼠族、饥荒和鼠疫，并通过信件回应已经发生的结果。她不会替殖民地做决定。\n\n她的事件节奏接近兰迪，叠加鼠灾事件后，整体难度更高。启用剧情时，她对殖民地的信任会影响袭击及其他大型威胁的节奏：信任越高，威胁越疏；信任越低，威胁越密。单次袭击的强度仍遵循游戏难度与随机波动。</description>
     <portraitLarge>Storyteller/MouseDisaster_Suin</portraitLarge>
     <portraitTiny>Storyteller/MouseDisaster_Suin_TINY</portraitTiny>
     <listOrder>55</listOrder>

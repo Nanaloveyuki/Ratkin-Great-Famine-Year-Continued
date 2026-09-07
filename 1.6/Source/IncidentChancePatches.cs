@@ -2,10 +2,39 @@ using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace MouseDisaster
 {
+    [HarmonyPatch(typeof(StorytellerComp_RandomMain), "ChooseRandomCategory")]
+    public static class MouseDisasterNarratorThreatTempoPatch
+    {
+        public static bool Prefix(StorytellerComp_RandomMain __instance, IIncidentTarget target,
+            List<IncidentCategoryDef> skipCategories, ref IncidentCategoryDef __result)
+        {
+            if (Find.Storyteller?.def?.defName != GameComponent_MouseDisasterNarrative.NarratorDefName ||
+                !(target is Map map) || !map.IsPlayerHome ||
+                !MouseDisasterRuntime.AllowsNewContent || MouseDisasterMod.Settings?.enableNarrative == false)
+                return true;
+
+            int trust = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NarratorTrust ?? 0;
+            if (trust == 0) return true;
+            var props = (StorytellerCompProperties_RandomMain)__instance.props;
+            float factor = MouseDisasterNarrativePolicy.ThreatFrequencyFactor(trust);
+            // Keep the original category retry and overdue-threat behavior without mutating shared Defs.
+            if (!skipCategories.Contains(IncidentCategoryDefOf.ThreatBig) &&
+                Find.TickManager.TicksGame - target.StoryState.LastThreatBigTick >
+                60000f * props.maxThreatBigIntervalDays / factor)
+                __result = IncidentCategoryDefOf.ThreatBig;
+            else
+                __result = props.categoryWeights.Where(cw => !skipCategories.Contains(cw.category))
+                    .RandomElementByWeight(cw => cw.weight *
+                        (cw.category == IncidentCategoryDefOf.ThreatBig ? factor : 1f)).category;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(IncidentWorker), nameof(IncidentWorker.CanFireNow))]
     public static class MouseDisasterIncidentTogglePatch
     {
