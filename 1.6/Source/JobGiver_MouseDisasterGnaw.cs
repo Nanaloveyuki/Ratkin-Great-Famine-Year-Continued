@@ -10,6 +10,7 @@ namespace MouseDisaster
 
         protected override Job TryGiveJob(Pawn pawn)
         {
+            if (MouseDisasterFeeding.IsSeekingSuppressed(pawn)) return null;
             if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly)) return null;
             if (!MouseDisasterUtility.IsGnawingEnabled || pawn?.Map == null || pawn.Downed || pawn.needs?.food == null)
             {

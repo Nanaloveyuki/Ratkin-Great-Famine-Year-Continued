@@ -44,7 +44,7 @@ namespace MouseDisaster
 
         public static void Prime(Pawn pawn)
         {
-            if (!Eligible(pawn) || pawn.DevelopmentalStage == DevelopmentalStage.Baby || pawn.needs?.food == null) return;
+            if (!Eligible(pawn) || MouseDisasterFeeding.IsSeekingSuppressed(pawn) || pawn.DevelopmentalStage == DevelopmentalStage.Baby || pawn.needs?.food == null) return;
             FoodUtility.TryFindBestFoodSourceFor(pawn, pawn, pawn.needs.food.CurCategory == HungerCategory.Starving,
                 out _, out _, canRefillDispenser: true, canUseInventory: true, canUsePackAnimalInventory: false,
                 allowForbidden: false, allowCorpse: !MouseDisasterUtility.IsThiefPawn(pawn), allowSociallyImproper: true,
@@ -80,7 +80,9 @@ namespace MouseDisaster
             if ((key & 64) == 0 && !candidate.IsSociallyProper(pawn)) return false;
             if ((key & 4096) != 0 && (MouseDisasterUtility.GetReliefArea(map)?[candidate.PositionHeld] == true) != ((key & 8192) != 0)) return false;
             if (!pawn.WillEat(candidate, pawn, careIfNotAcceptableForTitle: true, allowVenerated: (key & 2048) != 0)) return false;
-            int wanted = System.Math.Max(1, FoodUtility.WillIngestStackCountOf(pawn, entry.def, FoodUtility.GetNutrition(pawn, candidate, entry.def)));
+            int wanted = (key & 1024) != 0
+                ? System.Math.Max(1, FoodUtility.WillIngestStackCountOf(pawn, entry.def, FoodUtility.GetNutrition(pawn, candidate, entry.def)))
+                : 1;
             if (candidate.stackCount < wanted) return false;
             if (candidate.Spawned && (((key & 512) == 0 && !pawn.CanReserve(candidate, 10, wanted)) ||
                 !pawn.CanReach(candidate, PathEndMode.ClosestTouch, Danger.Some))) return false;

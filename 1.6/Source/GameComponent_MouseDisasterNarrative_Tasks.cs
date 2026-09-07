@@ -78,7 +78,7 @@ namespace MouseDisaster
                 else if (now >= envoyDeadline) FinishEnvoy("N008Timeout");
                 else if (envoyPhase == 2 && now >= envoyCheckTick)
                 {
-                    if (narrativeVisits.Any(v => v.resolved) || narrativeFlags.Any(f => f.StartsWith("N00")))
+                    if (narrativeVisitSummaries.Count > 0 || narrativeFlags.Any(f => f.StartsWith("N00")))
                     {
                         envoyPhase = 3;
                         envoyVerified = true;
@@ -366,7 +366,7 @@ namespace MouseDisaster
             var n = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
             if (n == null) return;
             Log.Message($"[MouseDisaster Narrative] trust={n.narratorTrust}; aid={n.aidCompleted}; broadcasts={n.successfulBroadcasts}; " +
-                $"driven={n.forceDepartures}; annualAdults={n.adultRatkinCount}; visits={n.narrativeVisits.Count}; " +
+                $"driven={n.forceDepartures}; annualAdults={n.adultRatkinCount}; visits={n.narrativeVisits.Count + n.narrativeVisitSummaries.Count}; " +
                 $"pendingVisits={n.narrativeVisits.Count(v => !v.resolved)}; envoy={n.envoyPhase}; relic={n.relicOutcome}; return={n.returnPhase}; " +
                 $"identity={n.identityAnsweredTier}; flags={string.Join(",", n.narrativeFlags)}");
         }

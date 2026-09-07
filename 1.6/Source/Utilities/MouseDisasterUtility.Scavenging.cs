@@ -60,28 +60,9 @@ namespace MouseDisaster
                 return null;
             }
 
-            bool colonyCaptive = IsColonyCaptiveForScavenge(pawn);
-            bool desperateHunger = pawn.needs?.food != null && pawn.needs.food.CurCategory >= HungerCategory.UrgentlyHungry;
-            if (HasAccessibleFood(pawn, out string foodReason) && !desperateHunger && !colonyCaptive)
+            if (logDecision)
             {
-                if (burstActive)
-                {
-                    EndPrisonerScavengeBurst(pawn, enterCooldown: false, logDecision, "reset: burst ended because normal food became available");
-                }
-
-                if (logDecision)
-                {
-                    LogPrisonerScavenge(pawn, "skip: accessible food exists (" + foodReason + ")");
-                }
-
-                return null;
-            }
-
-            if ((desperateHunger || colonyCaptive) && logDecision)
-            {
-                LogPrisonerScavenge(pawn, desperateHunger
-                    ? "pass: desperate hunger allows scavenge despite available food"
-                    : "pass: colony captive mode allows scavenge despite available food");
+                LogPrisonerScavenge(pawn, "pass: colony captive mode allows scavenge despite available food");
             }
 
             Filth filth = FindScavengeableFilth(pawn);

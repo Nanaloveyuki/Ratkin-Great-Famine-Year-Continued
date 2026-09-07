@@ -11,6 +11,8 @@ namespace MouseDisaster
         public static BackstoryDef MouseDisaster_Newborn;
         public static BackstoryDef MouseDisaster_Refugee;
         public static HediffDef MouseDisaster_Plague;
+        public static HediffDef MouseDisaster_FedOnce;
+        public static HediffDef MouseDisaster_RefeedingSyndrome;
         public static HediffDef MouseDisaster_GnawedTreeBark;
         public static HediffDef MouseDisaster_GnawedWall;
         public static HediffDef MouseDisaster_OverGnawedWall;

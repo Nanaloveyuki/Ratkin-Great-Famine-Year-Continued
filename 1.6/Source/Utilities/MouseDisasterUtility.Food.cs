@@ -144,7 +144,7 @@ namespace MouseDisaster
 
         public static Job TryCreateReliefFoodJob(Pawn pawn, bool allowInventorySearch)
         {
-            if (pawn?.needs?.food == null || !ShouldPrioritizeReliefAreaFood(pawn))
+            if (pawn?.needs?.food == null || MouseDisasterFeeding.IsSeekingSuppressed(pawn) || !ShouldPrioritizeReliefAreaFood(pawn))
             {
                 return null;
             }
@@ -280,7 +280,7 @@ namespace MouseDisaster
 
         public static Job TryCreateImproperFoodJob(Pawn pawn, bool allowInventorySearch)
         {
-            if (pawn?.needs?.food == null)
+            if (pawn?.needs?.food == null || MouseDisasterFeeding.IsSeekingSuppressed(pawn))
             {
                 return null;
             }

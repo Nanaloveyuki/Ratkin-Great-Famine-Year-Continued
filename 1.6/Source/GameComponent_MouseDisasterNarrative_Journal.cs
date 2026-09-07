@@ -32,6 +32,8 @@ namespace MouseDisaster
         public List<NarrativePawnObservation> people = new List<NarrativePawnObservation>();
         public bool delivered;
         public bool driven;
+        public int deliveredTick = -1;
+        public int drivenTick = -1;
         public bool resolved;
         public bool counted;
         public bool showLetter = true;
@@ -44,6 +46,8 @@ namespace MouseDisaster
             Scribe_Collections.Look(ref people, "people", LookMode.Deep);
             Scribe_Values.Look(ref delivered, "delivered");
             Scribe_Values.Look(ref driven, "driven");
+            Scribe_Values.Look(ref deliveredTick, "deliveredTick", -1);
+            Scribe_Values.Look(ref drivenTick, "drivenTick", -1);
             Scribe_Values.Look(ref resolved, "resolved");
             Scribe_Values.Look(ref counted, "counted");
             Scribe_Values.Look(ref showLetter, "showLetter", true);
@@ -55,9 +59,61 @@ namespace MouseDisaster
         }
     }
 
+    public sealed class NarrativeVisitSummary : IExposable
+    {
+        public int id;
+        public string scene;
+        public int created;
+        public int completed = -1;
+        public bool delivered, driven, counted;
+        public int deliveredTick = -1, drivenTick = -1;
+        public int left, settled, dead, detained, missing;
+
+        public static NarrativeVisitSummary FromVisit(NarrativeVisit visit, int completedTick)
+        {
+            var summary = new NarrativeVisitSummary
+            {
+                id = visit.id, scene = visit.scene, created = visit.created, completed = completedTick,
+                delivered = visit.delivered, driven = visit.driven, counted = visit.counted,
+                deliveredTick = visit.deliveredTick, drivenTick = visit.drivenTick
+            };
+            foreach (var person in visit.people)
+            {
+                switch (person.end)
+                {
+                    case NarrativePawnEnd.Left: summary.left++; break;
+                    case NarrativePawnEnd.Settled: summary.settled++; break;
+                    case NarrativePawnEnd.Dead: summary.dead++; break;
+                    case NarrativePawnEnd.Detained: summary.detained++; break;
+                    default: summary.missing++; break;
+                }
+            }
+            return summary;
+        }
+
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref id, "id");
+            Scribe_Values.Look(ref scene, "scene");
+            Scribe_Values.Look(ref created, "created");
+            Scribe_Values.Look(ref completed, "completed", -1);
+            Scribe_Values.Look(ref delivered, "delivered");
+            Scribe_Values.Look(ref driven, "driven");
+            Scribe_Values.Look(ref counted, "counted");
+            Scribe_Values.Look(ref deliveredTick, "deliveredTick", -1);
+            Scribe_Values.Look(ref drivenTick, "drivenTick", -1);
+            Scribe_Values.Look(ref left, "left");
+            Scribe_Values.Look(ref settled, "settled");
+            Scribe_Values.Look(ref dead, "dead");
+            Scribe_Values.Look(ref detained, "detained");
+            Scribe_Values.Look(ref missing, "missing");
+        }
+    }
+
     public partial class GameComponent_MouseDisasterNarrative
     {
         private List<NarrativeVisit> narrativeVisits = new List<NarrativeVisit>();
+        private List<NarrativeVisitSummary> narrativeVisitSummaries = new List<NarrativeVisitSummary>();
         private List<string> narrativeFlags = new List<string>();
         private int nextVisitId = 1;
         private int aidCompleted;
@@ -71,6 +127,7 @@ namespace MouseDisaster
         private void ExposeJournalData()
         {
             Scribe_Collections.Look(ref narrativeVisits, "narrativeVisits", LookMode.Deep);
+            Scribe_Collections.Look(ref narrativeVisitSummaries, "narrativeVisitSummaries", LookMode.Deep);
             Scribe_Collections.Look(ref narrativeFlags, "narrativeFlags", LookMode.Value);
             Scribe_Values.Look(ref nextVisitId, "nextVisitId", 1);
             Scribe_Values.Look(ref aidCompleted, "aidCompleted");
@@ -85,8 +142,22 @@ namespace MouseDisaster
                 narrativeVisits ??= new List<NarrativeVisit>();
                 narrativeVisits.RemoveAll(v => v == null);
                 narrativeFlags ??= new List<string>();
-                nextVisitId = System.Math.Max(nextVisitId, narrativeVisits.Select(v => v.id).DefaultIfEmpty(0).Max() + 1);
+                narrativeFlags.RemoveAll(string.IsNullOrWhiteSpace);
+                narrativeVisitSummaries ??= new List<NarrativeVisitSummary>();
+                narrativeVisitSummaries.RemoveAll(v => v == null);
+                nextVisitId = System.Math.Max(nextVisitId, narrativeVisits.Select(v => v.id)
+                    .Concat(narrativeVisitSummaries.Select(v => v.id)).DefaultIfEmpty(0).Max() + 1);
+                ArchiveResolvedVisits();
             }
+        }
+
+        private void ArchiveResolvedVisits()
+        {
+            foreach (var visit in narrativeVisits)
+                if (visit.resolved)
+                    // Old saves have no completion timestamp; do not invent one or replay rewards.
+                    narrativeVisitSummaries.Add(NarrativeVisitSummary.FromVisit(visit, -1));
+            narrativeVisits.RemoveAll(v => v.resolved);
         }
 
         public int TrackNarrativeVisit(string scene, Map map, IEnumerable<Pawn> pawns)
@@ -106,7 +177,10 @@ namespace MouseDisaster
         {
             var set = new HashSet<Pawn>(pawns ?? Enumerable.Empty<Pawn>());
             foreach (var visit in narrativeVisits.Where(v => !v.resolved && v.people.Any(p => set.Contains(p.pawn))))
+            {
+                if (!visit.delivered) visit.deliveredTick = CurrentNarrativeTick;
                 visit.delivered = true;
+            }
         }
 
         public void NotifyNarrativeForce(IEnumerable<Pawn> pawns)
@@ -115,6 +189,7 @@ namespace MouseDisaster
             foreach (var visit in narrativeVisits.Where(v => !v.resolved && !v.driven && v.people.Any(p => set.Contains(p.pawn))))
             {
                 visit.driven = true;
+                visit.drivenTick = CurrentNarrativeTick;
                 forceDepartures++;
                 ChangeNarratorTrust(-2);
             }
@@ -211,8 +286,15 @@ namespace MouseDisaster
         private void ProcessNarrativeJournal()
         {
             ProcessOpeningNarrative(Find.AnyPlayerHomeMap);
-            foreach (var visit in narrativeVisits.Where(v => !v.resolved).ToList())
+            for (int visitIndex = 0; visitIndex < narrativeVisits.Count; visitIndex++)
             {
+                var visit = narrativeVisits[visitIndex];
+                if (visit.resolved)
+                {
+                    narrativeVisitSummaries.Add(NarrativeVisitSummary.FromVisit(visit, -1));
+                    narrativeVisits.RemoveAt(visitIndex--);
+                    continue;
+                }
                 if (visit.scene == "S03")
                 {
                     var children = visit.people.Select(p => p.pawn).Where(p => p?.relations != null)
@@ -225,14 +307,13 @@ namespace MouseDisaster
                 foreach (var person in visit.people) ScanNarrativePawn(person, visit.mapId, visit.created);
                 if (visit.people.Any(p => p.end == NarrativePawnEnd.Pending)) continue;
                 visit.resolved = true;
-                int left = visit.people.Count(p => p.end == NarrativePawnEnd.Left);
-                int settled = visit.people.Count(p => p.end == NarrativePawnEnd.Settled);
-                int dead = visit.people.Count(p => p.end == NarrativePawnEnd.Dead);
-                int detained = visit.people.Count(p => p.end == NarrativePawnEnd.Detained);
-                int missing = visit.people.Count(p => p.end == NarrativePawnEnd.Missing);
+                var summary = NarrativeVisitSummary.FromVisit(visit, CurrentNarrativeTick);
+                int left = summary.left, settled = summary.settled, dead = summary.dead,
+                    detained = summary.detained, missing = summary.missing;
                 if (MouseDisasterNarrativePolicy.IsAidComplete(visit.delivered && visit.scene != "S07", visit.driven, visit.people.Count, left, settled))
                 {
                     visit.counted = true;
+                    summary.counted = true;
                     aidCompleted++;
                     ChangeNarratorTrust(2);
                 }
@@ -248,6 +329,8 @@ namespace MouseDisaster
                         (visit.counted ? "MouseDisaster_Story_AidCounted" : "MouseDisaster_Story_AidNotCounted").Translate();
                     ReceiveNarrativeLetterText(("MouseDisaster_Story_" + visit.scene + "_Label").Translate(), body, map);
                 }
+                narrativeVisitSummaries.Add(summary);
+                narrativeVisits.RemoveAt(visitIndex--);
             }
             ProcessN005Care();
             ProcessStoryTasks();

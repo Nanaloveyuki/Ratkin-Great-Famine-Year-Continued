@@ -68,4 +68,8 @@
   <MouseDisaster_Plague.label>鼠疫</MouseDisaster_Plague.label>
   <MouseDisaster_Plague.description>鼠灾带来的烈性传染病，病情会比流感更快恶化。</MouseDisaster_Plague.description>
   <MouseDisaster_Plague.stages.0.label>感染</MouseDisaster_Plague.stages.0.label>
+  <MouseDisaster_FedOnce.label>已吃饱</MouseDisaster_FedOnce.label>
+  <MouseDisaster_FedOnce.description>已完成本次鼠灾访客的寻食目标。</MouseDisaster_FedOnce.description>
+  <MouseDisaster_RefeedingSyndrome.label>再喂养综合征</MouseDisaster_RefeedingSyndrome.label>
+  <MouseDisaster_RefeedingSyndrome.description>机体长期缺乏糖类供能，短时间内大量进食后，胰岛素水平上升，引起血清电解质失衡。消化、血液滤毒和意识暂时下降。</MouseDisaster_RefeedingSyndrome.description>
 </LanguageData>

@@ -46,6 +46,15 @@ namespace MouseDisaster
         private readonly Dictionary<Pawn, MouseDisasterPawnBehavior> profiles = new Dictionary<Pawn, MouseDisasterPawnBehavior>();
         private readonly HashSet<Pawn> pendingSpawn = new HashSet<Pawn>();
         private int nextId;
+        private HashSet<int> fedPawnIds = new HashSet<int>();
+        private HashSet<int> refeedingPawnIds = new HashSet<int>();
+
+        internal bool HasCompletedFeeding(Pawn pawn) => pawn != null && fedPawnIds?.Contains(pawn.thingIDNumber) == true;
+        internal void CompleteFeeding(Pawn pawn) => (fedPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber);
+        internal bool HasAppliedRefeeding(Pawn pawn) => refeedingPawnIds?.Contains(pawn.thingIDNumber) == true;
+        internal void RecordRefeeding(Pawn pawn) => (refeedingPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber);
+        internal bool HasFoodSeekingProfile(Pawn pawn) => TryGetGroup(pawn, out _) &&
+            profiles.TryGetValue(pawn, out var profile) && (profile & MouseDisasterPawnBehavior.SeekFood) != 0;
 
         private static Game cachedGame;
         private static GameComponent_MouseDisasterEventBehavior cachedComponent;
@@ -63,7 +72,11 @@ namespace MouseDisaster
         {
             Scribe_Collections.Look(ref groups, "groups", LookMode.Deep);
             Scribe_Values.Look(ref nextId, "nextId");
+            Scribe_Collections.Look(ref fedPawnIds, "fedPawnIds", LookMode.Value);
+            Scribe_Collections.Look(ref refeedingPawnIds, "refeedingPawnIds", LookMode.Value);
             if (Scribe.mode != LoadSaveMode.PostLoadInit) return;
+            fedPawnIds ??= new HashSet<int>();
+            refeedingPawnIds ??= new HashSet<int>();
             groups ??= new List<MouseDisasterEventGroup>();
             byId.Clear(); byPawn.Clear(); profiles.Clear(); pendingSpawn.Clear();
             foreach (var group in groups)
@@ -126,6 +139,8 @@ namespace MouseDisaster
             var component = Component;
             if (component == null || !component.TryGetGroup(pawn, out var group) || !component.profiles.TryGetValue(pawn, out var profile))
                 return MouseDisasterPawnBehavior.None;
+            if (MouseDisasterFeeding.IsSeekingSuppressed(pawn))
+                profile &= ~(MouseDisasterPawnBehavior.SeekFood | MouseDisasterPawnBehavior.Beg | MouseDisasterPawnBehavior.Steal);
             return group.leaving ? profile & MouseDisasterPawnBehavior.ReliefOnly : profile;
         }
 

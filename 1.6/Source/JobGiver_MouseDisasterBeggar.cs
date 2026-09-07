@@ -12,7 +12,7 @@ namespace MouseDisaster
             if (MouseDisasterUtility.IsPendingAbandonedChild(pawn)) return null;
             if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||
                 !MouseDisasterUtility.IsBeggarPawn(pawn) ||
-                !MouseDisasterUtility.IsInBeggarMentalState(pawn) ||
+                (!MouseDisasterUtility.IsInBeggarMentalState(pawn) && (!MouseDisasterFeeding.HasSatisfied(pawn) || pawn.InMentalState)) ||
                 pawn.Map == null ||
                 pawn.Downed || pawn.DevelopmentalStage == DevelopmentalStage.Baby)
             {
@@ -25,6 +25,9 @@ namespace MouseDisaster
             }
 
             bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn);
+            if (MouseDisasterFeeding.HasSatisfied(pawn))
+                return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
+            if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
             if (!MouseDisasterUtility.CanBegAgain(pawn))
                 return MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
 

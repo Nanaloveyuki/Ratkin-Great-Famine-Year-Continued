@@ -13,7 +13,7 @@ namespace MouseDisaster
         {
             if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||
                 !MouseDisasterUtility.IsThiefPawn(pawn) ||
-                !MouseDisasterUtility.IsInThiefMentalState(pawn) ||
+                (!MouseDisasterUtility.IsInThiefMentalState(pawn) && (!MouseDisasterFeeding.HasSatisfied(pawn) || pawn.InMentalState)) ||
                 pawn.Map == null ||
                 pawn.Downed)
             {
@@ -26,6 +26,9 @@ namespace MouseDisaster
             }
 
             bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn);
+            if (MouseDisasterFeeding.HasSatisfied(pawn))
+                return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
+            if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
             if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly))
                 return MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
 

@@ -42,6 +42,52 @@ narrative text remain incident-specific; attitude is not a rewrite of those scri
   eating under combat pressure; burning, downed and non-combat escape paths are
   not globally disabled. Core health and needs updates remain intact.
 
+## Feeding Completion and Visit Summaries
+
+Food-cache requests without `calculateWantedStackCount` require only one available
+unit, matching the original selection contract. Explicit quantity requests retain
+their reservation and stack checks.
+
+A mouse-disaster food-seeking visitor at 82% food is marked as fed once in the game
+component, using the pawn's integer ID rather than a health effect or pawn reference.
+This stops additional begging, theft and gnawing; ordinary vanilla eating remains
+available. Existing map-stay requirements are preserved. Old hidden fed-once marks
+are migrated on access and removed. Editing or clearing health effects does not
+erase the independent completion record.
+
+Guanyin Tu satiety temporarily suppresses those extra food-seeking jobs only while
+its hediff exists. It neither records permanent feeding completion nor resets the
+visitor's food-seeking mental state. After removal, a hungry visitor can seek food
+again; a full visitor completes normally. Temporary satiety alone is not counted as
+full nutrition.
+
+At 82% food and malnutrition severity at least 0.4, refeeding syndrome can be applied
+once per visitor when new content is enabled. The check does not require a minimum
+meal size, actual ingestion or a particular carbohydrate source. A separate saved
+integer-ID record prevents refreshing the condition or forcing it back after a
+health editor removes it. Malnutrition is not removed. Digestion is reduced by 30
+percentage points, blood filtration by 20, and consciousness by 25 for 2-5 days.
+These penalties can compound with existing illness.
+
+Ordinary setters are observed immediately. The existing 150-tick food-need cadence
+also checks current values before hunger decay, covering loaded values, direct
+field edits and MaxNutrition changes without a full-map scan. NaN and infinite
+food percentages do not complete feeding. Mods replacing or skipping these game
+methods can still bypass the checks and need individual compatibility testing.
+
+Completed general visits become summaries of scene, ID, creation/completion times,
+delivery/expulsion decisions and their times, aid credit and outcome counts. They
+contain no pawn or map references. Only active visits participate in observation
+scans. Old completed records migrate without replaying aid/trust rewards; unknown
+historical timestamps remain -1. The envoy verification and debug totals include
+summaries. Specialized unfinished story records retain references required for
+their follow-up events. Summary storage still grows with event count, but no longer
+retains per-person observation objects or participates in periodic visit scanning.
+
+`scripts/verify-feeding-summary.ps1` checks feeding thresholds, exclusions, the
+new-content gate, summary migration and scalar serialization against controlled
+types, plus the syndrome XML. It is not a live-game save/load test.
+
 ## Remaining Scaling Costs
 
 The vanilla needs tracker already gates normal needs updates at a 150-tick interval;

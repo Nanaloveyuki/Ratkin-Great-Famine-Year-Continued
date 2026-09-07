@@ -13,11 +13,19 @@ public enum ThingRequestGroup { FoodSource }
 public enum Danger { Some }
 public enum PathEndMode { ClosestTouch }
 public enum LoadSaveMode { Inactive, PostLoadInit }
-public enum LookMode { Reference, Deep }
+public enum LookMode { Reference, Deep, Value }
 public interface IExposable { void ExposeData(); }
 public static class Scribe { public static LoadSaveMode mode; }
 public static class Scribe_Values { public static void Look<T>(ref T value,string key,T fallback=default(T)) {} }
-public static class Scribe_Collections { public static void Look<T>(ref List<T> value,string key,LookMode mode) {} }
+public static class Scribe_Collections {
+    public static bool reading;
+    private static Dictionary<string,object> saved=new Dictionary<string,object>();
+    public static void Look<T>(ref List<T> value,string key,LookMode mode) {}
+    public static void Look<T>(ref HashSet<T> value,string key,LookMode mode) {
+        if(reading) value=saved.TryGetValue(key,out var data) ? new HashSet<T>((HashSet<T>)data) : null;
+        else saved[key]=new HashSet<T>(value ?? new HashSet<T>());
+    }
+}
 public static class Scribe_References { public static void Look<T>(ref T value,string key) {} }
 public static class Scribe_Defs { public static void Look<T>(ref T value,string key) {} }
 public static class GenDate { public const int TicksPerHour=2500; }
@@ -46,7 +54,7 @@ public class MentalHandler { public int resets; public void Reset() { resets++; 
 public class Mind { public object duty; public MentalHandler mentalStateHandler=new MentalHandler(); }
 public class Jobs { public int stops; public void StopAll() { stops++; } }
 public class Pawn:Thing {
-    public int thingIDNumber; public bool Dead,Downed,player,thief=true,beggar,canReserve=true,canReach=true,willEat=true;
+    public int thingIDNumber; public bool Dead,Downed,player,fedOnce,temporarySatiety,thief=true,beggar,canReserve=true,canReach=true,willEat=true;
     public DevelopmentalStage DevelopmentalStage=DevelopmentalStage.Adult;
     public PawnKindDef kindDef=new PawnKindDef(); public bool burning; public bool IsBurning()=>burning;
     public Inventory inventory=new Inventory(); public Needs needs=new Needs(); public Mind mindState=new Mind(); public Jobs jobs=new Jobs(); public Lord lord;
@@ -106,9 +114,14 @@ public static class MouseDisasterUtility {
     public static ReliefArea GetReliefArea(Map map)=>map.area;
     public static bool IsAreaFoodSourceThing(Thing t,bool harvest)=>t!=null && t.Spawned && !t.Destroyed && t.IngestibleNow;
 }
+public static class MouseDisasterFeeding {
+    public static bool HasSatisfied(Pawn pawn)=>pawn?.fedOnce==true || GameComponent_MouseDisasterEventBehavior.Component?.HasCompletedFeeding(pawn)==true;
+    public static bool IsSeekingSuppressed(Pawn pawn)=>HasSatisfied(pawn) || pawn?.temporarySatiety==true;
+}
 public static class FoodUtility {
     public static float GetNutrition(Pawn p,Thing t,ThingDef d)=>1;
-    public static int WillIngestStackCountOf(Pawn p,ThingDef d,float nutrition)=>1;
+    public static int wanted=1;
+    public static int WillIngestStackCountOf(Pawn p,ThingDef d,float nutrition)=>wanted;
     public static bool TryFindBestFoodSourceFor(Pawn a,Pawn b,bool desperate,out Thing food,out ThingDef def,
         bool canRefillDispenser,bool canUseInventory,bool canUsePackAnimalInventory,bool allowForbidden,bool allowCorpse,
         bool allowSociallyImproper,bool allowHarvest,bool forceScanWholeMap,bool ignoreReservations,bool calculateWantedStackCount,bool allowVenerated) {
@@ -180,6 +193,11 @@ public static class Harness {
         map=NewMap(); var pawn=NewPawn(map,10); var food=new Thing { Map=map }; map.listerThings.foods.Add(food);
         int key=Key(); map.cache.Store(pawn,key,food,food.def,true);
         Check(map.cache.TryRead(pawn,key,out var found,out _,out bool available) && available && found==food,"valid target not reused");
+        FoodUtility.wanted=20; food.stackCount=5;
+        Check(map.cache.TryRead(pawn,key,out _,out _,out available) && available,"partial stack should satisfy default search");
+        map.cache.Store(pawn,key | 1024,food,food.def,true);
+        Check(!map.cache.TryRead(pawn,key | 1024,out _,out _,out _),"explicit wanted count ignored");
+        FoodUtility.wanted=1; food.stackCount=10000;
         pawn.canReserve=false; Check(!map.cache.TryRead(pawn,key,out _,out _,out _),"reservation change ignored"); pawn.canReserve=true;
         pawn.canReach=false; Check(!map.cache.TryRead(pawn,key,out _,out _,out _),"blocked path ignored"); pawn.canReach=true;
         food.stackCount=0; Check(!map.cache.TryRead(pawn,key,out _,out _,out _),"depleted stack reused"); food.stackCount=10000;
@@ -204,6 +222,26 @@ public static class Harness {
             Check(scans==1,"shared target lookup scaled with pawn count");
             rows.Add(count+" pawns x 100 requests: baseline "+(count*100)+", cached selections "+scans);
         }
+        c=Reset(); map=NewMap(); pawn=NewPawn(map,999);
+        Group(c,MouseDisasterEventAttitude.Friendly,pawn);
+        Check(GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn,MouseDisasterPawnBehavior.SeekFood),"initial food state missing");
+        pawn.temporarySatiety=true;
+        Check(!GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn,MouseDisasterPawnBehavior.SeekFood),"temporary satiety ignored");
+        Check(c.HasFoodSeekingProfile(pawn),"temporary satiety erased underlying food profile");
+        pawn.temporarySatiety=false;
+        Check(GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn,MouseDisasterPawnBehavior.SeekFood),"removed satiety still suppresses profile");
+        c.CompleteFeeding(pawn);
+        Check(!GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn,MouseDisasterPawnBehavior.SeekFood),"completed food state retained");
+        Check(GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn,MouseDisasterPawnBehavior.ReliefOnly),"completion removed relief restriction");
+        Scribe.mode=LoadSaveMode.PostLoadInit; c.ExposeData(); Scribe.mode=LoadSaveMode.Inactive;
+        Check(!GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn,MouseDisasterPawnBehavior.SeekFood),"completion lost on profile rebuild");
+        c.RecordRefeeding(pawn); c.ExposeData();
+        var restored=new GameComponent_MouseDisasterEventBehavior(Current.Game);
+        Check(!restored.HasCompletedFeeding(pawn),"feeding IDs leaked into fresh game");
+        Scribe_Collections.reading=true; Scribe.mode=LoadSaveMode.PostLoadInit;
+        restored.ExposeData(); Scribe_Collections.reading=false; Scribe.mode=LoadSaveMode.Inactive;
+        Check(restored.HasCompletedFeeding(pawn),"saved feeding IDs not restored");
+        Check(restored.HasAppliedRefeeding(pawn),"saved refeeding IDs not restored");
         return "PASS: "+checks+" behavior/cache assertions.\n"+string.Join("\n",rows)+"\nCounts use controlled reservations, diet and reachability; not a Unity TPS benchmark.";
     }
 }
