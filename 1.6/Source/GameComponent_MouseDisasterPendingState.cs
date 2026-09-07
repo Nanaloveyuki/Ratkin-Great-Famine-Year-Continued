@@ -23,6 +23,12 @@ namespace MouseDisaster
         public override void ExposeData()
         {
             if (Scribe.mode == LoadSaveMode.Saving)
+                foreach (int id in MouseDisasterUtility.NextBegTickByPawnId.Where(pair => pair.Value <= Find.TickManager.TicksGame).Select(pair => pair.Key).ToList())
+                    MouseDisasterUtility.NextBegTickByPawnId.Remove(id);
+            Scribe_Collections.Look(ref MouseDisasterUtility.NextBegTickByPawnId, "mouseDisaster_nextBegTicks", LookMode.Value, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+                MouseDisasterUtility.NextBegTickByPawnId ??= new Dictionary<int, int>();
+            if (Scribe.mode == LoadSaveMode.Saving)
             {
                 forcePrisonerOnPurchasePawnIds = MouseDisasterUtility.CopyForcePrisonerOnPurchasePawnIds();
                 tradableChattelPawnIds = MouseDisasterUtility.CopyTradableChattelPawnIds();

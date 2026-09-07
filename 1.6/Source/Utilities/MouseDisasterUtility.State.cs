@@ -407,6 +407,7 @@ namespace MouseDisaster
 
         internal static void ResetPendingState()
         {
+            NextBegTickByPawnId.Clear();
             BegAttempts.Clear();
             BeggedColonists.Clear();
             BegSuccess.Clear();

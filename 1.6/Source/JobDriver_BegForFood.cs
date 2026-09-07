@@ -14,13 +14,19 @@ namespace MouseDisaster
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return pawn.Reserve(TargetPawn, job, 1, -1, null, errorOnFailed);
+            if (pawn.DevelopmentalStage == DevelopmentalStage.Baby ||
+                !MouseDisasterUtility.CanReceiveBegging(TargetPawn) ||
+                !MouseDisasterUtility.CanBegAgain(pawn) || !MouseDisasterUtility.CanBegAgain(TargetPawn) ||
+                !pawn.Reserve(TargetPawn, job, 1, -1, null, errorOnFailed)) return false;
+            MouseDisasterUtility.StartBeggingCooldown(pawn, TargetPawn);
+            return true;
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOnDestroyedNullOrForbidden(TargetIndex.A);
             this.FailOnDowned(TargetIndex.A);
+            this.FailOn(() => !MouseDisasterUtility.CanReceiveBegging(TargetPawn));
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
             yield return Toils_General.WaitWith(TargetIndex.A, BegTicks, true);
             Toil resolve = ToilMaker.MakeToil("ResolveBegging");

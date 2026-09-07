@@ -13,6 +13,28 @@ namespace MouseDisaster
 {
     public static partial class MouseDisasterUtility
     {
+        private static readonly IntRange BeggingCooldownTicks = new IntRange(GenDate.TicksPerHour / 2, GenDate.TicksPerHour * 2);
+        internal static Dictionary<int, int> NextBegTickByPawnId = new Dictionary<int, int>();
+
+        public static bool CanBegAgain(Pawn pawn)
+        {
+            return pawn != null && (!NextBegTickByPawnId.TryGetValue(pawn.thingIDNumber, out int nextTick) ||
+                (Find.TickManager?.TicksGame ?? 0) >= nextTick);
+        }
+
+        public static bool CanReceiveBegging(Pawn pawn)
+        {
+            return pawn != null && pawn.Spawned && !pawn.Dead && !pawn.Downed && pawn.Awake() &&
+                pawn.DevelopmentalStage != DevelopmentalStage.Baby &&
+                pawn.health?.capacities.CapableOf(PawnCapacityDefOf.Talking) == true;
+        }
+
+        public static void StartBeggingCooldown(Pawn beggar, Pawn target)
+        {
+            int now = Find.TickManager.TicksGame;
+            NextBegTickByPawnId[beggar.thingIDNumber] = now + BeggingCooldownTicks.RandomInRange;
+            NextBegTickByPawnId[target.thingIDNumber] = now + BeggingCooldownTicks.RandomInRange;
+        }
 
         public static void ResetBeggarState(Pawn pawn)
         {

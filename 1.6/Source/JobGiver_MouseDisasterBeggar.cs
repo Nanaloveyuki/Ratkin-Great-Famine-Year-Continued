@@ -14,7 +14,7 @@ namespace MouseDisaster
                 !MouseDisasterUtility.IsBeggarPawn(pawn) ||
                 !MouseDisasterUtility.IsInBeggarMentalState(pawn) ||
                 pawn.Map == null ||
-                pawn.Downed)
+                pawn.Downed || pawn.DevelopmentalStage == DevelopmentalStage.Baby)
             {
                 return null;
             }
@@ -25,6 +25,8 @@ namespace MouseDisaster
             }
 
             bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn);
+            if (!MouseDisasterUtility.CanBegAgain(pawn))
+                return MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
 
             if (MouseDisasterUtility.IsSiegeBeggar(pawn))
             {
@@ -109,7 +111,7 @@ namespace MouseDisaster
             for (int i = 0; i < colonists.Count; i++)
             {
                 Pawn colonist = colonists[i];
-                if (colonist == null || colonist.Downed || !pawn.CanReserve(colonist) ||
+                if (!MouseDisasterUtility.CanReceiveBegging(colonist) || !MouseDisasterUtility.CanBegAgain(colonist) || !pawn.CanReserve(colonist) ||
                     !pawn.CanReach(colonist, PathEndMode.Touch, Danger.Some))
                 {
                     continue;
@@ -132,7 +134,7 @@ namespace MouseDisaster
                 }
             }
 
-            return preferUnbegged ? (bestUnbegged ?? bestAny) : bestAny;
+            return preferUnbegged ? bestUnbegged : bestAny;
         }
 
         private static Job TryCreateRecoveryJob(Pawn pawn)
