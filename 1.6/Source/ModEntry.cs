@@ -30,6 +30,17 @@ namespace MouseDisaster
             listing.Begin(new Rect(0f, 0f, viewRect.width - 16f, viewRect.height));
 
             DrawHeader(listing);
+            var removal = Current.Game?.GetComponent<GameComponent_MouseDisasterRemoval>();
+            if (Current.ProgramState == ProgramState.Playing && removal != null)
+            {
+                listing.Label("MouseDisaster_RemovalSection".Translate());
+                if (removal.NewContentDisabled) listing.Label("MouseDisaster_RemovalDisabled".Translate());
+                else if (listing.ButtonText("MouseDisaster_RemovalDisable".Translate())) removal.DisableNewContent();
+                if (listing.ButtonText("MouseDisaster_RemovalExport".Translate()))
+                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("MouseDisaster_RemovalConfirm".Translate(),
+                        () => LongEventHandler.QueueLongEvent(removal.ExportCleanSave, "SavingLongEvent", false, null)));
+                listing.GapLine();
+            }
 
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableNewContent", ref Settings.enableNewContent, "MouseDisaster_Settings_EnableNewContent_Tooltip");
             if (!Settings.enableNewContent)
@@ -124,11 +135,11 @@ namespace MouseDisaster
 
         private static void DrawHeader(Listing_Standard listing)
         {
-            int enabledIncidentCount = Settings.enableNewContent
+            int enabledIncidentCount = MouseDisasterRuntime.AllowsNewContent
                 ? MouseDisasterIncidentCatalog.CountEnabledIncidents(Settings.disabledIncidentDefNames)
                 : 0;
             int totalIncidentCount = MouseDisasterIncidentCatalog.AllEntries.Count;
-            string newContentStatus = Settings.enableNewContent ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
+            string newContentStatus = MouseDisasterRuntime.AllowsNewContent ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             string gnawingStatus = Settings.enableGnawing ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             string tailBiteStatus = Settings.enableExperimentalTailBite ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             listing.Label("MouseDisaster_UI_SettingsSummary".Translate(newContentStatus, enabledIncidentCount, totalIncidentCount, gnawingStatus, tailBiteStatus).Resolve());

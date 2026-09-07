@@ -4,4 +4,22 @@
   <MouseDisaster_BroadcastExpired>The hope broadcast could not trigger an incident for three days. Remaining requests were cancelled and the broadcast cooldown was cleared. Check event settings and map conditions.</MouseDisaster_BroadcastExpired>
   <MouseDisaster_BroadcastNoCandidates>Broadcast hope: no enabled candidate incidents</MouseDisaster_BroadcastNoCandidates>
   <MouseDisaster_BroadcastError>A hope broadcast incident threw an error. Remaining requests were cancelled and the cooldown was cleared. See the log for details.</MouseDisaster_BroadcastError>
+  <MouseDisaster_RemovalSection>Current save and removal preparation</MouseDisaster_RemovalSection>
+  <MouseDisaster_RemovalDisabled>New Mouse Disaster content is disabled for this save. Global mod settings are unchanged.</MouseDisaster_RemovalDisabled>
+  <MouseDisaster_RemovalDisable>Disable new Mouse Disaster content for this save only</MouseDisaster_RemovalDisable>
+  <MouseDisaster_RemovalExport>Back up and export a save for removal</MouseDisaster_RemovalExport>
+  <MouseDisaster_RemovalConfirm>The game will pause, disable new content for this save, and create a backup and a cleaned copy without overwriting existing saves.
+
+The copy will replace mod pawn kinds, backstories, hidden factions and storytellers, and remove mod traits, genes, health conditions, memories, items, areas, letters and ongoing mod tasks. Pawns and their Ratkin race dependencies will remain.
+
+After export, exit the game, remove only this mod, keep Ratkin and other dependencies, restart and load the cleaned copy. Do not overwrite it with the current running save. Unknown references will abort export with a diagnostic. Continue?</MouseDisaster_RemovalConfirm>
+  <MouseDisaster_RemovalDone>Exported: {0}
+Backup: {1}
+Definitions replaced: {2}; records removed: {3}.
+
+Exit the game, remove only this mod, keep Ratkin and other dependencies, restart and load the exported copy. The running world has not been cleaned and remains paused. Keep the backup until the copy has been loaded, saved and loaded again successfully.</MouseDisaster_RemovalDone>
+  <MouseDisaster_RemovalFailed>Cleanup export did not complete. Do not remove the mod based on this attempt. New content is disabled for this save.
+Backup name: {0} (may not exist if saving failed).
+Reason: {1}
+See the log for details. Existing saves were not overwritten.</MouseDisaster_RemovalFailed>
 </LanguageData>

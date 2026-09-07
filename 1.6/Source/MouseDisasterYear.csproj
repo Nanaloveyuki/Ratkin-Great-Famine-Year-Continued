@@ -47,6 +47,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(RimWorldManagedDir)\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
@@ -58,6 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgePatches.cs" />
+    <Compile Include="GameComponent_MouseDisasterRemoval.cs" />
+    <Compile Include="MouseDisasterSaveCleanup.cs" />
     <Compile Include="Incidents\AidIncidents.cs" />
     <Compile Include="Incidents\CaravanMuggersIncidents.cs" />
     <Compile Include="Incidents\CaravanRetaliationPatches.cs" />
