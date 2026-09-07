@@ -21,6 +21,7 @@ namespace MouseDisaster
         public PawnKindDef originalKindDef;
         public MouseDisasterVisitorStatus status;
         public int temporaryUntilTick = -1;
+        internal int slot = -1;
 
         public void ExposeData()
         {
@@ -37,6 +38,7 @@ namespace MouseDisaster
         private const int MaintenanceIntervalTicks = 60;
 
         private List<MouseDisasterVisitorRecord> visitorRecords = new List<MouseDisasterVisitorRecord>();
+        private readonly Dictionary<Pawn, MouseDisasterVisitorRecord> recordsByPawn = new Dictionary<Pawn, MouseDisasterVisitorRecord>();
 
         public GameComponent_MouseDisasterVisitorControl(Game game)
         {
@@ -48,6 +50,7 @@ namespace MouseDisaster
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 visitorRecords ??= new List<MouseDisasterVisitorRecord>();
+                RebuildRecordIndex();
             }
         }
 
@@ -68,7 +71,6 @@ namespace MouseDisaster
                 return;
             }
 
-            CleanupRecords(processTemporaryExpiry: false);
             foreach (Pawn pawn in pawns)
             {
                 if (!CanTrackPawn(pawn) || GetRecord(pawn) != null)
@@ -76,14 +78,17 @@ namespace MouseDisaster
                     continue;
                 }
 
-                visitorRecords.Add(new MouseDisasterVisitorRecord
+                var record = new MouseDisasterVisitorRecord
                 {
                     pawn = pawn,
                     originalFaction = pawn.Faction,
                     originalKindDef = pawn.kindDef,
+                    slot = visitorRecords.Count,
                     status = MouseDisasterVisitorStatus.Visitor,
                     temporaryUntilTick = -1
-                });
+                };
+                visitorRecords.Add(record);
+                recordsByPawn[pawn] = record;
             }
         }
 
@@ -97,7 +102,7 @@ namespace MouseDisaster
             MouseDisasterVisitorRecord record = GetRecord(pawn);
             if (record != null)
             {
-                visitorRecords.Remove(record);
+                ForgetRecord(record);
             }
         }
 
@@ -233,7 +238,7 @@ namespace MouseDisaster
             }
 
             RestoreOriginalIdentityAndForceLeave(record);
-            visitorRecords.Remove(record);
+            ForgetRecord(record);
             return true;
         }
 
@@ -247,7 +252,7 @@ namespace MouseDisaster
 
             BringPawnUnderPlayerProtection(pawn);
             SyncEmploymentMarkers(pawn, MouseDisasterVisitorStatus.Visitor);
-            visitorRecords.Remove(record);
+            ForgetRecord(record);
             return true;
         }
 
@@ -298,7 +303,7 @@ namespace MouseDisaster
                     continue;
                 }
 
-                visitorRecords.Remove(record);
+                ForgetRecord(record);
                 imprisonedCount++;
                 prisonCellIndex++;
             }
@@ -365,7 +370,7 @@ namespace MouseDisaster
                 }
 
                 MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
-                visitorRecords.Remove(record);
+                ForgetRecord(record);
                 hostileCount++;
 
                 if (!CanLeaveMapUnderOwnPower(pawn))
@@ -434,7 +439,7 @@ namespace MouseDisaster
                 Pawn pawn = record?.pawn;
                 if (record == null || pawn == null || pawn.Dead)
                 {
-                    visitorRecords.RemoveAt(i);
+                    RemoveRecordAt(i);
                     continue;
                 }
 
@@ -445,34 +450,49 @@ namespace MouseDisaster
                 {
                     RestoreOriginalIdentityAndForceLeave(record);
                     Messages.Message("MouseDisaster_VisitorControl_TemporaryExpired".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent, historical: false);
-                    visitorRecords.RemoveAt(i);
+                    RemoveRecordAt(i);
                     continue;
                 }
 
                 if (!pawn.Spawned && pawn.MapHeld == null)
                 {
-                    visitorRecords.RemoveAt(i);
+                    RemoveRecordAt(i);
                 }
             }
         }
 
         private MouseDisasterVisitorRecord GetRecord(Pawn pawn)
         {
-            if (pawn == null || visitorRecords == null)
-            {
-                return null;
-            }
+            return pawn != null && recordsByPawn.TryGetValue(pawn, out var record) ? record : null;
+        }
 
+        private void ForgetRecord(MouseDisasterVisitorRecord record)
+        {
+            if (record != null && record.slot >= 0 && record.slot < visitorRecords.Count && visitorRecords[record.slot] == record)
+                RemoveRecordAt(record.slot);
+        }
+
+        private void RemoveRecordAt(int index)
+        {
+            MouseDisasterVisitorRecord record = visitorRecords[index];
+            if (record?.pawn != null) recordsByPawn.Remove(record.pawn);
+            int last = visitorRecords.Count - 1;
+            visitorRecords[index] = visitorRecords[last];
+            if (visitorRecords[index] != null) visitorRecords[index].slot = index;
+            visitorRecords.RemoveAt(last);
+            if (record != null) record.slot = -1;
+        }
+
+        private void RebuildRecordIndex()
+        {
+            recordsByPawn.Clear();
             for (int i = 0; i < visitorRecords.Count; i++)
             {
-                MouseDisasterVisitorRecord record = visitorRecords[i];
-                if (record?.pawn == pawn)
-                {
-                    return record;
-                }
+                var record = visitorRecords[i];
+                if (record == null) continue;
+                record.slot = i;
+                if (record.pawn != null) recordsByPawn[record.pawn] = record;
             }
-
-            return null;
         }
 
         private static bool CanTrackPawn(Pawn pawn)
