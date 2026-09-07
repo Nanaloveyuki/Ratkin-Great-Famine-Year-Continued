@@ -46,7 +46,8 @@ namespace MouseDisaster
 
         public static bool Prefix(string text)
         {
-            if (!MouseDisasterUtility.IsExtremeCompatJobModeEnabled || text.NullOrEmpty())
+            if (Current.CreatingWorld != null || Current.ProgramState != ProgramState.Playing ||
+                !MouseDisasterUtility.IsExtremeCompatJobModeEnabled || text.NullOrEmpty())
             {
                 return true;
             }
@@ -68,7 +69,7 @@ namespace MouseDisaster
             }
 
             int nowTick = Find.TickManager?.TicksGame ?? Environment.TickCount;
-            if (LastEmitTickByKey.TryGetValue(key, out int lastTick) && nowTick - lastTick < 600)
+            if (LastEmitTickByKey.TryGetValue(key, out int lastTick) && nowTick >= lastTick && nowTick - lastTick < 600)
             {
                 return false;
             }

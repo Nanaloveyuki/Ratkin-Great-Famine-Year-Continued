@@ -22,7 +22,8 @@ namespace MouseDisaster
         public static bool TryGetMouseDisasterHiddenFaction(out Faction faction)
         {
             faction = null;
-            if (Find.FactionManager == null || MouseDisasterDefOf.MouseDisaster_HiddenFaction == null)
+            if (Current.CreatingWorld != null ||
+                Find.FactionManager == null || MouseDisasterDefOf.MouseDisaster_HiddenFaction == null)
             {
                 return false;
             }
@@ -38,6 +39,7 @@ namespace MouseDisaster
             faction = Find.FactionManager.FirstFactionOfDef(MouseDisasterDefOf.MouseDisaster_HiddenFaction);
             if (faction == null)
             {
+                if (!MouseDisasterRuntime.AllowsNewContent) return false;
                 faction = CreateMouseDisasterHiddenFaction();
                 if (faction == null)
                 {
@@ -136,7 +138,7 @@ namespace MouseDisaster
                 for (int j = i + 1; j < factions.Count; j++)
                 {
                     Faction second = factions[j];
-                    if (second == null)
+                    if (second == null || (!IsMouseDisasterHiddenFaction(first) && !IsMouseDisasterHiddenFaction(second)))
                     {
                         continue;
                     }
