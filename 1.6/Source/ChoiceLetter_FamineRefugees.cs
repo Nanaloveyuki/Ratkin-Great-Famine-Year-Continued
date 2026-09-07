@@ -38,7 +38,7 @@ namespace MouseDisaster
                     yield break;
                 }
 
-                DiaOption accept = new DiaOption("\u5141\u8bb8\u52a0\u5165");
+                DiaOption accept = new DiaOption("MouseDisaster_UI_AllowJoin".Translate().Resolve());
                 accept.action = delegate
                 {
                     List<Pawn> acceptedRefugees = GetValidRefugees();
@@ -50,7 +50,7 @@ namespace MouseDisaster
                         }
                     }
 
-                    Messages.Message("\u4f60\u540c\u610f\u4e86\u707e\u8352\u9003\u96be\u8005\u7684\u52a0\u5165\u8bf7\u6c42\u3002", acceptedRefugees, MessageTypeDefOf.PositiveEvent, historical: false);
+                    Messages.Message("MouseDisaster_UI_RefugeesAccepted".Translate().Resolve(), acceptedRefugees, MessageTypeDefOf.PositiveEvent, historical: false);
                     Find.LetterStack.RemoveLetter(this);
                 };
                 accept.resolveTree = true;
@@ -102,7 +102,7 @@ namespace MouseDisaster
                     attackAll.resolveTree = true;
                 }
 
-                DiaOption reject = new DiaOption("\u62d2\u7edd");
+                DiaOption reject = new DiaOption("MouseDisaster_UI_Reject".Translate().Resolve());
                 reject.action = delegate
                 {
                     List<Pawn> currentRefugees = GetValidRefugees();
@@ -112,7 +112,7 @@ namespace MouseDisaster
                         MouseDisasterUtility.MakeTravelAndExitLord(targetMap, currentRefugees, targetMap.Center, includeBabiesInExit: false);
                     }
 
-                    Messages.Message("\u4f60\u62d2\u7edd\u4e86\u707e\u8352\u9003\u96be\u8005\uff0c\u4ed6\u4eec\u6b63\u5728\u79bb\u5f00\u5730\u56fe\u3002", currentRefugees, MessageTypeDefOf.NeutralEvent, historical: false);
+                    Messages.Message("MouseDisaster_UI_RefugeesRejected".Translate().Resolve(), currentRefugees, MessageTypeDefOf.NeutralEvent, historical: false);
                     Find.LetterStack.RemoveLetter(this);
                 };
                 reject.resolveTree = true;

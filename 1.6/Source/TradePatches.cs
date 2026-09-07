@@ -64,11 +64,11 @@ namespace MouseDisaster
 
             float width = 140f;
             Rect infoRect = new Rect(curX, 0f, width, rect.height);
-            Widgets.Label(infoRect, "买下后为囚犯");
+            Widgets.Label(infoRect, "MouseDisaster_UI_PurchasedAsPrisonerLabel".Translate().Resolve());
             if (Mouse.IsOver(infoRect))
             {
                 Widgets.DrawHighlight(infoRect);
-                TooltipHandler.TipRegion(infoRect, "这些鼠灾交易对象被买下后会直接作为囚犯加入。");
+                TooltipHandler.TipRegion(infoRect, "MouseDisaster_UI_PurchasedAsPrisonerDescription".Translate().Resolve());
             }
 
             return false;

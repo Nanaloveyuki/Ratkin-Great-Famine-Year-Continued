@@ -57,7 +57,6 @@
     </stages>
   </ThoughtDef>
 
-  <!-- N-004 的机制文本先保持简短，叙事草案定稿后再替换。 -->
   <ThoughtDef>
     <defName>MouseDisaster_N004_MissingMother</defName>
     <thoughtClass>Thought_Memory</thoughtClass>

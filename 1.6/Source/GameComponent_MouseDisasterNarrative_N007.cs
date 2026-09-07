@@ -626,7 +626,7 @@ namespace MouseDisaster
         {
             return pawn != null && pawn.Faction != Faction.OfPlayer &&
                    MouseDisasterVisitorUtility.IsManagedVisitor(pawn) &&
-                   MouseDisasterPhase2Utility.IsPlagueCarrierMouseDisasterPawn(pawn);
+                   MouseDisasterPlagueUtility.IsPlagueCarrierMouseDisasterPawn(pawn);
         }
 
         private static bool IsN007VisitorControlBlockingPhase(MouseDisasterN007Phase phase)

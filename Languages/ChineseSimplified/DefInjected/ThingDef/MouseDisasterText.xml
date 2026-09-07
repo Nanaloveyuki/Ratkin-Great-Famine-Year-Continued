@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisaster_RecordCache.label>旧记录箱</MouseDisaster_RecordCache.label>
+  <MouseDisaster_RecordCache.description>装着配给清单和迁移记录的箱子。殖民者能够到达时，可以决定如何处置。</MouseDisaster_RecordCache.description>
+  <MouseDisaster_GrainBurrow.label>粮仓洞口</MouseDisaster_GrainBurrow.label>
+  <MouseDisaster_GrainBurrow.description>储粮附近的小洞。未处理时每天最多损失一份食物，总计不超过三份。可通过粮仓信件封堵或清理。</MouseDisaster_GrainBurrow.description>
+  <MouseDisaster_RecordPages.label>迁移记录</MouseDisaster_RecordPages.label>
+  <MouseDisaster_RecordPages.description>保存下来的配给清单和迁移记录。有几处数量被反复改过。它没有额外能力，可以留下，也可以转交。</MouseDisaster_RecordPages.description>
+  <Filth_MouseDisasterPoop.label>鐏</Filth_MouseDisasterPoop.label>
+  <MouseDisaster_GuanyinTu.label>观音土</MouseDisaster_GuanyinTu.label>
+  <MouseDisaster_GuanyinTu.description>经过简单处理的白垩土块，能暂时填饱肚子，但不能替代正常食物。</MouseDisaster_GuanyinTu.description>
+</LanguageData>

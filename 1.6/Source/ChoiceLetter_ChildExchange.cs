@@ -36,9 +36,9 @@ namespace MouseDisaster
                     yield break;
                 }
 
-                yield return BuildOption(MouseDisasterUtility.ChildExchangeModeColonist, "\u7528\u6b96\u6c11\u8005\u5a74\u513f\u4ea4\u6362");
-                yield return BuildOption(MouseDisasterUtility.ChildExchangeModeSlave, "\u7528\u5974\u96b6\u5a74\u513f\u4ea4\u6362");
-                yield return BuildOption(MouseDisasterUtility.ChildExchangeModePrisoner, "\u7528\u56da\u72af\u5a74\u513f\u4ea4\u6362");
+                yield return BuildOption(MouseDisasterUtility.ChildExchangeModeColonist, "MouseDisaster_UI_ExchangeColonistBaby".Translate().Resolve());
+                yield return BuildOption(MouseDisasterUtility.ChildExchangeModeSlave, "MouseDisaster_UI_ExchangeSlaveBaby".Translate().Resolve());
+                yield return BuildOption(MouseDisasterUtility.ChildExchangeModePrisoner, "MouseDisaster_UI_ExchangePrisonerBaby".Translate().Resolve());
                 yield return BuildRejectOption();
 
                 if (lookTargets.IsValid())
@@ -72,8 +72,8 @@ namespace MouseDisaster
         {
             Pawn baby = MouseDisasterUtility.FindExchangeOfferBaby(map ?? trader?.Map, mode);
             string label = baby == null
-                ? prefix + "\uff08\u65e0\u53ef\u7528\u76ee\u6807\uff09"
-                : prefix + "\uff08" + baby.LabelShortCap + "\uff09";
+                ? "MouseDisaster_UI_ExchangeNoTarget".Translate(prefix).Resolve()
+                : "MouseDisaster_UI_ExchangeTarget".Translate(prefix, baby.LabelShortCap).Resolve();
 
             DiaOption option = new DiaOption(label);
             if (baby == null)

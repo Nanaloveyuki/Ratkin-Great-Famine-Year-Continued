@@ -45,8 +45,8 @@ namespace MouseDisaster
             }));
         }
 
-        private static IEnumerable<MouseDisasterIncidentEntry> IncidentDebugEntries(bool original) => original
-            ? MouseDisasterIncidentCatalog.AllEntries.Take(14) : MouseDisasterIncidentCatalog.AllEntries.Skip(14);
+        private static IEnumerable<MouseDisasterIncidentEntry> IncidentDebugEntries(bool original) =>
+            MouseDisasterIncidentCatalog.AllEntries.Where(entry => entry.IsOriginal == original);
 
         private static void OpenIncidentDebugMenu(bool original)
         {

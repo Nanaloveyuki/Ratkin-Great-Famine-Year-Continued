@@ -131,7 +131,7 @@ namespace MouseDisaster
             string newContentStatus = Settings.enableNewContent ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             string gnawingStatus = Settings.enableGnawing ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
             string tailBiteStatus = Settings.enableExperimentalTailBite ? "MouseDisaster_Settings_Status_On".TranslateSimple() : "MouseDisaster_Settings_Status_Off".TranslateSimple();
-            listing.Label("新事件/Pawn: " + newContentStatus + "  事件: " + enabledIncidentCount + "/" + totalIncidentCount + "  啃食: " + gnawingStatus + "  咬尾巴: " + tailBiteStatus);
+            listing.Label("MouseDisaster_UI_SettingsSummary".Translate(newContentStatus, enabledIncidentCount, totalIncidentCount, gnawingStatus, tailBiteStatus).Resolve());
             listing.GapLine();
         }
 

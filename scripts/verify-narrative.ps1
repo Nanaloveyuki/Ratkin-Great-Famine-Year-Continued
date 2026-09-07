@@ -1,6 +1,7 @@
 param([switch]$Build)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'source-tools.ps1')
 $checks = 0
 function Assert-Narrative($Condition, [string]$Message) {
     if (!$Condition) { throw $Message }
@@ -21,7 +22,7 @@ foreach ($file in Get-ChildItem (Join-Path $root 'Languages/ChineseSimplified/Ke
         $keys[$node.Name] = $node.InnerText
     }
 }
-$sources = @(Get-ChildItem (Join-Path $root '1.6/Source') -Filter *.cs)
+$sources = @(Get-ChildItem (Join-Path $root '1.6/Source') -Recurse -Filter *.cs | Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' })
 $allCode = ($sources | ForEach-Object { Get-Content $_.FullName -Raw }) -join "`n"
 $required = @([regex]::Matches($allCode, '"(MouseDisaster_Story_[A-Za-z0-9]+)"') | ForEach-Object { $_.Groups[1].Value })
 foreach ($id in @('N005Care','N005Dead','N005Left','N005Missing','BroadcastEcho','N008Entry','N008Verified','N008Unverified','N008Traded','N008Rejected','N008Dead','N008Missing','N008Left','N008Timeout','N009Entry','N007Return','N007ReturnReceived','E01','E02','E03','E04','E05','PublicEnding','IdentityEntry','IdentityFull','IdentityPartial','BridgeChild','BridgeGrain','BridgePlague','BridgeEnvoy','S12Paid','S12Fight') + (1..14 | ForEach-Object { 'S{0:D2}' -f $_ }) + (1..6 | ForEach-Object { "N009Result$_" })) {
@@ -47,9 +48,7 @@ foreach ($item in $compile) { Assert-Narrative (Test-Path (Join-Path $root "1.6/
 
 # Compile the real scanner against controlled game objects; this tests transitions, not Unity AI.
 $journal = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNarrative_Journal.cs') -Raw
-$scanStart = $journal.IndexOf('        private void ScanNarrativePawn(')
-$scanEnd = $journal.IndexOf('        private void ProcessNarrativeJournal()', $scanStart)
-$scan = $journal.Substring($scanStart, $scanEnd - $scanStart)
+$scan = Get-CSharpMethod $journal 'ScanNarrativePawn'
 $stub = @'
 using System;
 using System.Collections.Generic;
@@ -108,10 +107,8 @@ foreach ($case in @(@(-1000,1.25),@(-100,1.25),@(0,1.0),@(100,0.75),@(1000,0.75)
 $checks += [NarrativeTests.Harness]::Run()
 
 # Run the real neutralization method against controlled pawns with existing duties.
-$utility = Get-Content (Join-Path $root '1.6/Source/MouseDisasterUtility.cs') -Raw
-$start = $utility.IndexOf('        public static void EnsureMouseDisasterFactionNeutralOnMap(')
-$end = $utility.IndexOf('        private static void EnsureFactionRelationWithPlayer(', $start)
-$neutral = $utility.Substring($start, $end - $start)
+$utility = (Get-ChildItem (Join-Path $root '1.6/Source/Utilities') -Filter 'MouseDisasterUtility.*.cs' | Sort-Object Name | ForEach-Object { Get-Content $_.FullName -Raw }) -join "`n"
+$neutral = Get-CSharpMethod $utility 'EnsureMouseDisasterFactionNeutralOnMap'
 $neutralStub = @'
 using System;
 using System.Collections.Generic;
@@ -225,7 +222,7 @@ $debug = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNar
 Assert-Narrative ($debug.Contains('childGetter = () => IncidentDebugEntries')) 'Event debug groups are not lazy'
 $catalog = Get-Content (Join-Path $root '1.6/Source/MouseDisasterIncidentCatalog.cs') -Raw
 $eventIds = @([regex]::Matches($catalog, 'new MouseDisasterIncidentEntry\("([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
-Assert-Narrative ($eventIds.Count -eq 50 -and $eventIds[13] -eq 'MouseDisaster_BeggarSiege') 'Debug original/continued group boundary changed'
+Assert-Narrative ($eventIds.Count -eq 50 -and @($eventIds | Sort-Object -Unique).Count -eq 50) 'Incident catalog membership changed'
 
 
 if ($Build) {

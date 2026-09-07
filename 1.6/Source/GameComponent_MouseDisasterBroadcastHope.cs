@@ -27,23 +27,6 @@ namespace MouseDisaster
         private const int MaxInitialDelayTicks = GenDate.TicksPerHour * 12;
 
         private Dictionary<int, int> broadcastCooldownUntilTickByMapId = new Dictionary<int, int>();
-        private static readonly string[] BroadcastIncidentDefNames =
-        {
-            "MouseDisaster_LargeRefugeeWave",
-            "MouseDisaster_AbandonedRatkinChildren",
-            "MouseDisaster_ShatteredMother",
-            "MouseDisaster_BeggarFamily",
-            "MouseDisaster_BeggarGroup",
-            "MouseDisaster_ThiefRatkinGroup",
-            "MouseDisaster_ThiefRatkinChildGroup",
-            "MouseDisaster_WildRatkinWandersIn",
-            "MouseDisaster_WildRatkinChildWandersIn",
-            "MouseDisaster_WildRatkinGroupWandersIn",
-            "MouseDisaster_FamineRefugees",
-            "MouseDisaster_RatkinTraderCaravan",
-            "MouseDisaster_ChildExchange"
-        };
-
         private List<BroadcastHopeSchedule> queuedBroadcasts = new List<BroadcastHopeSchedule>();
 
         public GameComponent_MouseDisasterBroadcastHope(Game game)
@@ -206,8 +189,9 @@ namespace MouseDisaster
                 return false;
             }
 
-            List<IncidentDef> candidates = BroadcastIncidentDefNames
-                .Select(DefDatabase<IncidentDef>.GetNamedSilentFail)
+            List<IncidentDef> candidates = MouseDisasterIncidentCatalog.AllEntries
+                .Where(entry => entry.BroadcastEligible)
+                .Select(entry => DefDatabase<IncidentDef>.GetNamedSilentFail(entry.DefName))
                 .Where(def => def?.Worker != null)
                 .InRandomOrder()
                 .ToList();

@@ -25,7 +25,7 @@ namespace MouseDisaster
                     yield break;
                 }
 
-                DiaOption accept = new DiaOption("\u4ea4\u4ed8");
+                DiaOption accept = new DiaOption("MouseDisaster_UI_Deliver".Translate().Resolve());
                 accept.action = delegate
                 {
                     Site site = null;
@@ -48,21 +48,21 @@ namespace MouseDisaster
 
                     if (createsIntelSite)
                     {
-                        Find.LetterStack.ReceiveLetter("\u9f20\u707e\u60c5\u62a5", "\u9f20\u707e\u63d0\u4f9b\u4e86\u4e00\u4e2a\u65b0\u5730\u70b9\u7684\u60c5\u62a5\u3002", LetterDefOf.PositiveEvent, site);
+                        Find.LetterStack.ReceiveLetter("MouseDisaster_UI_IntelLetterLabel".Translate().Resolve(), "MouseDisaster_UI_IntelSiteDiscovered".Translate().Resolve(), LetterDefOf.PositiveEvent, site);
                     }
                     else
                     {
-                        Messages.Message("\u4f60\u6ee1\u8db3\u4e86\u8fd9\u6b21\u9f20\u707e\u8bf7\u6c42\u3002", MessageTypeDefOf.PositiveEvent);
+                        Messages.Message("MouseDisaster_UI_RequestCompleted".Translate().Resolve(), MessageTypeDefOf.PositiveEvent);
                     }
 
                     Find.LetterStack.RemoveLetter(this);
                 };
                 accept.resolveTree = true;
 
-                DiaOption reject = new DiaOption("\u62d2\u7edd");
+                DiaOption reject = new DiaOption("MouseDisaster_UI_Reject".Translate().Resolve());
                 reject.action = delegate
                 {
-                    Messages.Message("\u4f60\u62d2\u7edd\u4e86\u8fd9\u6b21\u9f20\u707e\u8bf7\u6c42\u3002", MessageTypeDefOf.NeutralEvent);
+                    Messages.Message("MouseDisaster_UI_RequestRejected".Translate().Resolve(), MessageTypeDefOf.NeutralEvent);
                     Find.LetterStack.RemoveLetter(this);
                 };
                 reject.resolveTree = true;

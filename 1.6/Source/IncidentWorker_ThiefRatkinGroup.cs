@@ -53,7 +53,7 @@ namespace MouseDisaster
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
             {
-                Messages.Message("一帮饥饿的鼠族偷偷摸进了殖民地，它们只在找食物。", pawns, MessageTypeDefOf.NeutralEvent, false);
+                Messages.Message("MouseDisaster_UI_ThievesArrived".Translate().Resolve(), pawns, MessageTypeDefOf.NeutralEvent, false);
             }
             Find.TickManager.slower.SignalForceNormalSpeedShort();
             return true;

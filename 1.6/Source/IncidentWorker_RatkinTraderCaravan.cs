@@ -7,24 +7,6 @@ namespace MouseDisaster
 {
     public class IncidentWorker_RatkinTraderCaravan : IncidentWorker
     {
-        private static readonly string[] OptionalGoods =
-        {
-            "RatEgg_Meat",
-            "RatEgg_Ear",
-            "RatEgg_Tail",
-            "RatEgg_Brain",
-            "RatEgg_Viscera",
-            "RatEgg_SilkSkin"
-        };
-
-        private static readonly string[] RatEggCuisineKeywords =
-        {
-            "rategg",
-            "rat_egg",
-            "rat egg",
-            "鼠蛋"
-        };
-
         protected override bool CanFireNowSub(IncidentParms parms)
         {
             return base.CanFireNowSub(parms) &&
@@ -86,9 +68,9 @@ namespace MouseDisaster
             }
 
             HashSet<ThingDef> goodsToAdd = new HashSet<ThingDef>();
-            for (int i = 0; i < OptionalGoods.Length; i++)
+            foreach (string defName in MouseDisasterTraderTradePolicy.OptionalGoodDefNames)
             {
-                ThingDef def = DefDatabase<ThingDef>.GetNamedSilentFail(OptionalGoods[i]);
+                ThingDef def = DefDatabase<ThingDef>.GetNamedSilentFail(defName);
                 if (def != null)
                 {
                     goodsToAdd.Add(def);
@@ -125,16 +107,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            string source = ((def.defName ?? string.Empty) + " " + (def.label ?? string.Empty)).ToLowerInvariant();
-            for (int i = 0; i < RatEggCuisineKeywords.Length; i++)
-            {
-                if (source.Contains(RatEggCuisineKeywords[i]))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return MouseDisasterTraderTradePolicy.MatchesCuisineKeywords(def.defName, def.label);
         }
 
         private static bool CanTraderActuallySell(TraderKindDef traderKind, ThingDef def)

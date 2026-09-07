@@ -11,131 +11,6 @@ using Verse.AI.Group;
 
 namespace MouseDisaster
 {
-    public abstract class IncidentWorker_MouseDisasterAidBase : IncidentWorker
-    {
-        protected abstract MouseDisasterRequestKind RequestKind { get; }
-
-        protected override bool CanFireNowSub(IncidentParms parms)
-        {
-            Map map = parms.target as Map;
-            if (map == null || !base.CanFireNowSub(parms))
-            {
-                return false;
-            }
-
-            if (RequestKind == MouseDisasterRequestKind.PrisonerOrSlaveBaby)
-            {
-                return MouseDisasterUtility.FindExchangeOfferBaby(map, MouseDisasterUtility.ChildExchangeModePrisoner) != null ||
-                       MouseDisasterUtility.FindExchangeOfferBaby(map, MouseDisasterUtility.ChildExchangeModeSlave) != null;
-            }
-
-            return true;
-        }
-
-        protected override bool TryExecuteWorker(IncidentParms parms)
-        {
-            Map map = parms.target as Map;
-            if (map == null)
-            {
-                return false;
-            }
-
-            int amount = MouseDisasterPhase2Utility.CalculateAidAmount(map, RequestKind);
-            if (MouseDisasterPhase2Utility.SupportsVisitorDelivery(RequestKind))
-            {
-                if (!MouseDisasterPhase2Utility.TrySpawnAidRequestVisitors(map, RequestKind, amount, createsIntelSite: false, MouseDisasterIntelSiteKind.Treasure, out Pawn targetPawn, out List<Pawn> pawns, out _))
-                {
-                    return false;
-                }
-
-                Find.LetterStack.ReceiveLetter(
-                    def.letterLabel,
-                    MouseDisasterPhase2Utility.BuildVisitorDeliveryLetterText(def, targetPawn, RequestKind, amount, createsIntelSite: false),
-                    def.letterDef,
-                    pawns);
-                return true;
-            }
-
-            ChoiceLetter_MouseDisasterRequest letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_RequestLetter, new TargetInfo(map.Center, map)) as ChoiceLetter_MouseDisasterRequest;
-            if (letter == null)
-            {
-                return false;
-            }
-
-            letter.map = map;
-            letter.requestKind = RequestKind;
-            letter.amount = amount;
-            letter.createsIntelSite = false;
-            Find.LetterStack.ReceiveLetter(letter, null);
-            return true;
-        }
-    }
-
-    public abstract class IncidentWorker_MouseDisasterIntelBase : IncidentWorker
-    {
-        protected abstract MouseDisasterRequestKind RequestKind { get; }
-        protected abstract MouseDisasterIntelSiteKind SiteKind { get; }
-
-        protected override bool CanFireNowSub(IncidentParms parms)
-        {
-            return parms.target is Map && base.CanFireNowSub(parms);
-        }
-
-        protected override bool TryExecuteWorker(IncidentParms parms)
-        {
-            Map map = parms.target as Map;
-            if (map == null)
-            {
-                return false;
-            }
-
-            int amount = MouseDisasterPhase2Utility.CalculateAidAmount(map, RequestKind);
-            if (MouseDisasterPhase2Utility.SupportsVisitorDelivery(RequestKind))
-            {
-                if (!MouseDisasterPhase2Utility.TrySpawnAidRequestVisitors(map, RequestKind, amount, createsIntelSite: true, SiteKind, out Pawn targetPawn, out List<Pawn> pawns, out _))
-                {
-                    return false;
-                }
-
-                Find.LetterStack.ReceiveLetter(
-                    def.letterLabel,
-                    MouseDisasterPhase2Utility.BuildVisitorDeliveryLetterText(def, targetPawn, RequestKind, amount, createsIntelSite: true),
-                    def.letterDef,
-                    pawns);
-                return true;
-            }
-
-            ChoiceLetter_MouseDisasterRequest letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_RequestLetter, new TargetInfo(map.Center, map)) as ChoiceLetter_MouseDisasterRequest;
-            if (letter == null)
-            {
-                return false;
-            }
-
-            letter.map = map;
-            letter.requestKind = RequestKind;
-            letter.amount = amount;
-            letter.createsIntelSite = true;
-            letter.intelSiteKind = SiteKind;
-            Find.LetterStack.ReceiveLetter(letter, null);
-            return true;
-        }
-    }
-
-    public class IncidentWorker_MouseDisasterAidSimpleMeal : IncidentWorker_MouseDisasterAidBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.SimpleMeal; }
-    public class IncidentWorker_MouseDisasterAidFineMeal : IncidentWorker_MouseDisasterAidBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.FineMeal; }
-    public class IncidentWorker_MouseDisasterAidMedicine : IncidentWorker_MouseDisasterAidBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.Medicine; }
-    public class IncidentWorker_MouseDisasterAidSilver : IncidentWorker_MouseDisasterAidBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.Silver; }
-    public class IncidentWorker_MouseDisasterAidBaby : IncidentWorker_MouseDisasterAidBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.PrisonerOrSlaveBaby; }
-
-    public class IncidentWorker_MouseDisasterIntelTreasureSimpleMeal : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.SimpleMeal; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.Treasure; }
-    public class IncidentWorker_MouseDisasterIntelTreasureHerbal : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.HerbalMedicine; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.Treasure; }
-    public class IncidentWorker_MouseDisasterIntelTreasureSilver : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.Silver; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.Treasure; }
-    public class IncidentWorker_MouseDisasterIntelStructureSimpleMeal : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.SimpleMeal; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.StructureCluster; }
-    public class IncidentWorker_MouseDisasterIntelStructureHerbal : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.HerbalMedicine; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.StructureCluster; }
-    public class IncidentWorker_MouseDisasterIntelStructureSilver : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.Silver; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.StructureCluster; }
-    public class IncidentWorker_MouseDisasterIntelSettlementSimpleMeal : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.SimpleMeal; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.SmallSettlement; }
-    public class IncidentWorker_MouseDisasterIntelSettlementHerbal : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.HerbalMedicine; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.SmallSettlement; }
-    public class IncidentWorker_MouseDisasterIntelSettlementSilver : IncidentWorker_MouseDisasterIntelBase { protected override MouseDisasterRequestKind RequestKind => MouseDisasterRequestKind.Silver; protected override MouseDisasterIntelSiteKind SiteKind => MouseDisasterIntelSiteKind.SmallSettlement; }
 
     public class IncidentWorker_MouseDisasterPlagueWanderers : IncidentWorker
     {
@@ -160,7 +35,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            MouseDisasterPhase2Utility.InfectMany(pawns);
+            MouseDisasterPlagueUtility.InfectMany(pawns);
             if (MouseDisasterVisitorChoicePolicy.ShouldUpgradeToVisitorChoiceControl(def.defName) &&
                 MouseDisasterVisitorUtility.RegisterAndSendVisitorChoiceLetter(def, parms, map, pawns))
             {
@@ -205,7 +80,7 @@ namespace MouseDisaster
 
             GenSpawn.Spawn(mother, entryCell, map);
             mother.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
-            MouseDisasterPhase2Utility.InfectWithPlague(mother, Rand.Chance(0.9f) ? 0.82f : 0.42f);
+            MouseDisasterPlagueUtility.InfectWithPlague(mother, Rand.Chance(0.9f) ? 0.82f : 0.42f);
 
             List<Pawn> babies = new List<Pawn>();
             for (int i = 0; i < 3; i++)
@@ -223,7 +98,7 @@ namespace MouseDisaster
                 {
                     baby.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
                 }
-                MouseDisasterPhase2Utility.InfectWithPlague(baby, 0.25f);
+                MouseDisasterPlagueUtility.InfectWithPlague(baby, 0.25f);
                 babies.Add(baby);
             }
 
@@ -296,7 +171,7 @@ namespace MouseDisaster
 
             GenSpawn.Spawn(traderPawn, CellFinder.RandomClosewalkCellNear(cell, map, 6), map);
             MouseDisasterUtility.EnsureTradeLeader(traderPawn, MouseDisasterUtility.ResolveSlaveTraderKind());
-            MouseDisasterPhase2Utility.InfectWithPlague(traderPawn);
+            MouseDisasterPlagueUtility.InfectWithPlague(traderPawn);
             pawns.Add(traderPawn);
 
             Pawn escortPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_TraderRatkinEscort, faction, DevelopmentalStage.Adult, 0.6f);
@@ -390,7 +265,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            MouseDisasterPhase2Utility.InfectMany(pawns);
+            MouseDisasterPlagueUtility.InfectMany(pawns);
             MouseDisasterUtility.MakeTravelAndExitLord(map, pawns, exitCell, includeBabiesInExit: false);
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
@@ -435,7 +310,7 @@ namespace MouseDisaster
                 pawn.SetFaction(null);
                 GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(cell, map, 4), map);
                 MouseDisasterUtility.StripRatEggInventory(pawn);
-                MouseDisasterPhase2Utility.InfectWithPlague(pawn);
+                MouseDisasterPlagueUtility.InfectWithPlague(pawn);
                 pawns.Add(pawn);
             }
 
@@ -482,7 +357,7 @@ namespace MouseDisaster
 
             GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(cell, map, 4), map);
             MouseDisasterUtility.StripRatEggInventory(pawn);
-            MouseDisasterPhase2Utility.InfectWithPlague(pawn, 0.5f);
+            MouseDisasterPlagueUtility.InfectWithPlague(pawn, 0.5f);
             if (MouseDisasterVisitorChoicePolicy.ShouldUpgradeToVisitorChoiceControl(def.defName) &&
                 MouseDisasterVisitorUtility.RegisterAndSendVisitorChoiceLetter(def, parms, map, Gen.YieldSingle(pawn)))
             {
@@ -528,7 +403,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            MouseDisasterPhase2Utility.InfectMany(pawns);
+            MouseDisasterPlagueUtility.InfectMany(pawns);
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
             {
@@ -562,7 +437,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            MouseDisasterPhase2Utility.InfectMany(pawns);
+            MouseDisasterPlagueUtility.InfectMany(pawns);
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
             {

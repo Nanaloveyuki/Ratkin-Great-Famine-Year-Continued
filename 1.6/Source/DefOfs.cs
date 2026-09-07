@@ -18,7 +18,6 @@ namespace MouseDisaster
         public static HediffDef MouseDisaster_HiredWorkerMark;
         public static HediffDef MouseDisaster_DisasterRefugeeMark;
 
-        // 事件描述性 Hediff
         public static HediffDef MouseDisaster_AbandonedEgg;
         public static HediffDef MouseDisaster_AbandoningMother;
         public static HediffDef MouseDisaster_ShatteredMother_Dying;

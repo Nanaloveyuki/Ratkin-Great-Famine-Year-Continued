@@ -38,7 +38,7 @@ namespace MouseDisaster
             pawn.health.AddHediff(pregnancy);
             if (infect)
             {
-                MouseDisasterPhase2Utility.InfectWithPlague(pawn);
+                MouseDisasterPlagueUtility.InfectWithPlague(pawn);
             }
 
             return pawn;
@@ -75,7 +75,7 @@ namespace MouseDisaster
 
             if (infect)
             {
-                MouseDisasterPhase2Utility.InfectWithPlague(pawn);
+                MouseDisasterPlagueUtility.InfectWithPlague(pawn);
             }
 
             if (pawn.needs?.food != null)
@@ -98,7 +98,7 @@ namespace MouseDisaster
             MouseDisasterUtility.StripRatEggInventory(pawn);
             if (infect)
             {
-                MouseDisasterPhase2Utility.InfectWithPlague(pawn);
+                MouseDisasterPlagueUtility.InfectWithPlague(pawn);
             }
 
             if (pawn.needs?.food != null)
@@ -122,7 +122,7 @@ namespace MouseDisaster
 
             if (infect)
             {
-                MouseDisasterPhase2Utility.InfectWithPlague(pawn);
+                MouseDisasterPlagueUtility.InfectWithPlague(pawn);
             }
 
             if (pawn.needs?.food != null)
@@ -210,10 +210,10 @@ namespace MouseDisaster
 
             DropPodUtility.DropThingsNear(DropCellFinder.TradeDropSpot(map), map, payload, 110, canInstaDropDuringInit: false, leaveSlag: false, canRoofPunch: true, forbid: true, allowFogged: true, faction);
             Find.LetterStack.ReceiveLetter(
-                "空投报复",
+                "MouseDisaster_UI_AirdropRetaliationLabel".Translate().Resolve(),
                 sourceFaction == null
-                    ? $"你最近空投了过量的鼠灾婴儿鼠蛋。现在，{payload.Count}只带着纯负面特性的鼠蛋被空投回了你的殖民地。"
-                    : $"你对{sourceFaction.Name}的空投行为引来了报复。现在，{payload.Count}只带着纯负面特性的鼠蛋被空投回了你的殖民地。",
+                    ? "MouseDisaster_UI_AirdropOverloadRetaliation".Translate(payload.Count).Resolve()
+                    : "MouseDisaster_UI_AirdropFactionRetaliation".Translate(sourceFaction.Name, payload.Count).Resolve(),
                 infect ? LetterDefOf.ThreatBig : LetterDefOf.ThreatSmall,
                 payload);
         }
@@ -241,194 +241,5 @@ namespace MouseDisaster
                 DropPodUtility.DropThingsNear(DropCellFinder.TradeDropSpot(map), map, payload, 110, canInstaDropDuringInit: false, leaveSlag: false, canRoofPunch: true, forbid: true, allowFogged: true, faction);
             }
         }
-    }
-
-    public abstract class IncidentWorker_MouseDisasterLaboringRefugeesBase : IncidentWorker
-    {
-        protected abstract bool InfectsWithPlague { get; }
-
-        protected override bool CanFireNowSub(IncidentParms parms)
-        {
-            return parms.target is Map map &&
-                   base.CanFireNowSub(parms) &&
-                   ModsConfig.BiotechActive &&
-                   MouseDisasterUtility.TryFindEntryCell(map, out _);
-        }
-
-        protected override bool TryExecuteWorker(IncidentParms parms)
-        {
-            Map map = (Map)parms.target;
-            if (!MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 entryCell))
-            {
-                return false;
-            }
-
-            Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
-            int count = Rand.RangeInclusive(1, 3);
-            List<Pawn> pawns = new List<Pawn>();
-            for (int i = 0; i < count; i++)
-            {
-                Pawn pawn = MouseDisasterPhase3Utility.CreatePregnantVisitor(faction, InfectsWithPlague);
-                if (pawn == null)
-                {
-                    continue;
-                }
-
-                GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(entryCell, map, 5), map);
-                MouseDisasterPhase3Utility.StartImmediateLabor(pawn);
-                pawn.jobs?.StartJob(MouseDisasterUtility.CreateGotoJob(map.Center), JobCondition.InterruptForced);
-                pawns.Add(pawn);
-            }
-
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
-        }
-    }
-
-    public class IncidentWorker_MouseDisasterLaboringRefugees : IncidentWorker_MouseDisasterLaboringRefugeesBase
-    {
-        protected override bool InfectsWithPlague => false;
-    }
-
-    public class IncidentWorker_MouseDisasterPlagueLaboringRefugees : IncidentWorker_MouseDisasterLaboringRefugeesBase
-    {
-        protected override bool InfectsWithPlague => true;
-    }
-
-    public abstract class IncidentWorker_MouseDisasterStrongSiegeBase : IncidentWorker
-    {
-        protected abstract bool InfectsWithPlague { get; }
-
-        protected override bool CanFireNowSub(IncidentParms parms)
-        {
-            return parms.target is Map map &&
-                   base.CanFireNowSub(parms) &&
-                   MouseDisasterUtility.TryFindEntryCell(map, out _);
-        }
-
-        protected override bool TryExecuteWorker(IncidentParms parms)
-        {
-            Map map = (Map)parms.target;
-            if (!MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 cell))
-            {
-                return false;
-            }
-
-            Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
-            int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 4, 16, 80f);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnThiefGroup(map, cell, count, childOnly: false));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < pawns.Count; i++)
-            {
-                MouseDisasterUtility.RegisterStrongSiegePawn(pawns[i]);
-            }
-
-            if (InfectsWithPlague)
-            {
-                MouseDisasterPhase2Utility.InfectMany(pawns);
-            }
-
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
-        }
-    }
-
-    public class IncidentWorker_MouseDisasterStrongSiege : IncidentWorker_MouseDisasterStrongSiegeBase
-    {
-        protected override bool InfectsWithPlague => false;
-    }
-
-    public class IncidentWorker_MouseDisasterPlagueStrongSiege : IncidentWorker_MouseDisasterStrongSiegeBase
-    {
-        protected override bool InfectsWithPlague => true;
-    }
-
-    public abstract class IncidentWorker_MouseDisasterPassersbyBase : IncidentWorker
-    {
-        protected abstract bool InfectsWithPlague { get; }
-
-        protected override bool CanFireNowSub(IncidentParms parms)
-        {
-            return parms.target is Map map && base.CanFireNowSub(parms) && MouseDisasterUtility.TryFindEntryCell(map, out _);
-        }
-
-        protected override bool TryExecuteWorker(IncidentParms parms)
-        {
-            Map map = (Map)parms.target;
-            if (!MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 entryCell))
-            {
-                return false;
-            }
-
-            if (!MouseDisasterUtility.TryFindFarEdgeCell(map, entryCell, out IntVec3 exitCell))
-            {
-                exitCell = map.Center;
-            }
-
-            int total = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 4, 12, 85f);
-            int children = Find.Storyteller.difficulty.ChildrenAllowed ? Mathf.Clamp(Mathf.RoundToInt(total * 0.35f), 0, total - 1) : 0;
-            int adults = Mathf.Max(1, total - children);
-            Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnTravelerGroup(map, entryCell, adults, children, faction));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            if (InfectsWithPlague)
-            {
-                MouseDisasterPhase2Utility.InfectMany(pawns);
-            }
-
-            MouseDisasterUtility.MakeTravelAndExitLord(map, pawns, exitCell, includeBabiesInExit: false);
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
-        }
-    }
-
-    public class IncidentWorker_MouseDisasterPassersby : IncidentWorker_MouseDisasterPassersbyBase
-    {
-        protected override bool InfectsWithPlague => false;
-    }
-
-    public class IncidentWorker_MouseDisasterPlaguePassersbyPhase3 : IncidentWorker_MouseDisasterPassersbyBase
-    {
-        protected override bool InfectsWithPlague => true;
     }
 }

@@ -56,7 +56,7 @@ namespace MouseDisaster
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
             {
-                Messages.Message("一群鼠蛋溜进了殖民地，正一边偷吃一边顺手带走食物。", pawns, MessageTypeDefOf.NeutralEvent, false);
+                Messages.Message("MouseDisaster_UI_ChildThievesArrived".Translate().Resolve(), pawns, MessageTypeDefOf.NeutralEvent, false);
             }
             Find.TickManager.slower.SignalForceNormalSpeedShort();
             return true;

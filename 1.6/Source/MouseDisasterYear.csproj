@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -58,6 +58,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgePatches.cs" />
+    <Compile Include="Incidents\AidIncidents.cs" />
+    <Compile Include="Incidents\CaravanMuggersIncidents.cs" />
+    <Compile Include="Incidents\CaravanRetaliationPatches.cs" />
+    <Compile Include="Incidents\IntelIncidents.cs" />
+    <Compile Include="Incidents\LaboringRefugeesIncidents.cs" />
+    <Compile Include="Incidents\PassersbyIncidents.cs" />
+    <Compile Include="Incidents\PlagueVisitorIncidents.cs" />
+    <Compile Include="Incidents\StrongSiegeIncidents.cs" />
+    <Compile Include="Utilities\MouseDisasterPhase3CaravanUtility.cs" />
+    <Compile Include="Utilities\MouseDisasterPhase3Utility.cs" />
     <Compile Include="BirthPatches.cs" />
     <Compile Include="BeggarSiegePatches.cs" />
     <Compile Include="ChoiceLetter_ChildExchange.cs" />
@@ -92,6 +102,7 @@
     <Compile Include="MouseDisasterGenerationExtension.cs" />
     <Compile Include="LordJob_MouseDisasterFamilyExit.cs" />
     <Compile Include="MouseDisasterPawnGroupUtility.cs" />
+    <Compile Include="Utilities\MouseDisasterPawnLookup.cs" />
     <Compile Include="MouseDisasterNarrativePatches.cs" />
     <Compile Include="ChoiceLetter_MouseDisasterStory.cs" />
     <Compile Include="Building_MouseDisasterNarrative.cs" />
@@ -124,7 +135,7 @@
     <Compile Include="IncidentWorker_ChildExchange.cs" />
     <Compile Include="IncidentWorker_FamineRefugees.cs" />
     <Compile Include="IncidentWorker_LargeRefugeeWave.cs" />
-    <Compile Include="IncidentWorker_MouseDisasterPhase2.cs" />
+
     <Compile Include="IncidentWorker_MouseDisasterSiege.cs" />
     <Compile Include="IncidentWorker_RatkinTraderCaravan.cs" />
     <Compile Include="IncidentWorker_ShatteredMother.cs" />
@@ -150,17 +161,48 @@
     <Compile Include="ModEntry.cs" />
     <Compile Include="HarmonyBootstrap.cs" />
     <Compile Include="IdentityLifecyclePatches.cs" />
-    <Compile Include="MouseDisasterPhase3Caravan.cs" />
-    <Compile Include="MouseDisasterPhase3EventsAndSystems.cs" />
-    <Compile Include="MouseDisasterPhase3MapIncidents.cs" />
+
+    <Compile Include="Incidents\AirdropMistakeIncidents.cs" />
+    <Compile Include="ChoiceLetter_MouseDisasterMisguidedKinship.cs" />
+    <Compile Include="Incidents\MisguidedKinshipIncidents.cs" />
+    <Compile Include="Incidents\GreatFamineIncidents.cs" />
+    <Compile Include="Incidents\PlagueRevengeIncidents.cs" />
+    <Compile Include="GameComponent_MouseDisasterPhase3.cs" />
+    <Compile Include="Incidents\AirdropRetaliationPatches.cs" />
+
     <Compile Include="MouseDisasterSettings.cs" />
     <Compile Include="MouseDisasterSubtypeUtility.cs" />
-    <Compile Include="MouseDisasterPhase2Utility.cs" />
+    <Compile Include="Utilities\MouseDisasterPhase2Utility.AidVisitors.cs" />
+    <Compile Include="Utilities\MouseDisasterPhase2Utility.Resources.cs" />
+    <Compile Include="Utilities\MouseDisasterPhase2Utility.Intel.cs" />
+    <Compile Include="Utilities\MouseDisasterPhase2Utility.Plague.cs" />
+    <Compile Include="Utilities\MouseDisasterPlagueUtility.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterChildExchangeMood.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterGuanyinTu.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterN004.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterVisitorShelterMood.cs" />
-    <Compile Include="MouseDisasterUtility.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.State.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Identity.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Factions.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Travel.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Generation.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Apparel.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Traits.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Genes.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Trade.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Leashes.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Food.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Visitors.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Begging.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Birth.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.ChildExchange.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.AbandonedDelivery.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Lifecycle.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Health.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.TailBiting.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Scavenging.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.ScavengeEffects.cs" />
+    <Compile Include="Utilities\MouseDisasterUtility.Feedback.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReliefAreaFoodPatches.cs" />
     <Compile Include="ThiefPatches.cs" />

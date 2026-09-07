@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MouseDisaster
 {
@@ -40,6 +41,13 @@ namespace MouseDisaster
                 }
             }
 
+            return MatchesCuisineKeywords(defName, label);
+        }
+
+        public static IReadOnlyList<string> OptionalGoodDefNames { get; } = Array.AsReadOnly(OptionalGoods);
+
+        public static bool MatchesCuisineKeywords(string defName, string label)
+        {
             string source = ((defName ?? string.Empty) + " " + (label ?? string.Empty)).ToLowerInvariant();
             for (int i = 0; i < RatEggCuisineKeywords.Length; i++)
             {

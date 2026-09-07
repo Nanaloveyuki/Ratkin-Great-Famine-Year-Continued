@@ -69,20 +69,20 @@ namespace MouseDisaster
             Map map = Find.CurrentMap;
             if (map == null)
             {
-                Messages.Message("当前不在地图上，无法触发地图事件。", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("MouseDisaster_UI_NoCurrentMap".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
             IncidentDef incident = IncidentDef.Named(defName);
             if (incident == null)
             {
-                Messages.Message("未找到目标事件定义。", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("MouseDisaster_UI_IncidentDefMissing".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
             if (!MouseDisasterIncidentCatalog.ShouldAllowDebugTrigger(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames))
             {
-                Messages.Message("该事件已在设置中禁用。", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("MouseDisaster_UI_IncidentDisabled".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
@@ -96,20 +96,20 @@ namespace MouseDisaster
             Caravan caravan = Find.WorldObjects?.Caravans?.FirstOrDefault(item => item != null && item.IsPlayerControlled);
             if (caravan == null)
             {
-                Messages.Message("当前没有可用的玩家商队。", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("MouseDisaster_UI_NoPlayerCaravan".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
             IncidentDef incident = IncidentDef.Named(defName);
             if (incident == null)
             {
-                Messages.Message("未找到目标事件定义。", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("MouseDisaster_UI_IncidentDefMissing".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 
             if (!MouseDisasterIncidentCatalog.ShouldAllowDebugTrigger(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames))
             {
-                Messages.Message("该事件已在设置中禁用。", MessageTypeDefOf.RejectInput, false);
+                Messages.Message("MouseDisaster_UI_IncidentDisabled".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
                 return;
             }
 

@@ -49,7 +49,7 @@ namespace MouseDisaster
                 }
 
                 lastPlagueSpreadDayByMapId[map.uniqueID] = absoluteDay;
-                MouseDisasterPhase2Utility.DoPlagueSpreadCheck(map);
+                MouseDisasterPlagueUtility.DoPlagueSpreadCheck(map);
             }
         }
     }
