@@ -36,6 +36,9 @@ namespace MouseDisaster
                 return null;
             }
 
+            if (!GameComponent_MouseDisasterBroadcastHope.HasEnabledCandidates)
+                return new FloatMenuOption("MouseDisaster_BroadcastNoCandidates".Translate(), null);
+
             if (!pawn.CanReach(console, PathEndMode.InteractionCell, Danger.Some))
             {
                 return new FloatMenuOption("MouseDisaster_UI_BroadcastUnreachable".Translate(BroadcastHopeLabel).Resolve(), null);

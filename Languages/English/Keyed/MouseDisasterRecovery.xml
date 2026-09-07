@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisaster_BroadcastWaiting>No hope broadcast incident meets the current conditions. The broadcast will retry every in-game hour. Event settings, map conditions and vanilla restrictions still apply.</MouseDisaster_BroadcastWaiting>
+  <MouseDisaster_BroadcastExpired>The hope broadcast could not trigger an incident for three days. Remaining requests were cancelled and the broadcast cooldown was cleared. Check event settings and map conditions.</MouseDisaster_BroadcastExpired>
+  <MouseDisaster_BroadcastNoCandidates>Broadcast hope: no enabled candidate incidents</MouseDisaster_BroadcastNoCandidates>
+  <MouseDisaster_BroadcastError>A hope broadcast incident threw an error. Remaining requests were cancelled and the cooldown was cleared. See the log for details.</MouseDisaster_BroadcastError>
+</LanguageData>

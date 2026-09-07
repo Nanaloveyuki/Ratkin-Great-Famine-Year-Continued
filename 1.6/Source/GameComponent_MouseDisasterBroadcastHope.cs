@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
@@ -12,12 +13,14 @@ namespace MouseDisaster
             public int mapId = -1;
             public int remainingTriggers;
             public int nextTriggerTick;
+            public int failedAttempts;
 
             public void ExposeData()
             {
                 Scribe_Values.Look(ref mapId, "mapId", -1);
                 Scribe_Values.Look(ref remainingTriggers, "remainingTriggers", 0);
                 Scribe_Values.Look(ref nextTriggerTick, "nextTriggerTick", 0);
+                Scribe_Values.Look(ref failedAttempts, "failedAttempts", 0);
             }
         }
 
@@ -25,6 +28,7 @@ namespace MouseDisaster
         private const int RetryIntervalTicks = GenDate.TicksPerHour;
         private const int TriggerIntervalTicks = GenDate.TicksPerHour * 6;
         private const int MaxInitialDelayTicks = GenDate.TicksPerHour * 12;
+        private const int MaxFailedAttempts = 72;
 
         private Dictionary<int, int> broadcastCooldownUntilTickByMapId = new Dictionary<int, int>();
         private List<BroadcastHopeSchedule> queuedBroadcasts = new List<BroadcastHopeSchedule>();
@@ -81,8 +85,22 @@ namespace MouseDisaster
                     continue;
                 }
 
-                if (TryExecuteRandomMouseDisaster(map))
+                bool executed;
+                try
                 {
+                    executed = TryExecuteRandomMouseDisaster(map);
+                }
+                catch (Exception exception)
+                {
+                    queuedBroadcasts.RemoveAt(i);
+                    broadcastCooldownUntilTickByMapId.Remove(schedule.mapId);
+                    Log.Error("[MouseDisaster] Broadcast cancelled on map " + schedule.mapId + ": " + exception);
+                    Messages.Message("MouseDisaster_BroadcastError".Translate(), MessageTypeDefOf.RejectInput, historical: true);
+                    continue;
+                }
+                if (executed)
+                {
+                    schedule.failedAttempts = 0;
                     schedule.remainingTriggers--;
                     if (schedule.remainingTriggers <= 0)
                     {
@@ -95,6 +113,17 @@ namespace MouseDisaster
                 }
                 else
                 {
+                    schedule.failedAttempts++;
+                    if (schedule.failedAttempts == 1)
+                        Messages.Message("MouseDisaster_BroadcastWaiting".Translate(), MessageTypeDefOf.NeutralEvent, historical: true);
+                    if (schedule.failedAttempts >= MaxFailedAttempts)
+                    {
+                        queuedBroadcasts.RemoveAt(i);
+                        broadcastCooldownUntilTickByMapId.Remove(schedule.mapId);
+                        Messages.Message("MouseDisaster_BroadcastExpired".Translate(), MessageTypeDefOf.RejectInput, historical: true);
+                        Log.Warning("[MouseDisaster] Broadcast expired on map " + schedule.mapId + "; no eligible incident succeeded in " + MaxFailedAttempts + " retries.");
+                        continue;
+                    }
                     schedule.nextTriggerTick = nowTick + RetryIntervalTicks;
                 }
             }
@@ -120,7 +149,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            if (component.IsMapOnCooldown(map, out _))
+            if (component.IsMapOnCooldown(map, out _) || !HasEnabledCandidates)
             {
                 return false;
             }
@@ -182,6 +211,17 @@ namespace MouseDisaster
             return true;
         }
 
+        public static bool HasEnabledCandidates => EnabledCandidates().Any();
+
+        private static IEnumerable<IncidentDef> EnabledCandidates()
+        {
+            return MouseDisasterIncidentCatalog.AllEntries
+                .Where(entry => entry.BroadcastEligible && MouseDisasterIncidentCatalog.IsIncidentEnabled(
+                    entry.DefName, MouseDisasterMod.Settings?.disabledIncidentDefNames))
+                .Select(entry => DefDatabase<IncidentDef>.GetNamedSilentFail(entry.DefName))
+                .Where(def => def?.Worker != null);
+        }
+
         private static bool TryExecuteRandomMouseDisaster(Map map)
         {
             if (map == null)
@@ -189,26 +229,14 @@ namespace MouseDisaster
                 return false;
             }
 
-            List<IncidentDef> candidates = MouseDisasterIncidentCatalog.AllEntries
-                .Where(entry => entry.BroadcastEligible)
-                .Select(entry => DefDatabase<IncidentDef>.GetNamedSilentFail(entry.DefName))
-                .Where(def => def?.Worker != null)
-                .InRandomOrder()
-                .ToList();
+            List<IncidentDef> candidates = EnabledCandidates().InRandomOrder().ToList();
 
             for (int i = 0; i < candidates.Count; i++)
             {
                 IncidentDef incident = candidates[i];
                 IncidentParms parms = StorytellerUtility.DefaultParmsNow(incident.category, map);
-                if (!incident.Worker.CanFireNow(parms))
-                {
-                    continue;
-                }
-
-                if (incident.Worker.TryExecute(parms))
-                {
+                if (incident.Worker.CanFireNow(parms) && incident.Worker.TryExecute(parms))
                     return true;
-                }
             }
 
             return false;

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisaster_BroadcastWaiting>希望广播暂未找到符合当前条件的事件，将每游戏小时重试。事件开关、地图条件和原版事件限制仍然生效。</MouseDisaster_BroadcastWaiting>
+  <MouseDisaster_BroadcastExpired>希望广播连续三天未能触发事件，剩余请求已取消，广播冷却已解除。请检查事件设置与地图条件。</MouseDisaster_BroadcastExpired>
+  <MouseDisaster_BroadcastNoCandidates>希望广播：没有已启用的候选事件</MouseDisaster_BroadcastNoCandidates>
+  <MouseDisaster_BroadcastError>希望广播事件执行异常，剩余请求已取消，广播冷却已解除。请查看日志中的错误详情。</MouseDisaster_BroadcastError>
+</LanguageData>
