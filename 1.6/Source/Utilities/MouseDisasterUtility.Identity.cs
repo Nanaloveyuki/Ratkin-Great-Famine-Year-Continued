@@ -354,6 +354,8 @@ namespace MouseDisaster
 
         public static bool CanMouseDisasterVisitorRetaliate(Pawn pawn)
         {
+            if (GameComponent_MouseDisasterEventBehavior.Component?.TryGetGroup(pawn, out var group) == true)
+                return group.hostile;
             if (pawn?.mindState == null)
             {
                 return false;

@@ -55,9 +55,9 @@ namespace MouseDisaster
             return faction != null;
         }
 
-        private static Faction CreateMouseDisasterHiddenFaction()
+        private static Faction CreateMouseDisasterHiddenFaction(FactionDef requestedDef = null)
         {
-            FactionDef factionDef = MouseDisasterDefOf.MouseDisaster_HiddenFaction;
+            FactionDef factionDef = requestedDef ?? MouseDisasterDefOf.MouseDisaster_HiddenFaction;
             if (factionDef == null || Find.UniqueIDsManager == null)
             {
                 return null;
@@ -188,6 +188,7 @@ namespace MouseDisaster
 
         public static void MakeFactionNeutralToPlayer(Faction faction, bool force = false)
         {
+            if (IsEventBehaviorFaction(faction)) return;
             if (faction == null || Faction.OfPlayer == null)
             {
                 return;
@@ -231,7 +232,8 @@ namespace MouseDisaster
                     continue;
                 }
 
-                EnsureFactionRelationPair(faction, other, FactionRelationKind.Hostile, -100);
+                bool eventFaction = IsEventBehaviorFaction(other);
+                EnsureFactionRelationPair(faction, other, eventFaction ? FactionRelationKind.Neutral : FactionRelationKind.Hostile, eventFaction ? 0 : -100);
             }
         }
 
@@ -403,6 +405,33 @@ namespace MouseDisaster
                 baseGoodwill = other == Faction.OfPlayer ? 20 : 0
             });
             return true;
+        }
+
+        internal static Faction GetEventFaction(bool hostile, bool friendly)
+        {
+            if (Current.CreatingWorld != null || Find.FactionManager == null) return null;
+            FactionDef def = hostile ? MouseDisasterDefOf.MouseDisaster_HostileVisitors : friendly ?
+                MouseDisasterDefOf.MouseDisaster_FriendlyVisitors : MouseDisasterDefOf.MouseDisaster_NeutralVisitors;
+            Faction faction = Find.FactionManager.FirstFactionOfDef(def);
+            if (faction != null) return faction;
+            faction = CreateMouseDisasterHiddenFaction(def);
+            if (faction == null) return null;
+            Find.FactionManager.Add(faction);
+            foreach (Faction other in Find.FactionManager.AllFactionsListForReading)
+            {
+                if (other == faction) continue;
+                bool sameMod = other.def == MouseDisasterDefOf.MouseDisaster_HiddenFaction || IsEventBehaviorFaction(other);
+                FactionRelationKind kind = other.IsPlayer ? (hostile ? FactionRelationKind.Hostile : friendly ? FactionRelationKind.Ally : FactionRelationKind.Neutral) :
+                    (sameMod ? FactionRelationKind.Neutral : FactionRelationKind.Hostile);
+                EnsureFactionRelationPair(faction, other, kind, kind == FactionRelationKind.Ally ? 100 : kind == FactionRelationKind.Hostile ? -100 : 0);
+            }
+            return faction;
+        }
+
+        internal static bool IsEventBehaviorFaction(Faction faction)
+        {
+            return faction != null && (faction.def == MouseDisasterDefOf.MouseDisaster_NeutralVisitors ||
+                faction.def == MouseDisasterDefOf.MouseDisaster_HostileVisitors || faction.def == MouseDisasterDefOf.MouseDisaster_FriendlyVisitors);
         }
 
         private static void NormalizeHiddenFactionDisplayName(Faction faction)

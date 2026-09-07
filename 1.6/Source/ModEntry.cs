@@ -21,7 +21,7 @@ namespace MouseDisaster
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            float incidentSectionHeight = MouseDisasterIncidentCatalog.AllEntries.Count * 30f;
+            float incidentSectionHeight = MouseDisasterIncidentCatalog.AllEntries.Count * 60f;
             float narrativeSectionHeight = MouseDisasterNarrativePolicy.SettingIds.Length * 30f + 950f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, Mathf.Max(1920f + incidentSectionHeight + narrativeSectionHeight, inRect.height + 900f + incidentSectionHeight + narrativeSectionHeight));
             Widgets.BeginScrollView(inRect, ref settingsScrollPosition, viewRect);
@@ -167,6 +167,20 @@ namespace MouseDisaster
                 if (newEnabled != enabled)
                 {
                     Settings.SetIncidentEnabled(entry.DefName, newEnabled);
+                }
+                Rect attitudeRect = listing.GetRect(0f);
+                attitudeRect.height = 30f;
+                TooltipHandler.TipRegion(attitudeRect, ("MouseDisaster_AttitudeTip_" + Settings.GetEventAttitude(entry.DefName)).Translate());
+                if (listing.ButtonText(("MouseDisaster_Attitude_" + Settings.GetEventAttitude(entry.DefName)).Translate()))
+                {
+                    var options = new List<FloatMenuOption>();
+                    foreach (MouseDisasterEventAttitude attitude in System.Enum.GetValues(typeof(MouseDisasterEventAttitude)))
+                    {
+                        MouseDisasterEventAttitude selected = attitude;
+                        options.Add(new FloatMenuOption(("MouseDisaster_Attitude_" + attitude).Translate(),
+                            () => Settings.eventAttitudes[entry.DefName] = selected));
+                    }
+                    Find.WindowStack.Add(new FloatMenu(options));
                 }
                 listing.Gap(2f);
             }

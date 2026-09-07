@@ -76,7 +76,7 @@ namespace MouseDisaster
     [HarmonyPatch(typeof(IncidentWorker), nameof(IncidentWorker.TryExecute))]
     public static class MouseDisasterIncidentExecuteTogglePatch
     {
-        public static bool Prefix(IncidentWorker __instance, IncidentParms parms, ref bool __result, out System.Collections.Generic.HashSet<Pawn> __state)
+        public static bool Prefix(IncidentWorker __instance, IncidentParms parms, ref bool __result, out MouseDisasterEventExecution __state)
         {
             __state = null;
             string defName = __instance?.def?.defName;
@@ -88,7 +88,13 @@ namespace MouseDisaster
             if (MouseDisasterRuntime.AllowsNewContent &&
                 (GameComponent_MouseDisasterNarrative.DebugForcing || MouseDisasterIncidentCatalog.IsIncidentEnabled(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames)))
             {
-                if (parms?.target is Map map) __state = new System.Collections.Generic.HashSet<Pawn>(map.mapPawns.AllPawns);
+                __state = new MouseDisasterEventExecution
+                {
+                    previous = MouseDisasterEventExecution.Current,
+                    groupId = GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(__instance.def) ?? 0,
+                    before = parms?.target is Map map ? new HashSet<Pawn>(map.mapPawns.AllPawns) : null
+                };
+                MouseDisasterEventExecution.Current = __state;
                 return true;
             }
 
@@ -96,7 +102,7 @@ namespace MouseDisaster
             return false;
         }
 
-        public static void Postfix(IncidentWorker __instance, IncidentParms parms, bool __result, System.Collections.Generic.HashSet<Pawn> __state)
+        public static void Postfix(IncidentWorker __instance, IncidentParms parms, bool __result, MouseDisasterEventExecution __state)
         {
             if (!__result || !MouseDisasterIncidentCatalog.IsKnownIncident(__instance?.def?.defName))
             {
@@ -104,10 +110,16 @@ namespace MouseDisaster
             }
 
             var participants = new System.Collections.Generic.List<Pawn>();
-            if (__state != null && parms?.target is Map map)
+            if (__state?.before != null && parms?.target is Map map)
                 foreach (Pawn pawn in map.mapPawns.AllPawns)
-                    if (!__state.Contains(pawn)) participants.Add(pawn);
+                    if (!__state.before.Contains(pawn)) participants.Add(pawn);
+            if (__state != null) GameComponent_MouseDisasterEventBehavior.Component?.Register(__state.groupId, participants);
             Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordIncidentExecuted(__instance.def, parms, participants);
+        }
+
+        public static void Finalizer(MouseDisasterEventExecution __state)
+        {
+            if (__state != null) MouseDisasterEventExecution.Current = __state.previous;
         }
     }
 

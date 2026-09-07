@@ -88,7 +88,7 @@ namespace MouseDisaster
             return reliefArea != null && reliefArea[food.PositionHeld];
         }
 
-        private static bool IsAreaFoodSourceThing(Thing thing, bool allowHarvest)
+        internal static bool IsAreaFoodSourceThing(Thing thing, bool allowHarvest)
         {
             if (thing == null || !thing.Spawned)
             {
@@ -139,8 +139,7 @@ namespace MouseDisaster
 
         public static bool HasAnyStealableFoodOnMap(Map map)
         {
-            return map?.listerThings?.ThingsInGroup(ThingRequestGroup.FoodSource)
-                ?.Any(thing => IsAreaFoodSourceThing(thing, allowHarvest: true)) == true;
+            return map?.GetComponent<MapComponent_MouseDisasterFoodTargets>()?.HasAnyFood() == true;
         }
 
         public static Job TryCreateReliefFoodJob(Pawn pawn, bool allowInventorySearch)
@@ -291,6 +290,7 @@ namespace MouseDisaster
             {
                 return reliefFoodJob;
             }
+            if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly)) return null;
 
             bool desperate = pawn.needs.food.CurCategory == HungerCategory.Starving;
             suppressReliefAreaPostfix = true;
@@ -553,7 +553,7 @@ namespace MouseDisaster
             }
 
             Area_MouseDisasterRelief reliefArea = GetReliefArea(getter.Map);
-            if (reliefArea == null)
+            if (reliefArea == null || (onlyReliefAreaFood && reliefArea.TrueCount == 0))
             {
                 return false;
             }
@@ -565,6 +565,12 @@ namespace MouseDisaster
             }
 
             FoodPreferability minPref = ResolveReliefFoodMinPreferability(eater, desperate, minPrefOverride);
+            var targetCache = getter == eater && MapComponent_MouseDisasterFoodTargets.Eligible(getter)
+                ? getter.Map.GetComponent<MapComponent_MouseDisasterFoodTargets>() : null;
+            int cacheKey = MapComponent_MouseDisasterFoodTargets.Key(desperate, false, false, false, allowForbidden,
+                allowCorpse, allowSociallyImproper, allowHarvest, true, ignoreReservations, calculateWantedStackCount,
+                allowVenerated, minPref, areaSearch: true, reliefOnly: onlyReliefAreaFood);
+            if (targetCache != null && targetCache.TryRead(getter, cacheKey, out foodSource, out foodDef, out bool cachedFound)) return cachedFound;
             Thing bestThing = null;
             ThingDef bestFoodDef = null;
             float bestScore = float.MinValue;
@@ -645,6 +651,8 @@ namespace MouseDisaster
                 int wantedStackCount = calculateWantedStackCount
                     ? Mathf.Max(1, FoodUtility.WillIngestStackCountOf(eater, candidateFoodDef, nutrition))
                     : 1;
+                float score = FoodUtility.FoodOptimality(eater, candidate, candidateFoodDef, (getter.Position - candidate.PositionHeld).LengthManhattan);
+                if (score <= bestScore) continue;
                 if (!ignoreReservations && !getter.CanReserve(candidate, 10, wantedStackCount))
                 {
                     continue;
@@ -655,17 +663,12 @@ namespace MouseDisaster
                     continue;
                 }
 
-                float score = FoodUtility.FoodOptimality(eater, candidate, candidateFoodDef, (getter.Position - candidate.PositionHeld).LengthManhattan);
-                if (score <= bestScore)
-                {
-                    continue;
-                }
-
                 bestThing = candidate;
                 bestFoodDef = candidateFoodDef;
                 bestScore = score;
             }
 
+            targetCache?.Store(getter, cacheKey, bestThing, bestFoodDef, bestThing != null && bestFoodDef != null);
             if (bestThing == null || bestFoodDef == null)
             {
                 return false;

@@ -33,6 +33,13 @@ namespace MouseDisaster
         public const float ScavengeToxicBuildupAbuse = 0.05f;
 
         public bool enableNewContent = true;
+        public Dictionary<string, MouseDisasterEventAttitude> eventAttitudes = new Dictionary<string, MouseDisasterEventAttitude>();
+
+        public MouseDisasterEventAttitude GetEventAttitude(string defName)
+        {
+            return defName != null && eventAttitudes != null && eventAttitudes.TryGetValue(defName, out var attitude)
+                ? MouseDisasterEventPolicy.Normalize(attitude) : MouseDisasterEventAttitude.Neutral;
+        }
         public bool enableAgeCapAdjustment = true;
         public bool enableWildRatkinIncidents = true;
         public bool enableThiefIncidents = true;
@@ -78,6 +85,7 @@ namespace MouseDisaster
 
         public void ResetToDefaults()
         {
+            eventAttitudes.Clear();
             enableNewContent = true;
             enableAgeCapAdjustment = true;
             enableWildRatkinIncidents = true;
@@ -193,6 +201,8 @@ namespace MouseDisaster
 
         public override void ExposeData()
         {
+            Scribe_Collections.Look(ref eventAttitudes, "eventAttitudes", LookMode.Value, LookMode.Value);
+            eventAttitudes ??= new Dictionary<string, MouseDisasterEventAttitude>();
             Scribe_Values.Look(ref enableNarrative, "enableNarrative", true);
             Scribe_Collections.Look(ref disabledNarrativeIds, "disabledNarrativeIds", LookMode.Value);
             Scribe_Values.Look(ref narrativeProgressGoal, "narrativeProgressGoal", 3);

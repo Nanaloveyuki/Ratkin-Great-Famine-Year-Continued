@@ -90,7 +90,7 @@ namespace MouseDisaster
                     {
                         if (MouseDisasterVisitorUtility.TryMakeHostile(recruitableRefugees, out int hostileCount) && hostileCount > 0)
                         {
-                            Messages.Message("MouseDisaster_VisitorControl_AttackAll_Success".Translate(hostileCount), recruitableRefugees, MessageTypeDefOf.ThreatBig, historical: false);
+                            Messages.Message("MouseDisaster_VisitorControl_ForcedAway_Success".Translate(hostileCount), recruitableRefugees, MessageTypeDefOf.NeutralEvent, historical: false);
                         }
                         else
                         {

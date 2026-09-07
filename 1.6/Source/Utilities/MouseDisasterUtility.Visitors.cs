@@ -113,6 +113,7 @@ namespace MouseDisaster
 
         public static bool TryStartVisitorAssault(Pawn triggerPawn)
         {
+            if (GameComponent_MouseDisasterEventBehavior.Component?.TryGetGroup(triggerPawn, out _) == true) return false;
             if (triggerPawn?.Map == null || triggerPawn.Downed || triggerPawn.Dead || !triggerPawn.Spawned)
             {
                 return false;

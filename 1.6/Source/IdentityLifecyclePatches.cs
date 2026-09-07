@@ -12,6 +12,7 @@ namespace MouseDisaster
             // SpawnSetup 会和并行渲染交错发生，这里只标记缓存失效，
             // 避免在生成期做基因/身份/兼容状态重写，把 Verse 的共享缓存打坏。
             MouseDisasterUtility.MarkMapPawnCacheDirty(__instance);
+            GameComponent_MouseDisasterEventBehavior.Component?.NotifySpawned(__instance);
         }
     }
 

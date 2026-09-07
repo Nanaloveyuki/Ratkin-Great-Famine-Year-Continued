@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgePatches.cs" />
+    <Compile Include="MouseDisasterEventPolicy.cs" />
+    <Compile Include="GameComponent_MouseDisasterEventBehavior.cs" />
+    <Compile Include="MapComponent_MouseDisasterFoodTargets.cs" />
     <Compile Include="GameComponent_MouseDisasterRemoval.cs" />
     <Compile Include="MouseDisasterSaveCleanup.cs" />
     <Compile Include="Incidents\AidIncidents.cs" />

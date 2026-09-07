@@ -38,6 +38,8 @@ namespace MouseDisaster
             {
                 return false;
             }
+            int behaviorGroupId = MouseDisasterEventExecution.Current?.groupId ?? 0;
+            GameComponent_MouseDisasterEventBehavior.Component?.Register(behaviorGroupId, attackers, apply: false);
 
             CameraJumper.TryJumpAndSelect(caravan);
             DiaNode root = new DiaNode("MouseDisaster_UI_CaravanMuggersDemand".Translate(faction.Name, GenLabel.ThingsLabel(demands)).Resolve());
@@ -64,6 +66,7 @@ namespace MouseDisaster
                 {
                     Map map = CaravanIncidentUtility.SetupCaravanAttackMap(caravan, attackers, sendLetterIfRelatedPawns: true);
                     LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: true, canTimeoutOrFlee: false), map, attackers);
+                    GameComponent_MouseDisasterEventBehavior.Component?.Register(behaviorGroupId, attackers);
                     Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
                     CameraJumper.TryJump(attackers[0]);
                 }, "GeneratingMapForNewEncounter", doAsynchronously: false, null);

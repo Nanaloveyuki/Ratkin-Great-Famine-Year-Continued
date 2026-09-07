@@ -62,6 +62,9 @@ namespace MouseDisaster
         public static PawnKindDef MouseDisaster_WildRatkinAdult;
         public static PawnKindDef MouseDisaster_WildRatkinChild;
         public static FactionDef MouseDisaster_HiddenFaction;
+        public static FactionDef MouseDisaster_HostileVisitors;
+        public static FactionDef MouseDisaster_NeutralVisitors;
+        public static FactionDef MouseDisaster_FriendlyVisitors;
         public static LetterDef MouseDisaster_AcceptFamineRefugees;
         public static LetterDef MouseDisaster_ChildExchangeLetter;
         public static LetterDef MouseDisaster_FoodGiveLetter;

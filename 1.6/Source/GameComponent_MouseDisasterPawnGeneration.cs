@@ -32,6 +32,7 @@ namespace MouseDisaster
         public int intervalTicks = 1;
         public int randomSeed;
         public int generatedSlots;
+        public int behaviorGroupId;
         public bool infectsWithPlague;
         public List<Pawn> pawns = new List<Pawn>();
         public Pawn traderPawn;
@@ -42,6 +43,7 @@ namespace MouseDisaster
         public void ExposeData()
         {
             Scribe_Values.Look(ref kind, "kind", MouseDisasterPawnBatchKind.LargeRefugeeWave);
+            Scribe_Values.Look(ref behaviorGroupId, "behaviorGroupId", 0);
             Scribe_References.Look(ref map, "map");
             Scribe_References.Look(ref faction, "faction");
             Scribe_Defs.Look(ref incidentDef, "incidentDef");
@@ -173,6 +175,11 @@ namespace MouseDisaster
 
                 return;
             }
+        }
+
+        internal bool HasPendingBehaviorGroup(int groupId)
+        {
+            return batches != null && batches.Any(batch => batch != null && batch.behaviorGroupId == groupId);
         }
 
         public static bool TryStartLargeRefugeeWave(IncidentDef incidentDef, IncidentParms parms, Map map, IntVec3 entryCell, int adults, int children)
@@ -314,6 +321,10 @@ namespace MouseDisaster
 
         private static void ProcessNextPawn(MouseDisasterPawnBatch batch)
         {
+            if (batch.behaviorGroupId == 0)
+                batch.behaviorGroupId = MouseDisasterEventExecution.Current?.groupId ??
+                    GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(batch.incidentDef) ?? 0;
+            int firstNewPawn = batch.pawns.Count;
             int slot = batch.generatedSlots++;
             Rand.PushState(Gen.HashCombineInt(batch.randomSeed, slot));
             try
@@ -337,6 +348,9 @@ namespace MouseDisaster
             {
                 Rand.PopState();
             }
+            if (batch.pawns.Count > firstNewPawn)
+                GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId,
+                    batch.pawns.GetRange(firstNewPawn, batch.pawns.Count - firstNewPawn));
         }
 
         private static void GenerateLargeRefugee(MouseDisasterPawnBatch batch)
@@ -458,6 +472,7 @@ namespace MouseDisaster
                     }
                     break;
             }
+            GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId, pawns);
         }
 
         private static void TruncateBatch(MouseDisasterPawnBatch batch, string reason)
@@ -496,6 +511,8 @@ namespace MouseDisaster
             try
             {
                 TruncateBatch(batch, reason);
+                if (batch != null)
+                    GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId, ActivePawns(batch));
             }
             catch (Exception exception)
             {

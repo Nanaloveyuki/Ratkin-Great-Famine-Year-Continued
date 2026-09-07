@@ -5,6 +5,21 @@ using Verse.AI;
 
 namespace MouseDisaster
 {
+    [HarmonyPatch(typeof(FleeUtility), nameof(FleeUtility.FleeJob), new[] { typeof(Pawn), typeof(Thing), typeof(int) })]
+    internal static class MouseDisasterThiefCombatFearPatch
+    {
+        public static bool Prefix(Pawn pawn, Thing danger, ref Job __result)
+        {
+            if ((danger is Pawn || danger is Building_Turret) && !pawn.Downed && !pawn.IsBurning() &&
+                GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.IgnoreCombatFear))
+            {
+                __result = null;
+                return false;
+            }
+            return true;
+        }
+    }
+
     [HarmonyPatch(typeof(MentalStateHandler), nameof(MentalStateHandler.TryStartMentalState))]
     public static class ThiefMentalStatePatch
     {
@@ -14,6 +29,12 @@ namespace MouseDisaster
         public static bool Prefix(MentalStateHandler __instance, MentalStateDef stateDef, ref bool __result)
         {
             Pawn pawn = PawnField(__instance);
+            if (stateDef == MentalStateDefOf.PanicFlee &&
+                GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.IgnoreCombatFear) && !pawn.IsBurning())
+            {
+                __result = false;
+                return false;
+            }
             bool isThief = MouseDisasterUtility.IsThiefPawn(pawn);
             bool isBeggar = MouseDisasterUtility.IsBeggarPawn(pawn);
             if (!isThief && !isBeggar)
@@ -51,6 +72,7 @@ namespace MouseDisaster
         public static bool Prefix(Pawn_MindState __instance)
         {
             Pawn pawn = PawnField(__instance);
+            if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.IgnoreCombatFear) && !pawn.IsBurning()) return false;
             return !MouseDisasterUtility.IsBeggarPawn(pawn) || MouseDisasterUtility.CanMouseDisasterVisitorRetaliate(pawn);
         }
     }

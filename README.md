@@ -26,4 +26,6 @@ RimWorld 1.6 的“鼠灾-大荒年”延续维护版本。
 
 当前存档停用、卸载用副本导出及验证边界见 [存档停用与卸载](docs/recovery.md)。
 
+逐事件态度设置、寻食缓存与性能验证边界见 [事件行为与性能](docs/event-behavior-performance.md)。
+
 退出 RimWorld 后运行 `powershell -ExecutionPolicy Bypass -File .\scripts\build-and-deploy.ps1`，脚本会构建主体与冲突保护 DLL、同步运行所需文件并逐文件校验 SHA-256。

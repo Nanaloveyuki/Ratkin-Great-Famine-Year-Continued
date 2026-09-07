@@ -313,6 +313,11 @@ namespace MouseDisaster
 
         public bool TryMakeHostile(IEnumerable<Pawn> pawns, out int hostileCount)
         {
+            if (GameComponent_MouseDisasterEventBehavior.Component?.React(pawns, true, out int affectedCount) == true)
+            {
+                hostileCount = affectedCount;
+                return true;
+            }
             hostileCount = 0;
             List<Pawn> validPawns = GetActiveVisitors(pawns);
             if (validPawns.Count == 0)
@@ -326,9 +331,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            Faction hostileFaction = validPawns
-                .Select(pawn => GetRecord(pawn)?.originalFaction)
-                .FirstOrDefault(faction => faction != null);
+            Faction hostileFaction = MouseDisasterUtility.GetEventFaction(hostile: true, friendly: false);
             if (hostileFaction == null && !MouseDisasterUtility.TryFindFormerFaction(out hostileFaction))
             {
                 return false;
