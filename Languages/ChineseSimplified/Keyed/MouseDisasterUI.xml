@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+  <MouseDisaster_Settings_AllowColonistAutoGiveFood>允许殖民者主动赠送食物</MouseDisaster_Settings_AllowColonistAutoGiveFood>
+  <MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip>默认关闭。开启后，本模组的乞讨交互可让殖民者自动交出背包中的食物。关闭时仍会发生乞讨，但不会自动赠食；不影响玩家手动赠食、救济区供食或正常照料喂食。</MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip>
   <MouseDisaster_UI_BroadcastHope>广播希望</MouseDisaster_UI_BroadcastHope>
   <MouseDisaster_UI_ExchangeTarget>{0}（{1}）</MouseDisaster_UI_ExchangeTarget>
   <MouseDisaster_UI_ExchangeNoTarget>{0}（无可用目标）</MouseDisaster_UI_ExchangeNoTarget>

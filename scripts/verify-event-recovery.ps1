@@ -112,6 +112,20 @@ $production = foreach ($file in 'GameComponent_MouseDisasterBroadcastHope.cs','M
 }
 $begging = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Begging.cs') -Raw
 $syntax = [Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree]::ParseText($begging).GetRoot()
+$giveFood = $syntax.DescendantNodes() | Where-Object {
+    $_ -is [Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax] -and $_.Identifier.ValueText -eq 'TryConsumeBeggedFood'
+}
+$guard = $giveFood.Body.Statements[0].ToString()
+if ($guard -notmatch 'MouseDisasterMod.Settings\?\.allowColonistAutoGiveFood != true' -or $guard -notmatch 'return false;') {
+    throw 'Automatic food giving must be opt-in before any inventory access.'
+}
+$settings = Get-Content (Join-Path $root '1.6/Source/MouseDisasterSettings.cs') -Raw
+if ($settings -notmatch 'public bool allowColonistAutoGiveFood = false;' -or
+    (Get-CSharpMethod $settings 'ResetToDefaults') -notmatch 'allowColonistAutoGiveFood = false;' -or
+    (Get-CSharpMethod $settings 'ExposeData') -notmatch 'Scribe_Values.Look\(ref allowColonistAutoGiveFood, "allowColonistAutoGiveFood", false\);') {
+    throw 'Automatic food giving must default off for new, reset, and existing settings.'
+}
+Write-Host 'PASS: automatic food giving entry guard and settings default/reset/load contracts.'
 $members = $syntax.DescendantNodes() | Where-Object {
     ($_ -is [Microsoft.CodeAnalysis.CSharp.Syntax.FieldDeclarationSyntax] -and $_.Declaration.Variables.Identifier.ValueText -in @('BeggingCooldownTicks','NextBegTickByPawnId')) -or
     ($_ -is [Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax] -and $_.Identifier.ValueText -in @('CanBegAgain','CanReceiveBegging','StartBeggingCooldown'))

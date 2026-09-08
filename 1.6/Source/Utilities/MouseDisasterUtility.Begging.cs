@@ -109,6 +109,11 @@ namespace MouseDisaster
 
         public static bool TryConsumeBeggedFood(Pawn beggar, Pawn targetColonist)
         {
+            if (MouseDisasterMod.Settings?.allowColonistAutoGiveFood != true)
+            {
+                return false;
+            }
+
             if (beggar == null || targetColonist?.inventory?.innerContainer == null)
             {
                 return false;

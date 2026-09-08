@@ -33,6 +33,7 @@ namespace MouseDisaster
         public const float ScavengeToxicBuildupAbuse = 0.05f;
 
         public bool enableNewContent = true;
+        public bool allowColonistAutoGiveFood = false;
         public Dictionary<string, MouseDisasterEventAttitude> eventAttitudes = new Dictionary<string, MouseDisasterEventAttitude>();
 
         public MouseDisasterEventAttitude GetEventAttitude(string defName)
@@ -102,6 +103,7 @@ namespace MouseDisaster
         {
             eventAttitudes.Clear();
             enableNewContent = true;
+            allowColonistAutoGiveFood = false;
             enableAgeCapAdjustment = true;
             enableWildRatkinIncidents = true;
             enableThiefIncidents = true;
@@ -232,6 +234,7 @@ namespace MouseDisaster
             Scribe_Values.Look(ref narrativeEchoChancePercent, "narrativeEchoChancePercent", 100f);
             Scribe_Values.Look(ref narrativeEchoCooldownDays, "narrativeEchoCooldownDays", 3);
             Scribe_Values.Look(ref enableNewContent, "enableNewContent", true);
+            Scribe_Values.Look(ref allowColonistAutoGiveFood, "allowColonistAutoGiveFood", false);
             Scribe_Values.Look(ref enableAgeCapAdjustment, "enableAgeCapAdjustment", true);
             Scribe_Values.Look(ref enableWildRatkinIncidents, "enableWildRatkinIncidents", true);
             Scribe_Values.Look(ref enableThiefIncidents, "enableThiefIncidents", true);

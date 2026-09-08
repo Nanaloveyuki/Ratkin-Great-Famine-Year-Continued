@@ -50,6 +50,7 @@ namespace MouseDisaster
             listing.GapLine();
 
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_General");
+            DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
             DrawDaysSlider(listing, "MouseDisaster_Settings_BroadcastHopeCooldown", ref Settings.broadcastHopeCooldownDays, 0, 10);
