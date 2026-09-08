@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'source-tools.ps1')
 $stub = @'
 using System;
 using System.Collections.Generic;
@@ -100,7 +101,9 @@ public static class LordMaker {
 public static class RCellFinder { public static bool TryFindBestExitSpot(Pawn pawn,out IntVec3 exit) { exit=new IntVec3(); return true; } }
 public class Settings {
     public MouseDisasterEventAttitude attitude;
-    public MouseDisasterEventAttitude GetEventAttitude(string name)=>attitude;
+    public Dictionary<string,MouseDisasterEventAttitude> eventAttitudes=new Dictionary<string,MouseDisasterEventAttitude>();
+    public MouseDisasterEventAttitude GetEventAttitude(string name)=>eventAttitudes.TryGetValue(name,out var value) ? MouseDisasterEventPolicy.Normalize(value) : attitude;
+    // NARRATIVE_SETTINGS_METHODS
 }
 public static class MouseDisasterMod { public static Settings Settings=new Settings(); }
 public static class MouseDisasterUtility {
@@ -242,12 +245,39 @@ public static class Harness {
         restored.ExposeData(); Scribe_Collections.reading=false; Scribe.mode=LoadSaveMode.Inactive;
         Check(restored.HasCompletedFeeding(pawn),"saved feeding IDs not restored");
         Check(restored.HasAppliedRefeeding(pawn),"saved refeeding IDs not restored");
+        MouseDisasterMod.Settings.attitude=MouseDisasterEventAttitude.Neutral;
+        MouseDisasterMod.Settings.SetNarrativeAttitude("N004",MouseDisasterEventAttitude.Friendly);
+        Check(MouseDisasterMod.Settings.GetEventAttitude("MouseDisaster_ShatteredMother")==MouseDisasterEventAttitude.Friendly,"N004 source setting not shared");
+        MouseDisasterMod.Settings.SetNarrativeAttitude("N005",MouseDisasterEventAttitude.HostileLeaning);
+        Check(MouseDisasterMod.Settings.GetEventAttitude("MouseDisaster_ChildExchange")==MouseDisasterEventAttitude.HostileLeaning,"N005 source setting not shared");
+        MouseDisasterMod.Settings.SetNarrativeAttitude("N007",MouseDisasterEventAttitude.FriendlyLeaning);
+        Check(MouseDisasterNarrativePolicy.GetAttitudeSources("N007").Count==9,"N007 source membership changed");
+        Check(MouseDisasterMod.Settings.GetNarrativeAttitude("N007")==MouseDisasterEventAttitude.FriendlyLeaning,"N007 shared setting mismatch");
+        MouseDisasterMod.Settings.eventAttitudes["MouseDisaster_PlagueWanderers"]=MouseDisasterEventAttitude.Hostile;
+        Check(!MouseDisasterMod.Settings.GetNarrativeAttitude("N007").HasValue,"mixed source settings not detected");
+        Check(MouseDisasterMod.Settings.GetEventAttitude("MouseDisaster_PlagueCaravanMuggers")==MouseDisasterEventAttitude.Neutral,"unrelated plague event modified");
+        foreach(string id in new[]{"N001","N002","N003","N006","N009","N010","S01","E01"})
+            Check(MouseDisasterNarrativePolicy.GetAttitudeSources(id).Count==0,"non-visitor narrative exposes ineffective attitude");
+        foreach(MouseDisasterEventAttitude attitude in Enum.GetValues(typeof(MouseDisasterEventAttitude))) {
+            c=Reset(); map=NewMap(); pawn=NewPawn(map,1001);
+            var duty=new object(); pawn.mindState.duty=duty;
+            MouseDisasterMod.Settings.SetNarrativeAttitude("N008",attitude);
+            int id=c.CreateGroup("N008"); c.Register(id,new[]{pawn});
+            Check(c.TryGetGroup(pawn,out var envoyGroup) && envoyGroup.attitude==attitude,"envoy attitude not applied");
+            if(attitude!=MouseDisasterEventAttitude.Hostile) Check(ReferenceEquals(pawn.mindState.duty,duty),"nonhostile envoy lost meeting duty");
+            MouseDisasterMod.Settings.SetNarrativeAttitude("N008",MouseDisasterEventAttitude.Neutral);
+            Check(envoyGroup.attitude==attitude,"settings changed existing envoy snapshot");
+            c.React(new[]{pawn},true,out _);
+            Check(envoyGroup.hostile || envoyGroup.leaving,"envoy expulsion reaction missing");
+        }
         return "PASS: "+checks+" behavior/cache assertions.\n"+string.Join("\n",rows)+"\nCounts use controlled reservations, diet and reachability; not a Unity TPS benchmark.";
     }
 }
 }
 '@
-$production = foreach ($file in 'MouseDisasterEventPolicy.cs','MapComponent_MouseDisasterFoodTargets.cs','GameComponent_MouseDisasterEventBehavior.cs') {
+$settingsSource = Get-Content (Join-Path $root '1.6/Source/MouseDisasterSettings.cs') -Raw
+$stub = $stub.Replace('// NARRATIVE_SETTINGS_METHODS', ((Get-CSharpMethod $settingsSource 'GetNarrativeAttitude') + (Get-CSharpMethod $settingsSource 'SetNarrativeAttitude')))
+$production = foreach ($file in 'MouseDisasterEventPolicy.cs','MouseDisasterNarrativePolicy.cs','MapComponent_MouseDisasterFoodTargets.cs','GameComponent_MouseDisasterEventBehavior.cs') {
     $code = Get-Content (Join-Path $root "1.6/Source/$file") -Raw
     [regex]::Replace($code, '(?m)^using [^;]+;\r?\n', '').Replace('namespace MouseDisaster','namespace EventBehaviorTests')
 }

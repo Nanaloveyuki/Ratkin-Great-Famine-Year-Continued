@@ -95,8 +95,15 @@ $xmlIds = foreach ($file in Get-ChildItem (Join-Path $root 'Defs/IncidentDefs') 
 $catalogIds = @([MouseDisaster.MouseDisasterIncidentCatalog]::AllEntries | ForEach-Object DefName)
 Assert-Refactor (@(Compare-Object $xmlIds $catalogIds).Count -eq 0) 'XML/catalog membership differs'
 foreach ($entry in [MouseDisaster.MouseDisasterIncidentCatalog]::AllEntries) {
-    Assert-Refactor ($keys.ContainsKey($entry.DisplayLabel)) "Missing incident menu text: $($entry.DefName)"
+    $labelKey = $entry.DisplayLabel.Substring($entry.DisplayId.Length + 1)
+    Assert-Refactor ($keys.ContainsKey($labelKey)) "Missing incident menu text: $($entry.DefName)"
+    Assert-Refactor ($entry.DisplayId -match '^[ON]-\d{3}$') "Invalid display ID: $($entry.DefName)"
+    Assert-Refactor ($entry.IsOriginal -eq $entry.DisplayId.StartsWith('O-')) "Origin classification mismatch: $($entry.DefName)"
 }
+$displayIds = @([MouseDisaster.MouseDisasterIncidentCatalog]::AllEntries | ForEach-Object DisplayId)
+Assert-Refactor (@($displayIds | Sort-Object -Unique).Count -eq 50) 'Display IDs are not unique'
+Assert-Refactor (@(Compare-Object @($displayIds | Where-Object { $_ -like 'O-*' }) @(1..14 | ForEach-Object { 'O-{0:D3}' -f $_ })).Count -eq 0) 'Original display ID range changed'
+Assert-Refactor (@(Compare-Object @($displayIds | Where-Object { $_ -like 'N-*' }) @(11..46 | ForEach-Object { 'N-{0:D3}' -f $_ })).Count -eq 0) 'New incident IDs overlap narrative IDs'
 $plagueStub = @'
 using System;
 using System.Collections.Generic;

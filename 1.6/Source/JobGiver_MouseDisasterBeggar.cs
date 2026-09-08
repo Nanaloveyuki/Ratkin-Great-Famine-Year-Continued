@@ -24,7 +24,8 @@ namespace MouseDisaster
                 return null;
             }
 
-            bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn);
+            bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn) ||
+                Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.IsWaitingEnvoy(pawn) == true;
             if (MouseDisasterFeeding.HasSatisfied(pawn))
                 return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
             if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;

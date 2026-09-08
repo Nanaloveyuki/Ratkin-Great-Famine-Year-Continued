@@ -40,6 +40,21 @@ namespace MouseDisaster
             return defName != null && eventAttitudes != null && eventAttitudes.TryGetValue(defName, out var attitude)
                 ? MouseDisasterEventPolicy.Normalize(attitude) : MouseDisasterEventAttitude.Neutral;
         }
+
+        public MouseDisasterEventAttitude? GetNarrativeAttitude(string id)
+        {
+            var sources = MouseDisasterNarrativePolicy.GetAttitudeSources(id);
+            if (sources.Count == 0) return null;
+            var first = GetEventAttitude(sources[0]);
+            return sources.All(source => GetEventAttitude(source) == first) ? first : (MouseDisasterEventAttitude?)null;
+        }
+
+        public void SetNarrativeAttitude(string id, MouseDisasterEventAttitude attitude)
+        {
+            eventAttitudes ??= new Dictionary<string, MouseDisasterEventAttitude>();
+            foreach (string source in MouseDisasterNarrativePolicy.GetAttitudeSources(id))
+                eventAttitudes[source] = MouseDisasterEventPolicy.Normalize(attitude);
+        }
         public bool enableAgeCapAdjustment = true;
         public bool enableWildRatkinIncidents = true;
         public bool enableThiefIncidents = true;

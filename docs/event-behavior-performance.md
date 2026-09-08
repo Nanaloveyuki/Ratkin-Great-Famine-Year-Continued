@@ -42,6 +42,30 @@ narrative text remain incident-specific; attitude is not a rewrite of those scri
   eating under combat pressure; burning, downed and non-combat escape paths are
   not globally disabled. Core health and needs updates remain intact.
 
+## Event Display IDs and Narrative Attitudes
+
+Display IDs are explicit catalog data, not list indexes: the 14 entries already
+classified as original use O-001 through O-014. N-001 through N-010 remain reserved
+for the existing narrative chain; the other 36 incident entries use N-011 through
+N-046. Settings and debug menus share the catalog labels. Def names, saved flags,
+toggle keys and incident counts are unchanged. S-series outcome notifications and
+E-series endings retain their own IDs. Return branches display N-004-R and N-007-R
+while retaining their existing internal keys.
+
+N-004 shares the ShatteredMother attitude, N-005 shares ChildExchange, and N-007
+shares its nine plague-visitor source attitudes. A mixed N-007 selection is shown
+explicitly; selecting an attitude there updates all nine source settings. Changing
+a source separately is reflected immediately. These controls only affect future
+cohorts, not active story records, existing cohorts or quarantine/release decisions.
+
+N-008 creates its own behavior cohort with the saved N008 settings key. It uses
+the same five attitudes and attack/expulsion reactions as incidents. Nonhostile
+envoys retain their meeting duty and do not leave merely because feeding completes.
+Expulsion settles the story without replacing the configured hostility/flee reaction
+with an unconditional departure. Notifications, grain-burrow tasks and endings do
+not expose ineffective attitude controls. Return branches retain their existing
+story behavior rather than silently reassigning an existing pawn to a new cohort.
+
 ## Feeding Completion and Visit Summaries
 
 Food-cache requests without `calculateWantedStackCount` require only one available

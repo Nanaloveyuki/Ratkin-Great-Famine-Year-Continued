@@ -92,18 +92,8 @@ namespace MouseDisaster
     public partial class GameComponent_MouseDisasterNarrative
     {
         private const int N007ReferenceGraceTicks = GenDate.TicksPerDay;
-        private static readonly HashSet<string> N007PlagueVisitorIncidentDefNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            "MouseDisaster_PlagueWanderers",
-            "MouseDisaster_PlagueTraderCaravan",
-            "MouseDisaster_PlaguePassersby",
-            "MouseDisaster_PlagueRefugees",
-            "MouseDisaster_PlagueOrphan",
-            "MouseDisaster_PlagueBeggarGroup",
-            "MouseDisaster_PlagueThiefGroup",
-            "MouseDisaster_PlagueLaboringRefugees",
-            "MouseDisaster_PlagueStrongSiege"
-        };
+        private static readonly HashSet<string> N007PlagueVisitorIncidentDefNames =
+            new HashSet<string>(MouseDisasterNarrativePolicy.GetAttitudeSources("N007"), StringComparer.OrdinalIgnoreCase);
 
         private List<MouseDisasterN007Record> n007Records = new List<MouseDisasterN007Record>();
 

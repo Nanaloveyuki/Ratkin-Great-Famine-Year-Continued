@@ -205,6 +205,33 @@ $n007 = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNarr
 $release = $n007.Substring($n007.IndexOf('case MouseDisasterN007Phase.ReleasePending:'))
 $release = $release.Substring(0, $release.IndexOf('case MouseDisasterN007Phase.RecoveryDecision:'))
 Assert-Narrative (!$release.Contains('StartN007Release')) 'Departure Lord reset in scanner'
+$tasks = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNarrative_Tasks.cs') -Raw
+$hold = Get-CSharpMethod $tasks 'IsWaitingEnvoy'
+$holdStub = @'
+using System;
+namespace EnvoyHoldTests {
+public class Pawn {}
+public class Harness {
+    Pawn envoy = new Pawn();
+    int envoyPhase;
+    public static int Run() {
+        var h = new Harness();
+        for (int phase=0; phase<=4; phase++) {
+            h.envoyPhase=phase;
+            if(h.IsWaitingEnvoy(h.envoy)!=(phase>0 && phase<4)) throw new Exception("Envoy hold phase mismatch");
+            if(h.IsWaitingEnvoy(new Pawn()) || h.IsWaitingEnvoy(null)) throw new Exception("Hold applied to another pawn");
+        }
+        return 10;
+    }
+'@
+Add-Type -TypeDefinition ($holdStub + $hold + "`n}}")
+$checks += [EnvoyHoldTests.Harness]::Run()
+$startEnvoy = Get-CSharpMethod $tasks 'StartEnvoy'
+Assert-Narrative ($startEnvoy.Contains('behavior.CreateGroup("N008")')) 'Envoy settings do not reach a behavior cohort'
+Assert-Narrative ($startEnvoy.IndexOf('HoldN007Pawns') -lt $startEnvoy.IndexOf('behavior.CreateGroup')) 'Meeting hold overwrites hostile envoy behavior'
+Assert-Narrative ($tasks.Contains('release: !reacted')) 'Story completion overwrites expulsion reaction'
+$beggar = Get-Content (Join-Path $root '1.6/Source/JobGiver_MouseDisasterBeggar.cs') -Raw
+Assert-Narrative ($beggar.Contains('IsWaitingEnvoy(pawn)')) 'Fed envoy can leave before the meeting ends'
 Assert-Narrative (!$allCode.Contains('baby.Destroy();')) 'Baby aid still destroys its recipient'
 
 Assert-Narrative ($utility.Contains('forceGenerateNewPawn: true')) 'Generation may rewrite existing world pawns'
@@ -221,7 +248,7 @@ Assert-Narrative ($alerts.Contains('exitToMainMenu: false')) 'Story ending exits
 $debug = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNarrative_Debug.cs') -Raw
 Assert-Narrative ($debug.Contains('childGetter = () => IncidentDebugEntries')) 'Event debug groups are not lazy'
 $catalog = Get-Content (Join-Path $root '1.6/Source/MouseDisasterIncidentCatalog.cs') -Raw
-$eventIds = @([regex]::Matches($catalog, 'new MouseDisasterIncidentEntry\("([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+$eventIds = @([regex]::Matches($catalog, 'new MouseDisasterIncidentEntry\("[ON]-\d{3}", "([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
 Assert-Narrative ($eventIds.Count -eq 50 -and @($eventIds | Sort-Object -Unique).Count -eq 50) 'Incident catalog membership changed'
 
 

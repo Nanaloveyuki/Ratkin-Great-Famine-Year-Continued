@@ -89,12 +89,14 @@ namespace MouseDisaster
             }
         }
 
-        public int CreateGroup(IncidentDef incident)
+        public int CreateGroup(IncidentDef incident) => CreateGroup(incident.defName);
+
+        public int CreateGroup(string settingsKey)
         {
             var group = new MouseDisasterEventGroup
             {
-                id = ++nextId, incidentDefName = incident.defName,
-                attitude = MouseDisasterMod.Settings?.GetEventAttitude(incident.defName) ?? MouseDisasterEventAttitude.Neutral
+                id = ++nextId, incidentDefName = settingsKey,
+                attitude = MouseDisasterMod.Settings?.GetEventAttitude(settingsKey) ?? MouseDisasterEventAttitude.Neutral
             };
             group.hostile = group.attitude == MouseDisasterEventAttitude.Hostile;
             groups.Add(group); byId[group.id] = group;

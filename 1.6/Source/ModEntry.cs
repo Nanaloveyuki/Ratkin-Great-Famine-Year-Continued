@@ -22,7 +22,7 @@ namespace MouseDisaster
         public override void DoSettingsWindowContents(Rect inRect)
         {
             float incidentSectionHeight = MouseDisasterIncidentCatalog.AllEntries.Count * 60f;
-            float narrativeSectionHeight = MouseDisasterNarrativePolicy.SettingIds.Length * 30f + 950f;
+            float narrativeSectionHeight = MouseDisasterNarrativePolicy.SettingIds.Length * 30f + 1070f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, Mathf.Max(1920f + incidentSectionHeight + narrativeSectionHeight, inRect.height + 900f + incidentSectionHeight + narrativeSectionHeight));
             Widgets.BeginScrollView(inRect, ref settingsScrollPosition, viewRect);
 
@@ -168,20 +168,8 @@ namespace MouseDisaster
                 {
                     Settings.SetIncidentEnabled(entry.DefName, newEnabled);
                 }
-                Rect attitudeRect = listing.GetRect(0f);
-                attitudeRect.height = 30f;
-                TooltipHandler.TipRegion(attitudeRect, ("MouseDisaster_AttitudeTip_" + Settings.GetEventAttitude(entry.DefName)).Translate());
-                if (listing.ButtonText(("MouseDisaster_Attitude_" + Settings.GetEventAttitude(entry.DefName)).Translate()))
-                {
-                    var options = new List<FloatMenuOption>();
-                    foreach (MouseDisasterEventAttitude attitude in System.Enum.GetValues(typeof(MouseDisasterEventAttitude)))
-                    {
-                        MouseDisasterEventAttitude selected = attitude;
-                        options.Add(new FloatMenuOption(("MouseDisaster_Attitude_" + attitude).Translate(),
-                            () => Settings.eventAttitudes[entry.DefName] = selected));
-                    }
-                    Find.WindowStack.Add(new FloatMenu(options));
-                }
+                DrawAttitudeControl(listing, Settings.GetEventAttitude(entry.DefName),
+                    selected => Settings.eventAttitudes[entry.DefName] = selected);
                 listing.Gap(2f);
             }
 
@@ -192,6 +180,25 @@ namespace MouseDisaster
         {
             listing.Label(labelKey.Translate(value.ToString("0")));
             value = listing.Slider(value, min, max);
+        }
+
+        private static void DrawAttitudeControl(Listing_Standard listing, MouseDisasterEventAttitude? current,
+            System.Action<MouseDisasterEventAttitude> set, string extraTip = null)
+        {
+            string label = current.HasValue ? ("MouseDisaster_Attitude_" + current.Value).Translate().ToString()
+                : "MouseDisaster_Story_AttitudeMixed".Translate().ToString();
+            string tip = current.HasValue ? ("MouseDisaster_AttitudeTip_" + current.Value).Translate().ToString() : label;
+            Rect rect = listing.GetRect(0f);
+            rect.height = 30f;
+            TooltipHandler.TipRegion(rect, extraTip == null ? tip : tip + "\n\n" + extraTip);
+            if (!listing.ButtonText(label)) return;
+            var options = new List<FloatMenuOption>();
+            foreach (MouseDisasterEventAttitude attitude in System.Enum.GetValues(typeof(MouseDisasterEventAttitude)))
+            {
+                MouseDisasterEventAttitude selected = attitude;
+                options.Add(new FloatMenuOption(("MouseDisaster_Attitude_" + attitude).Translate(), () => set(selected)));
+            }
+            Find.WindowStack.Add(new FloatMenu(options));
         }
 
         private static void DrawNarrativeControls(Listing_Standard listing)
@@ -205,6 +212,18 @@ namespace MouseDisaster
                 listing.CheckboxLabeled(("MouseDisaster_Story_Toggle" + id).Translate(), ref changed,
                     "MouseDisaster_Story_ToggleTip".Translate());
                 if (changed != enabled) Settings.SetNarrativeEnabled(id, changed);
+                var sources = MouseDisasterNarrativePolicy.GetAttitudeSources(id);
+                if (sources.Count > 0)
+                {
+                    var names = new List<string>();
+                    foreach (string source in sources)
+                        foreach (var entry in MouseDisasterIncidentCatalog.AllEntries)
+                            if (entry.DefName == source) names.Add(entry.DisplayLabel);
+                    string tip = names.Count == 0 ? "MouseDisaster_Story_AttitudeIndependentTip".Translate().ToString()
+                        : "MouseDisaster_Story_AttitudeSharedTip".Translate(string.Join("\n", names)).ToString();
+                    DrawAttitudeControl(listing, Settings.GetNarrativeAttitude(id),
+                        selected => Settings.SetNarrativeAttitude(id, selected), tip);
+                }
                 listing.Gap(2f);
             }
             DrawSectionTitle(listing, "MouseDisaster_Story_TriggerSection");

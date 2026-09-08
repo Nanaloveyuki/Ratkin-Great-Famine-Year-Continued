@@ -102,6 +102,8 @@ namespace MouseDisaster
                 if (!CanUseStoryLetter(letter.stage)) Find.LetterStack.RemoveLetter(letter);
         }
 
+        public bool IsWaitingEnvoy(Pawn pawn) => pawn != null && pawn == envoy && envoyPhase > 0 && envoyPhase < 4;
+
         private void StartEnvoy(Map map)
         {
             if (!MouseDisasterUtility.TryFindFormerFaction(out Faction faction) || faction.HostileTo(Faction.OfPlayer) ||
@@ -115,6 +117,8 @@ namespace MouseDisaster
             envoyPhase = 1;
             envoyDeadline = CurrentNarrativeTick + GenDate.TicksPerDay * 3;
             HoldN007Pawns(new[] { pawn });
+            var behavior = GameComponent_MouseDisasterEventBehavior.Component;
+            if (behavior != null) behavior.Register(behavior.CreateGroup("N008"), new[] { pawn });
             TrackNarrativeVisit("S14", map, new[] { pawn });
             EnsureStoryLetter("Envoy", map);
         }
@@ -198,18 +202,23 @@ namespace MouseDisaster
                 FinishEnvoy("N008Traded");
                 return true;
             }
-            if (choice == "Drive") NotifyNarrativeForce(new[] { envoy });
-            FinishEnvoy("N008Rejected");
+            bool reacted = false;
+            if (choice == "Drive")
+            {
+                NotifyNarrativeForce(new[] { envoy });
+                reacted = GameComponent_MouseDisasterEventBehavior.Component?.React(new[] { envoy }, true, out _) == true;
+            }
+            FinishEnvoy("N008Rejected", release: !reacted);
             return true;
         }
 
-        private void FinishEnvoy(string result)
+        private void FinishEnvoy(string result, bool release = true)
         {
             if (envoyPhase >= 4) return;
             envoyPhase = 4;
             CompleteNarrativeFlag("N008");
             Map map = envoy?.Map;
-            if (envoy != null && !envoy.Dead && envoy.Spawned && envoy.Faction != Faction.OfPlayer && !envoy.IsPrisoner && !envoy.IsSlave)
+            if (release && envoy != null && !envoy.Dead && envoy.Spawned && envoy.Faction != Faction.OfPlayer && !envoy.IsPrisoner && !envoy.IsSlave)
                 StartN007Release(map, new[] { envoy });
             SendJournalOnce(result, map);
         }

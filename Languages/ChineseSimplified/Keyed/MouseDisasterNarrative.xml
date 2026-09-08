@@ -141,8 +141,11 @@
   <MouseDisaster_Story_S14_Label>送走以后</MouseDisaster_Story_S14_Label>
   <MouseDisaster_Story_S14_Text>来客的去向已经确认。实际交付和后续安置都核对过，计数结果列在下面。</MouseDisaster_Story_S14_Text>
   <MouseDisaster_Story_N007Counts>已记录康复：{0}；死亡：{1}；离场：{2}；已转由其他方式处理或失联：{3}。康复与离场可能为同一人。</MouseDisaster_Story_N007Counts>
-  <MouseDisaster_Story_ControlSection>原版剧情开关</MouseDisaster_Story_ControlSection>
-  <MouseDisaster_Story_EnableNarrative>启用原版剧情自然触发</MouseDisaster_Story_EnableNarrative>
+  <MouseDisaster_Story_ControlSection>新增剧情、总结与结局</MouseDisaster_Story_ControlSection>
+  <MouseDisaster_Story_EnableNarrative>启用新增剧情自然触发</MouseDisaster_Story_EnableNarrative>
+  <MouseDisaster_Story_AttitudeMixed>态度：按来源事件分别设置</MouseDisaster_Story_AttitudeMixed>
+  <MouseDisaster_Story_AttitudeSharedTip>与来源事件共用态度配置：{0}。在此选择会同步修改这些事件的设置，只影响后续新到访群体；已开始的剧情、检疫和离场流程保持原有处理。</MouseDisaster_Story_AttitudeSharedTip>
+  <MouseDisaster_Story_AttitudeIndependentTip>控制后续新到访信使的初始态度与受攻击、被驱逐时的反应。已到场信使不受设置修改影响。</MouseDisaster_Story_AttitudeIndependentTip>
   <MouseDisaster_Story_EnableNarrativeTip>控制新剧情的自然触发。已经开始的照料、检疫、使者会面和地点处理仍可结束。尚未到场的康复回访在关闭后取消。基础随机事件由原事件开关控制。</MouseDisaster_Story_EnableNarrativeTip>
   <MouseDisaster_Story_ToggleTip>控制该项新剧情。S 系列开关控制新一批来客的后果通知；客观接济统计继续保留。已开始的流程继续结算。</MouseDisaster_Story_ToggleTip>
   <MouseDisaster_Story_TriggerSection>剧情触发门槛</MouseDisaster_Story_TriggerSection>
@@ -201,10 +204,10 @@
   <MouseDisaster_Story_DebugE05>E-05 记录中止 / 预览文本，不改达成状态</MouseDisaster_Story_DebugE05>
   <MouseDisaster_Story_ToggleR01>R-01 她的名字</MouseDisaster_Story_ToggleR01>
   <MouseDisaster_Story_DebugR01>R-01 她的名字 / 预览文本，不改达成状态</MouseDisaster_Story_DebugR01>
-  <MouseDisaster_Story_ToggleN004Return>N-004 放逐回访</MouseDisaster_Story_ToggleN004Return>
-  <MouseDisaster_Story_DebugN004Return>N-004 放逐回访 / 强制触发</MouseDisaster_Story_DebugN004Return>
-  <MouseDisaster_Story_ToggleN007Return>N-007 康复回访</MouseDisaster_Story_ToggleN007Return>
-  <MouseDisaster_Story_DebugN007Return>N-007 康复回访 / 强制触发</MouseDisaster_Story_DebugN007Return>
+  <MouseDisaster_Story_ToggleN004Return>N-004-R 放逐回访</MouseDisaster_Story_ToggleN004Return>
+  <MouseDisaster_Story_DebugN004Return>N-004-R 放逐回访 / 强制触发</MouseDisaster_Story_DebugN004Return>
+  <MouseDisaster_Story_ToggleN007Return>N-007-R 康复回访</MouseDisaster_Story_ToggleN007Return>
+  <MouseDisaster_Story_DebugN007Return>N-007-R 康复回访 / 强制触发</MouseDisaster_Story_DebugN007Return>
   <MouseDisaster_Story_ToggleEcho>穗音插话与章节过渡</MouseDisaster_Story_ToggleEcho>
   <MouseDisaster_Story_ToggleS01>S-01 空投失误记录</MouseDisaster_Story_ToggleS01>
   <MouseDisaster_Story_DebugS01>S-01 空投失误记录 / 强制触发</MouseDisaster_Story_DebugS01>

@@ -18,6 +18,11 @@ $ErrorActionPreference = "Stop"
 
 $expectedPackageId = "nanaloveyuki.mouse.disaster.famine.continued"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$publishedFileIdPath = Join-Path $repoRoot "About\PublishedFileId.txt"
+if (-not (Test-Path -LiteralPath $publishedFileIdPath -PathType Leaf) -or
+    [string]::IsNullOrWhiteSpace((Get-Content -LiteralPath $publishedFileIdPath -Raw))) {
+    throw "Required Workshop ID file is missing or empty: $publishedFileIdPath"
+}
 $projectPaths = @(
     (Join-Path $repoRoot "1.6\Source\MouseDisasterYear.csproj"),
     (Join-Path $repoRoot "Guard\Source\MouseDisasterContinuedGuard.csproj")
@@ -172,3 +177,4 @@ foreach ($file in $sourceFiles) {
 
 Write-Host "Deployed MouseDisaster $Configuration build to: $targetFull"
 Write-Host "Verified $($sourceFiles.Count) file(s) with SHA-256."
+Write-Host "Workshop ID verified: $((Get-Content -LiteralPath $publishedFileIdPath -Raw).Trim())"

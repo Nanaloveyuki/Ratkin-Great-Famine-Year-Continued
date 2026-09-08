@@ -16,6 +16,22 @@ namespace MouseDisaster
             "S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13", "S14"
         };
 
+        private static readonly Dictionary<string, string[]> AttitudeSources = new Dictionary<string, string[]>
+        {
+            { "N004", new[] { "MouseDisaster_ShatteredMother" } },
+            { "N005", new[] { "MouseDisaster_ChildExchange" } },
+            { "N007", new[] {
+                "MouseDisaster_PlagueWanderers", "MouseDisaster_PlagueTraderCaravan",
+                "MouseDisaster_PlaguePassersby", "MouseDisaster_PlagueRefugees", "MouseDisaster_PlagueOrphan",
+                "MouseDisaster_PlagueBeggarGroup", "MouseDisaster_PlagueThiefGroup",
+                "MouseDisaster_PlagueLaboringRefugees", "MouseDisaster_PlagueStrongSiege"
+            } },
+            { "N008", new[] { "N008" } }
+        };
+
+        public static IReadOnlyList<string> GetAttitudeSources(string id) =>
+            id != null && AttitudeSources.TryGetValue(id, out var sources) ? sources : Array.Empty<string>();
+
         public static bool Enabled(string id, IEnumerable<string> disabled)
         {
             return SettingIds.Contains(id) && !(disabled?.Contains(id) ?? false);
