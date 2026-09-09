@@ -263,7 +263,7 @@ namespace MouseDisaster
 
         public static void TryRecoverIncidentVisitorFromPlayerGuest(Pawn pawn)
         {
-            if (pawn == null || pawn.Dead || !IsMouseDisasterIncidentVisitor(pawn) || pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony || MouseDisasterVisitorUtility.IsShelteredVisitor(pawn))
+            if (pawn == null || pawn.Dead || pawn.Downed || !IsMouseDisasterIncidentVisitor(pawn) || IsPlayerAffiliatedRatkin(pawn) || MouseDisasterVisitorUtility.IsShelteredVisitor(pawn))
             {
                 return;
             }

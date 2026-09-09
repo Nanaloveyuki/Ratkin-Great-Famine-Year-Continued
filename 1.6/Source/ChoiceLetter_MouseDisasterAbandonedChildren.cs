@@ -42,7 +42,9 @@ namespace MouseDisaster
                 DiaOption accept = new DiaOption("MouseDisaster_N004_Accept".Translate());
                 accept.action = delegate
                 {
+                    validPawns = GetValidPawns();
                     ResolveDecision(MouseDisasterN004Decision.Accepted);
+                    MouseDisasterUtility.CancelAbandonedDelivery(mother, children);
                     for (int i = 0; i < validPawns.Count; i++)
                     {
                         validPawns[i].SetFaction(Faction.OfPlayer);
@@ -56,14 +58,15 @@ namespace MouseDisaster
                 DiaOption reject = new DiaOption("MouseDisaster_N004_Reject".Translate());
                 reject.action = delegate
                 {
+                    validPawns = GetValidPawns();
                     ResolveDecision(MouseDisasterN004Decision.Rejected);
                     MouseDisasterUtility.CancelAbandonedDelivery(mother, children);
-                    if (map != null && mother != null && mother.Spawned && !mother.Dead)
+                    if (IsEligiblePawn(mother) && mother.Spawned)
                     {
                         MouseDisasterUtility.MakeTravelAndExitLord(map, new[] { mother }, map.Center);
                     }
 
-                    List<Pawn> livingChildren = (children ?? new List<Pawn>()).Where(child => child != null && child.Spawned && !child.Dead).ToList();
+                    List<Pawn> livingChildren = (children ?? new List<Pawn>()).Where(IsEligiblePawn).ToList();
                     for (int i = 0; i < livingChildren.Count; i++)
                     {
                         livingChildren[i].SetFaction(null);
@@ -78,7 +81,8 @@ namespace MouseDisaster
                 ignore.action = delegate
                 {
                     ResolveDecision(MouseDisasterN004Decision.Ignored);
-                    MouseDisasterUtility.RegisterAbandonedDelivery(mother, children, foodCell);
+                    if (IsEligiblePawn(mother) && mother.Spawned)
+                        MouseDisasterUtility.RegisterAbandonedDelivery(mother, (children ?? new List<Pawn>()).Where(IsEligiblePawn), foodCell);
                     Find.LetterStack.RemoveLetter(this);
                 };
                 ignore.resolveTree = true;
@@ -129,17 +133,23 @@ namespace MouseDisaster
         private List<Pawn> GetValidPawns()
         {
             List<Pawn> result = new List<Pawn>();
-            if (mother != null && !mother.Dead && mother.Spawned)
+            if (IsEligiblePawn(mother))
             {
                 result.Add(mother);
             }
 
             if (children != null)
             {
-                result.AddRange(children.Where(child => child != null && !child.Dead && child.Spawned));
+                result.AddRange(children.Where(IsEligiblePawn));
             }
 
             return result.Distinct().ToList();
+        }
+
+        private bool IsEligiblePawn(Pawn pawn)
+        {
+            return map != null && pawn != null && !pawn.Dead && !pawn.Destroyed && pawn.MapHeld == map &&
+                   !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn);
         }
     }
 }

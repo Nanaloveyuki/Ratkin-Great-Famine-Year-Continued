@@ -46,7 +46,7 @@ namespace MouseDisaster
                 MouseDisasterUtility.StripRatEggInventory(child);
                 MouseDisasterUtility.PrepareNonCaravanBabyPawn(child, foodCell);
                 child.health.AddHediff(MouseDisasterDefOf.MouseDisaster_AbandonedEgg);
-                if (MouseDisasterUtility.IsLeadYourPetEnabled && !child.Position.InHorDistOf(foodCell, 3f))
+                if (MouseDisasterUtility.IsLeadYourPetEnabled && !child.Downed && !child.Position.InHorDistOf(foodCell, 3f))
                 {
                     child.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
                 }

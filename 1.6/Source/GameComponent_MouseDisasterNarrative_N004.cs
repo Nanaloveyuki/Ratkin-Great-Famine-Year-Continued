@@ -194,23 +194,30 @@ namespace MouseDisaster
             }
 
             Map map = ResolveN004Map(record);
-            Pawn prey = record.children.FirstOrDefault(child => IsPresentOnMap(child) && child.Faction != Faction.OfPlayer);
+            Pawn prey = record.children.FirstOrDefault(child => IsPresentOnMap(child) && child.Spawned && child.Map == map &&
+                !MouseDisasterUtility.IsPlayerAffiliatedRatkin(child));
             if (map != null && prey != null)
             {
                 List<Pawn> predators = map.mapPawns.AllPawnsSpawned
-                    .Where(pawn => pawn != null && !pawn.Dead && pawn.IsAnimal && pawn.Faction == null && pawn.RaceProps.predator && pawn.meleeVerbs?.TryGetMeleeVerb(null) != null && pawn.CurJobDef != JobDefOf.PredatorHunt)
+                    .Where(pawn => pawn != null && !pawn.Dead && !pawn.Downed && pawn.IsAnimal && pawn.Faction == null && pawn.RaceProps.predator && pawn.meleeVerbs?.TryGetMeleeVerb(null) != null && pawn.CurJobDef != JobDefOf.PredatorHunt &&
+                        pawn.CanReach(prey, PathEndMode.Touch, Danger.Deadly))
                     .ToList();
                 if (predators.TryRandomElement(out Pawn predator))
                 {
-                    predator.jobs.StartJob(JobMaker.MakeJob(JobDefOf.PredatorHunt, prey), JobCondition.InterruptForced);
-                    record.predatorHuntStarted = true;
-                    return;
+                    Job huntJob = JobMaker.MakeJob(JobDefOf.PredatorHunt, prey);
+                    predator.jobs.StartJob(huntJob, JobCondition.InterruptForced);
+                    if (predator.CurJob == huntJob && predator.CurJobDef == JobDefOf.PredatorHunt)
+                    {
+                        record.predatorHuntStarted = true;
+                        return;
+                    }
                 }
             }
 
             if (CurrentNarrativeTick >= record.predatorHuntDeadlineTick && map != null)
             {
-                List<Pawn> remainingChildren = record.children.Where(IsPresentOnMap).ToList();
+                List<Pawn> remainingChildren = record.children.Where(child => IsPresentOnMap(child) && child.Spawned && child.Map == map &&
+                    !MouseDisasterUtility.IsPlayerAffiliatedRatkin(child)).ToList();
                 if (remainingChildren.Count > 0)
                 {
                     MouseDisasterUtility.MakeTravelAndExitLord(map, remainingChildren, map.Center);

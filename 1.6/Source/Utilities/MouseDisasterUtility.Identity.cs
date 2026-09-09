@@ -259,7 +259,7 @@ namespace MouseDisaster
 
         private static bool CanAutoOrderJob(Pawn pawn, bool requireStarving)
         {
-            if (pawn?.jobs == null || pawn.Dead || !pawn.Spawned)
+            if (pawn?.jobs == null || pawn.Dead || pawn.Downed || !pawn.Spawned)
             {
                 return false;
             }

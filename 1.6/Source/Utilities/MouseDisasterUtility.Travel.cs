@@ -22,7 +22,7 @@ namespace MouseDisaster
         public static Job ExitMapJob(Pawn pawn)
         {
             if (IsPendingAbandonedChild(pawn)) return null;
-            if (pawn?.Map == null)
+            if (pawn?.Map == null || pawn.Dead || pawn.Downed || !pawn.Spawned)
             {
                 return null;
             }
