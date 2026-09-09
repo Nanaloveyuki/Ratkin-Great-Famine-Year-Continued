@@ -193,13 +193,32 @@ namespace MouseDisaster
             {
                 Lord lord = pawn.GetLord();
                 if (lord != null) oldLords.Add(lord);
+                bool preserveDuty = !group.hostile && !group.leaving && !(lord?.LordJob is LordJob_AssaultColony);
+                var duty = preserveDuty ? pawn.mindState.duty : null;
+                MentalStateDef visitorState = !group.hostile && !group.leaving && group.attitude != MouseDisasterEventAttitude.Friendly &&
+                    (MouseDisasterUtility.IsInBeggarMentalState(pawn) || MouseDisasterUtility.IsInThiefMentalState(pawn))
+                    ? pawn.MentalStateDef : null;
                 if (group.hostile || lord?.LordJob is LordJob_AssaultColony)
                 {
                     lord?.RemovePawn(pawn);
                     pawn.jobs?.StopAll();
                     pawn.mindState.duty = null;
                 }
-                if (pawn.Faction != faction) pawn.SetFaction(faction);
+                if (pawn.Faction != faction)
+                {
+                    // SetFaction reports ChangedFaction to the lord and clears mental state/duty.
+                    // Detach first so a peaceful cohort does not lose its lord or trigger departure transitions.
+                    if (preserveDuty) lord?.RemovePawn(pawn);
+                    pawn.SetFaction(faction);
+                    if (visitorState != null && !pawn.mindState.mentalStateHandler.TryStartMentalState(
+                        visitorState, forced: true, forceWake: true, transitionSilently: true))
+                        Log.Warning("[MouseDisaster] Could not restore visitor state after faction change: " + pawn);
+                    if (preserveDuty)
+                    {
+                        lord?.AddPawns(new[] { pawn }, updateDuties: false);
+                        pawn.mindState.duty = duty;
+                    }
+                }
                 if (group.hostile || group.attitude == MouseDisasterEventAttitude.Friendly)
                     pawn.mindState?.mentalStateHandler?.Reset();
                 if (!group.hostile && !group.leaving) MapComponent_MouseDisasterFoodTargets.Prime(pawn);

@@ -51,7 +51,13 @@ public static class FleeUtility { public static Job FleeJob(Pawn pawn,Thing dang
 public class Inventory { public List<Thing> innerContainer=new List<Thing>(); }
 public class FoodNeed { public HungerCategory CurCategory; }
 public class Needs { public FoodNeed food=new FoodNeed(); }
-public class MentalHandler { public int resets; public void Reset() { resets++; } }
+public class MentalStateDef {}
+public static class Log { public static void Warning(string message) { throw new Exception(message); } }
+public class MentalHandler {
+    public int resets; public MentalStateDef state;
+    public void Reset() { resets++; state=null; }
+    public bool TryStartMentalState(MentalStateDef def,bool forced,bool forceWake,bool transitionSilently) { state=def; return true; }
+}
 public class Mind { public object duty; public MentalHandler mentalStateHandler=new MentalHandler(); }
 public class Jobs { public int stops; public void StopAll() { stops++; } }
 public class Pawn:Thing {
@@ -59,7 +65,11 @@ public class Pawn:Thing {
     public DevelopmentalStage DevelopmentalStage=DevelopmentalStage.Adult;
     public PawnKindDef kindDef=new PawnKindDef(); public bool burning; public bool IsBurning()=>burning;
     public Inventory inventory=new Inventory(); public Needs needs=new Needs(); public Mind mindState=new Mind(); public Jobs jobs=new Jobs(); public Lord lord;
-    public void SetFaction(Faction faction) { Faction=faction; }
+    public MentalStateDef MentalStateDef=>mindState.mentalStateHandler.state;
+    public void SetFaction(Faction faction) {
+        if(lord!=null) { lord.changedFactionLosses++; lord.RemovePawn(this); }
+        Faction=faction; mindState.mentalStateHandler.Reset(); mindState.duty=null; jobs.StopAll();
+    }
     public Lord GetLord()=>lord;
     public bool WillEat(Thing food,Pawn getter,bool careIfNotAcceptableForTitle,bool allowVenerated)=>willEat;
     public bool CanReserve(Thing food,int maxPawns,int count)=>canReserve;
@@ -87,7 +97,9 @@ public class GameComponent { public virtual void ExposeData() {} public virtual 
 public class GameComponent_MouseDisasterPawnGeneration { public HashSet<int> pending=new HashSet<int>(); public bool HasPendingBehaviorGroup(int id)=>pending.Contains(id); }
 public class Lord {
     public List<Pawn> ownedPawns=new List<Pawn>(); public object LordJob; public Faction faction;
-    public void RemovePawn(Pawn p) { ownedPawns.Remove(p); p.lord=null; }
+    public int changedFactionLosses;
+    public void RemovePawn(Pawn p) { ownedPawns.Remove(p); p.lord=null; p.mindState.duty=null; }
+    public void AddPawns(IEnumerable<Pawn> pawns,bool updateDuties) { foreach(var p in pawns) { ownedPawns.Add(p); p.lord=this; } }
 }
 public class LordJob_AssaultColony {
     public LordJob_AssaultColony(Faction faction,bool canKidnap,bool canTimeoutOrFlee,bool canSteal) {}
@@ -107,6 +119,9 @@ public class Settings {
 }
 public static class MouseDisasterMod { public static Settings Settings=new Settings(); }
 public static class MouseDisasterUtility {
+    public static MentalStateDef begging=new MentalStateDef(),thieving=new MentalStateDef();
+    public static bool IsInBeggarMentalState(Pawn pawn)=>pawn.MentalStateDef==begging;
+    public static bool IsInThiefMentalState(Pawn pawn)=>pawn.MentalStateDef==thieving;
     public static Faction neutral=new Faction(),hostile=new Faction(),friendly=new Faction(); public static int exits;
     public static bool IsRatkin(Pawn pawn)=>true;
     public static bool IsPlayerAffiliatedRatkin(Pawn pawn)=>pawn==null || pawn.player || pawn.Faction==Faction.OfPlayer;
@@ -148,6 +163,39 @@ public static class Harness {
     }
     private static int Key(bool forbidden=false)=>MapComponent_MouseDisasterFoodTargets.Key(false,true,true,false,forbidden,false,true,false,true,false,false,false,FoodPreferability.Undefined);
     public static string Run() {
+        foreach(var attitude in new[]{MouseDisasterEventAttitude.Neutral,MouseDisasterEventAttitude.HostileLeaning,MouseDisasterEventAttitude.FriendlyLeaning,MouseDisasterEventAttitude.Friendly,MouseDisasterEventAttitude.Hostile}) {
+            foreach(var state in new[]{MouseDisasterUtility.begging,MouseDisasterUtility.thieving,(MentalStateDef)null}) {
+                var behavior=Reset(); var testMap=NewMap(); var visitor=NewPawn(testMap,2000);
+                visitor.Faction=new Faction(); visitor.mindState.mentalStateHandler.state=state;
+                var originalDuty=new object(); visitor.mindState.duty=originalDuty;
+                var originalLord=new Lord { faction=visitor.Faction,LordJob=new object() };
+                originalLord.AddPawns(new[]{visitor},false);
+                int groupId=Group(behavior,attitude,visitor);
+                bool hostile=attitude==MouseDisasterEventAttitude.Hostile;
+                Check(originalLord.changedFactionLosses==0,"faction switch notified original lord");
+                Check(hostile ? visitor.GetLord()!=originalLord : visitor.GetLord()==originalLord,"visitor lord retention");
+                Check(hostile || ReferenceEquals(visitor.mindState.duty,originalDuty),"faction switch erased visitor duty");
+                Check(visitor.MentalStateDef==(hostile || attitude==MouseDisasterEventAttitude.Friendly ? null : state),"visitor mental state retention");
+                Check(hostile || originalLord.faction==visitor.Faction,"retained lord faction mismatch");
+                behavior.Register(groupId,new[]{visitor});
+                Check(hostile || originalLord.ownedPawns.Count==1,"repeated registration duplicated lord membership");
+            }
+        }
+        foreach(var state in new[]{MouseDisasterUtility.begging,MouseDisasterUtility.thieving}) {
+            var behavior=Reset(); var visitor=NewPawn(NewMap(),2001);
+            visitor.Faction=new Faction(); visitor.mindState.mentalStateHandler.state=state;
+            Group(behavior,MouseDisasterEventAttitude.Neutral,visitor);
+            Check(visitor.GetLord()==null && visitor.MentalStateDef==state,"standalone visitor lost job-giver mental state");
+        }
+        {
+            var behavior=Reset(); var testMap=NewMap(); var visitors=new[]{NewPawn(testMap,2002),NewPawn(testMap,2003)};
+            var originalFaction=new Faction(); var originalLord=new Lord { faction=originalFaction,LordJob=new object() };
+            originalLord.AddPawns(visitors,false);
+            foreach(var visitor in visitors) { visitor.Faction=originalFaction; visitor.mindState.duty=new object(); }
+            Group(behavior,MouseDisasterEventAttitude.Neutral,visitors);
+            Check(originalLord.ownedPawns.Count==2 && visitors.All(p=>p.GetLord()==originalLord && p.mindState.duty!=null),"whole cohort lost lord or duty");
+            Check(originalLord.changedFactionLosses==0,"cohort conversion triggered pawn-lost transition");
+        }
         Check(MouseDisasterEventPolicy.Normalize((MouseDisasterEventAttitude)99)==MouseDisasterEventAttitude.Neutral,"invalid attitude");
         foreach(MouseDisasterEventAttitude a in Enum.GetValues(typeof(MouseDisasterEventAttitude))) {
             Check(MouseDisasterEventPolicy.Compose(true,false,a).HasFlag(MouseDisasterPawnBehavior.SeekFood),"thief food module");
