@@ -31,6 +31,7 @@
     <li>lezhizhong.mouse.disaster.famine</li>
   </incompatibleWith>
   <loadAfter>
+    <li>Nanaloveyuki.IrisMenus</li>
     <li>brrainz.harmony</li>
     <li>Ludeon.RimWorld</li>
     <li>Ludeon.RimWorld.Biotech</li>
