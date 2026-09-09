@@ -225,7 +225,7 @@ namespace MouseDisaster
 
             if (leadYourPetTryStartRatkinMotherLeashMethod == null && leadYourPetComponentType != null)
             {
-                leadYourPetTryStartRatkinMotherLeashMethod = AccessTools.Method(leadYourPetComponentType, "TryStartRatkinMotherLeash");
+                leadYourPetTryStartRatkinMotherLeashMethod = AccessTools.Method(leadYourPetComponentType, "TryStartRatkinMotherLeash", new[] { typeof(Pawn), typeof(Pawn), typeof(bool) });
             }
 
             if (leadYourPetStartLeashMethod == null && leadYourPetComponentType != null)
@@ -235,12 +235,12 @@ namespace MouseDisaster
 
             if (leadYourPetTryAssignTravelMouseEggsMethod == null && leadYourPetComponentType != null)
             {
-                leadYourPetTryAssignTravelMouseEggsMethod = AccessTools.Method(leadYourPetComponentType, "TryAssignTravelMouseEggs");
+                leadYourPetTryAssignTravelMouseEggsMethod = AccessTools.Method(leadYourPetComponentType, "TryAssignTravelMouseEggs", new[] { typeof(Lord) });
             }
 
             if (leadYourPetAnchorLeashedPetsToCellMethod == null && leadYourPetComponentType != null)
             {
-                leadYourPetAnchorLeashedPetsToCellMethod = AccessTools.Method(leadYourPetComponentType, "AnchorLeashedPetsToCell");
+                leadYourPetAnchorLeashedPetsToCellMethod = AccessTools.Method(leadYourPetComponentType, "AnchorLeashedPetsToCell", new[] { typeof(Pawn), typeof(IntVec3) });
             }
 
             if (leadYourPetEndLeashForPetMethod == null && leadYourPetComponentType != null)

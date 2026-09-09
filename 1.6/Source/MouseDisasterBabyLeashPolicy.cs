@@ -17,7 +17,8 @@ namespace MouseDisaster
         public static bool IsKnownLeadYourPetPackageId(string packageId)
         {
             return !string.IsNullOrWhiteSpace(packageId) &&
-                   (packageId.Equals(CurrentLeadYourPetPackageId, StringComparison.OrdinalIgnoreCase) ||
+                   (packageId.Equals("nanaloveyuki.leadyourpet.continued", StringComparison.OrdinalIgnoreCase) ||
+                    packageId.Equals(CurrentLeadYourPetPackageId, StringComparison.OrdinalIgnoreCase) ||
                     packageId.Equals(LegacyLeadYourPetPackageId, StringComparison.OrdinalIgnoreCase));
         }
 
