@@ -2,7 +2,7 @@
 <loadFolders>
   <v1.6>
     <li>Guard</li>
-    <li IfModNotActive="lezhizhong.mouse.disaster.famine">/</li>
-    <li IfModNotActive="lezhizhong.mouse.disaster.famine">1.6</li>
+    <li IfModNotActive="lezhizhong.mouse.disaster.famine,local.mousedisaster.greatfamine">/</li>
+    <li IfModNotActive="lezhizhong.mouse.disaster.famine,local.mousedisaster.greatfamine">1.6</li>
   </v1.6>
 </loadFolders>

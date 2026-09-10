@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgePatches.cs" />
+    <Compile Include="JobDriver_MotherFeedBaby.cs" />
     <Compile Include="Incidents\RefugeeMassacre.cs" />
     <Compile Include="MapComponent_MouseDisasterPredation.cs" />
     <Compile Include="MouseDisasterFeeding.cs" />

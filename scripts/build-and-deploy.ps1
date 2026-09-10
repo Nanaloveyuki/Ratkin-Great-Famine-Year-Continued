@@ -25,11 +25,13 @@ if (-not (Test-Path -LiteralPath $publishedFileIdPath -PathType Leaf) -or
 }
 $projectPaths = @(
     (Join-Path $repoRoot "1.6\Source\MouseDisasterYear.csproj"),
-    (Join-Path $repoRoot "Guard\Source\MouseDisasterContinuedGuard.csproj")
+    (Join-Path $repoRoot "Guard\Source\MouseDisasterContinuedGuard.csproj"),
+    (Join-Path $repoRoot "Compat\Optimized\AL_MouseDisaster.csproj")
 )
 $sourceAssemblies = @(
     (Join-Path $repoRoot "1.6\Assemblies\MouseDisaster.dll"),
-    (Join-Path $repoRoot "Guard\Assemblies\MouseDisasterContinuedGuard.dll")
+    (Join-Path $repoRoot "Guard\Assemblies\MouseDisasterContinuedGuard.dll"),
+    (Join-Path $repoRoot "1.6\Assemblies\AL_MouseDisaster.dll")
 )
 $modsRootFull = [System.IO.Path]::GetFullPath($GameModsRoot).TrimEnd([char[]]"\/")
 if ([string]::IsNullOrWhiteSpace($GameModPath)) {
@@ -136,7 +138,7 @@ foreach ($relativeDirectory in @("Guard\Assemblies", "Guard\Languages")) {
         $sourceFiles.Add($file)
     }
 }
-foreach ($relativeFile in @("LoadFolders.xml", "NOTICE", "README.md", "1.6\Assemblies\MouseDisaster.dll")) {
+foreach ($relativeFile in @("LoadFolders.xml", "NOTICE", "README.md", "1.6\Assemblies\MouseDisaster.dll", "1.6\Assemblies\AL_MouseDisaster.dll")) {
     $filePath = Join-Path $repoRoot $relativeFile
     if (-not (Test-Path -LiteralPath $filePath -PathType Leaf)) {
         throw "Required deployment file not found: $filePath"

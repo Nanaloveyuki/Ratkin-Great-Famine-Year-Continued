@@ -9,7 +9,8 @@ namespace MouseDisasterContinuedGuard
 
         static DuplicateModGuard()
         {
-            if (ModLister.GetActiveModWithIdentifier(OriginalPackageId, true) == null)
+            if (ModLister.GetActiveModWithIdentifier(OriginalPackageId, true) == null &&
+                ModLister.GetActiveModWithIdentifier("local.mousedisaster.greatfamine", true) == null)
             {
                 return;
             }
