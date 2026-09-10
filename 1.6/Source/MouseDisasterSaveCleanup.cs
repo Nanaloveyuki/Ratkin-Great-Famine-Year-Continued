@@ -30,6 +30,22 @@ namespace MouseDisaster
             if (document.Root?.Name != "savegame" || game == null)
                 throw new InvalidOperationException("Expected a RimWorld savegame/game document.");
 
+            // A quest owns its pending world objects and parts. Remove it as a unit.
+            foreach (XElement quest in game.Descendants("quests").Elements().Where(n =>
+                plan.OwnedDefs.Contains((string)n.Element("root") ?? "")).ToList())
+                Remove(quest);
+
+            // Keep visited maps attached to the same world object after removing the custom class.
+            foreach (XElement site in game.Descendants().Where(n => IsOwnedClass(n) &&
+                ((string)n.Attribute("Class")).Split(',')[0].Trim() == "MouseDisaster.MouseDisasterRefugeeSite").ToList())
+            {
+                site.SetAttributeValue("Class", "RimWorld.Planet.Site");
+                site.SetElementValue("def", "Site");
+                Remove(site.Element("refugeeResidents"));
+                Remove(site.Element("refugeeCleared"));
+                ReplacedDefs++;
+            }
+
             foreach (XElement node in game.Descendants().Where(IsOwnedClass).ToList())
             {
                 if (node.Document == null) continue;
@@ -59,10 +75,12 @@ namespace MouseDisaster
                 {
                     if (node.Document == null) continue;
                     XElement job = node.Ancestors().FirstOrDefault(n => n.Name == "curJob");
+                    XElement queuedJob = node.Ancestors().FirstOrDefault(n => n.Name == "li" && n.Parent?.Name == "jobs");
                     XElement reservation = node.Ancestors().FirstOrDefault(n => n.Name == "li" &&
                         (n.Parent?.Name == "reservations" || (n.Parent?.Name == "list" &&
                             n.Ancestors().Any(a => a.Name == "pawnDestinationReservationManager"))));
                     if (job != null) ClearCurrentJob(job.Parent);
+                    else if (queuedJob != null) Remove(queuedJob);
                     else if (reservation != null) Remove(reservation);
                     else if (node.Name == "li") Remove(node);
                     else node.Value = "null";
@@ -99,6 +117,7 @@ namespace MouseDisaster
         {
             XElement owner = node.Parent;
             if (node.Name == "li") { Remove(node); return; }
+            if (node.Name == "recipe" && owner.Parent?.Name == "bills") { Remove(owner); return; }
             if (node.Name == "def" && owner.Name == "curJob") { ClearCurrentJob(owner.Parent); return; }
             if (node.Name == "def" && plan.ThingDefs.Contains(node.Value) && owner.Element("id") != null)
             {
@@ -136,6 +155,18 @@ namespace MouseDisaster
             if (node?.Parent == null) return;
             foreach (XElement entry in node.DescendantsAndSelf())
             {
+                if (entry.Parent?.Name == "quests" && entry.Element("root") != null)
+                {
+                    AddReference(entry, "id", "Quest_");
+                    string questId = (string)entry.Element("id");
+                    int index = 0;
+                    foreach (XElement part in entry.Element("parts")?.Elements() ?? Enumerable.Empty<XElement>())
+                        removedReferences.Add("QuestPart_" + questId + "_" + index++);
+                }
+                if (entry.Element("def") != null && (entry.Name == "worldObject" || entry.Parent?.Name == "worldObjects"))
+                    AddReference(entry, "ID", "WorldObject_");
+                if (entry.Parent?.Name == "bills" && entry.Element("recipe") != null)
+                    AddReference(entry, "loadID", "Bill_" + entry.Element("recipe").Value + "_");
                 if (entry.Element("id") != null && entry.Element("def") != null)
                     removedReferences.Add("Thing_" + entry.Element("id").Value);
                 if (entry.Parent?.Name == "xenogenes" || entry.Parent?.Name == "endogenes")
