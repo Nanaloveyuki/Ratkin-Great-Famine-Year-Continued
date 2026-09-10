@@ -249,7 +249,7 @@ $debug = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterNar
 Assert-Narrative ($debug.Contains('childGetter = () => IncidentDebugEntries')) 'Event debug groups are not lazy'
 $catalog = Get-Content (Join-Path $root '1.6/Source/MouseDisasterIncidentCatalog.cs') -Raw
 $eventIds = @([regex]::Matches($catalog, 'new MouseDisasterIncidentEntry\("[ON]-\d{3}", "([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
-Assert-Narrative ($eventIds.Count -eq 50 -and @($eventIds | Sort-Object -Unique).Count -eq 50) 'Incident catalog membership changed'
+Assert-Narrative ($eventIds.Count -eq 51 -and @($eventIds | Sort-Object -Unique).Count -eq 51) 'Incident catalog membership changed'
 
 
 if ($Build) {

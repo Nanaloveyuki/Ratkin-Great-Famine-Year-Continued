@@ -106,11 +106,15 @@ namespace MouseDisaster
     {
         private GameComponent_MouseDisasterNarrative Narrative => Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
         public Alert_MouseDisasterNarrative() { defaultPriority = AlertPriority.Medium; }
-        public override string GetLabel() => "MouseDisaster_Story_AlertLabel".Translate();
+        public override string GetLabel() => Suin
+            ? "MouseDisaster_Story_AlertTrustLabel".Translate(Narrative?.NarratorTrust ?? 0).ToString()
+            : "MouseDisaster_Story_AlertLabel".Translate().ToString();
+        private bool Suin => Find.Storyteller?.def?.defName == GameComponent_MouseDisasterNarrative.NarratorDefName;
         public override TaggedString GetExplanation() => "MouseDisaster_Story_AlertText".Translate(
-            Narrative?.UnreadNarrativeCount ?? 0, Narrative?.PendingNarrativeCount ?? 0);
+            Narrative?.UnreadNarrativeCount ?? 0, Narrative?.PendingNarrativeCount ?? 0).ToString() +
+            (Suin ? "\n\n" + "MouseDisaster_Story_Trust".Translate(Narrative?.NarratorTrust ?? 0).ToString() : "");
         public override AlertReport GetReport() => Narrative != null &&
-            (Narrative.UnreadNarrativeCount > 0 || Narrative.PendingNarrativeCount > 0);
+            (Suin || Narrative.UnreadNarrativeCount > 0 || Narrative.PendingNarrativeCount > 0);
         protected override void OnClick() { Narrative?.OpenNarrativeJournal(); }
     }
 }

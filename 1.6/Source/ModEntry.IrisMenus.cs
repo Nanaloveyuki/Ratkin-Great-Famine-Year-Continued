@@ -9,11 +9,12 @@ namespace MouseDisaster
         private enum SettingsPage
         {
             Safety,
+            General,
+            PawnBehavior,
             OriginalEvents,
             ContinuedEvents,
             Endings,
-            General,
-            Experimental
+            Developer
         }
 
         private delegate void RegisterSubItemListing(Mod owner, string pageId, Func<string> title,

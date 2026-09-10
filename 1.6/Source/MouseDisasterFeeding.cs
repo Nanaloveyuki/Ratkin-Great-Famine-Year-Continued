@@ -28,7 +28,8 @@ namespace MouseDisaster
         public static bool HasTemporarySatiety(Pawn pawn) =>
             pawn?.health?.hediffSet?.HasHediff(MouseDisasterDefOf.MouseDisaster_GuanyinTuSatiety) == true;
 
-        public static bool IsSeekingSuppressed(Pawn pawn) => HasSatisfied(pawn) || HasTemporarySatiety(pawn);
+        public static bool ShouldLeaveAfterFed(Pawn pawn) => MouseDisasterMod.Settings?.leaveAfterFed != false && HasSatisfied(pawn);
+        public static bool IsSeekingSuppressed(Pawn pawn) => ShouldLeaveAfterFed(pawn) || HasTemporarySatiety(pawn);
 
         internal static bool IsFull(float level) =>
             !float.IsNaN(level) && !float.IsInfinity(level) && level >= SatisfiedFoodLevel;
@@ -49,8 +50,9 @@ namespace MouseDisaster
             if (!completed && !HasTemporarySatiety(pawn))
             {
                 state.CompleteFeeding(pawn);
-                if (pawn.MentalStateDef == MouseDisasterDefOf.MouseDisaster_BeggingState ||
-                    pawn.MentalStateDef == MouseDisasterDefOf.MouseDisaster_ThievingState)
+                if (MouseDisasterMod.Settings?.leaveAfterFed != false &&
+                    (pawn.MentalStateDef == MouseDisasterDefOf.MouseDisaster_BeggingState ||
+                    pawn.MentalStateDef == MouseDisasterDefOf.MouseDisaster_ThievingState))
                     pawn.mindState?.mentalStateHandler?.Reset();
             }
             float malnutrition = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Malnutrition)?.Severity ?? 0f;

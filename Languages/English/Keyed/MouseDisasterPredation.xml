@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisaster_RefugeeMassacre_MenuLabel>Refugee massacre</MouseDisaster_RefugeeMassacre_MenuLabel>
+  <MouseDisaster_Predation_Settings>Refugee predation</MouseDisaster_Predation_Settings>
+  <MouseDisaster_Predation_Chance>Chance of predators targeting each arrival: {0}%</MouseDisaster_Predation_Chance>
+  <MouseDisaster_Predation_FightBack>Refugees fight back against predators</MouseDisaster_Predation_FightBack>
+  <MouseDisaster_Predation_FightBack_Tip>When disabled, refugees flee instead of retaliating. Those incapable of violence cannot fight back.</MouseDisaster_Predation_FightBack_Tip>
+  <MouseDisaster_Predation_FollowDifficulty>Outside predators follow difficulty after prey runs out</MouseDisaster_Predation_FollowDifficulty>
+  <MouseDisaster_Predation_FollowDifficulty_Tip>When enabled, predators without accessible Ratkin prey or corpses seek food normally, following your setting for hunting humans. When disabled, they leave if hungry with no Ratkin food available. They never eat Ratkin corpses in the home area.</MouseDisaster_Predation_FollowDifficulty_Tip>
+  <MouseDisaster_Predation_Label>Refugees hunted</MouseDisaster_Predation_Label>
+  <MouseDisaster_Predation_Text>A wild predator has begun hunting the arriving Ratkin refugees, favoring their children.</MouseDisaster_Predation_Text>
+  <MouseDisaster_OutsidePredators_Label>Outside predators</MouseDisaster_OutsidePredators_Label>
+  <MouseDisaster_OutsidePredators_Text>A predator has followed the Ratkin refugees into this area. It is searching for Ratkin prey.</MouseDisaster_OutsidePredators_Text>
+</LanguageData>

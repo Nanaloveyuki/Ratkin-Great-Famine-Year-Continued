@@ -26,7 +26,7 @@ namespace MouseDisaster
 
             bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn) ||
                 Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.IsWaitingEnvoy(pawn) == true;
-            if (MouseDisasterFeeding.HasSatisfied(pawn))
+            if (MouseDisasterFeeding.ShouldLeaveAfterFed(pawn))
                 return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
             if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
             if (!MouseDisasterUtility.CanBegAgain(pawn))
@@ -72,10 +72,14 @@ namespace MouseDisaster
                 return MouseDisasterUtility.TryCreateImproperFoodJob(pawn, true) ?? TryCreateRecoveryJob(pawn);
             }
 
-            if (!mustStayOnMap && (MouseDisasterUtility.HasBeggarSucceeded(pawn) || pawn.needs?.food?.CurLevelPercentage >= 0.75f))
+            if (!mustStayOnMap && MouseDisasterUtility.HasBeggarSucceeded(pawn))
             {
                 return MouseDisasterUtility.ExitMapJob(pawn);
             }
+
+            if (!mustStayOnMap && pawn.needs?.food?.CurLevelPercentage >= 0.75f)
+                return MouseDisasterMod.Settings?.leaveAfterFed == false
+                    ? null : MouseDisasterUtility.ExitMapJob(pawn);
 
             Job directReliefFoodJob = MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
             if (directReliefFoodJob != null)

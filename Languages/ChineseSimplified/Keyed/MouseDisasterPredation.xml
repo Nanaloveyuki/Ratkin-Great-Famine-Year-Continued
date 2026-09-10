@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisaster_RefugeeMassacre_MenuLabel>鼠难民屠杀</MouseDisaster_RefugeeMassacre_MenuLabel>
+  <MouseDisaster_Predation_Settings>特殊情况：鼠难民被捕食</MouseDisaster_Predation_Settings>
+  <MouseDisaster_Predation_Chance>每批来客遭捕食的概率：{0}%</MouseDisaster_Predation_Chance>
+  <MouseDisaster_Predation_FightBack>鼠难民遭捕食时反击</MouseDisaster_Predation_FightBack>
+  <MouseDisaster_Predation_FightBack_Tip>关闭后鼠难民逃跑而不反击。无法使用暴力的鼠族不能反击。</MouseDisaster_Predation_FightBack_Tip>
+  <MouseDisaster_Predation_FollowDifficulty>外来捕食者无鼠可吃后遵循存档难度</MouseDisaster_Predation_FollowDifficulty>
+  <MouseDisaster_Predation_FollowDifficulty_Tip>开启：无可接近的鼠族或鼠族尸体后，恢复原版觅食，包括存档的“野生捕食者是否捕食人类”设置。关闭：饥饿且无鼠可吃时离图。玩家居住区内的鼠族尸体始终不可吃。</MouseDisaster_Predation_FollowDifficulty_Tip>
+  <MouseDisaster_Predation_Label>鼠难民被捕食</MouseDisaster_Predation_Label>
+  <MouseDisaster_Predation_Text>一只野生捕食者开始追猎这批鼠难民，优先盯上了其中的鼠蛋。</MouseDisaster_Predation_Text>
+  <MouseDisaster_OutsidePredators_Label>外边的捕食者</MouseDisaster_OutsidePredators_Label>
+  <MouseDisaster_OutsidePredators_Text>一只捕食者追随着鼠难民来到这里，正在寻找可以捕食的鼠族。</MouseDisaster_OutsidePredators_Text>
+</LanguageData>

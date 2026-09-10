@@ -36,6 +36,7 @@ namespace MouseDisaster
             MouseDisasterUtility.TryForceRatkinBirthXenotype(pawn, parentPawn);
             MouseDisasterUtility.TryNormalizeColonyBornRatkinBabyBackstory(pawn, parentPawn);
             MouseDisasterUtility.TryAssignBirthMouseDisasterGenes(pawn, parentPawn);
+            MouseDisasterUtility.TryInheritBirthStatus(pawn, parentPawn);
             MouseDisasterUtility.TryRemoveMouseDisasterFatherRelationAfterBirth(pawn, parentPawn);
             MouseDisasterUtility.TryGainBloodlineBirthThought(parentPawn);
             MouseDisasterUtility.RefreshRatkinDevelopmentalPresentation(pawn);

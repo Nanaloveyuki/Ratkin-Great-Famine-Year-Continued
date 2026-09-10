@@ -10,6 +10,7 @@ namespace MouseDisaster
     {
         public static bool Prefix(Pawn pawn, Thing danger, ref Job __result)
         {
+            if (MapComponent_MouseDisasterPredation.ShouldFlee(danger as Pawn, pawn)) return true;
             if ((danger is Pawn || danger is Building_Turret) && !pawn.Downed && !pawn.IsBurning() &&
                 GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.IgnoreCombatFear))
             {

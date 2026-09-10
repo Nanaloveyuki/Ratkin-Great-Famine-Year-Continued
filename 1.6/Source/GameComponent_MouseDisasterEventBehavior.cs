@@ -16,6 +16,7 @@ namespace MouseDisaster
         public MouseDisasterEventAttitude attitude;
         public bool hostile;
         public bool leaving;
+        public List<int> predationRolledMaps = new List<int>();
         public List<Pawn> pawns = new List<Pawn>();
 
         public void ExposeData()
@@ -25,6 +26,8 @@ namespace MouseDisaster
             Scribe_Values.Look(ref attitude, "attitude", MouseDisasterEventAttitude.Neutral);
             Scribe_Values.Look(ref hostile, "hostile");
             Scribe_Values.Look(ref leaving, "leaving");
+            Scribe_Collections.Look(ref predationRolledMaps, "predationRolledMaps", LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit) predationRolledMaps ??= new List<int>();
             Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
             if (Scribe.mode == LoadSaveMode.PostLoadInit) pawns ??= new List<Pawn>();
         }
@@ -128,6 +131,8 @@ namespace MouseDisaster
                 if (byPawn[pawn] == group) added.Add(pawn);
             }
             if (apply) Apply(group, added);
+            foreach (var mapGroup in added.Where(p => p.MapHeld?.IsPlayerHome == true).GroupBy(p => p.MapHeld))
+                mapGroup.Key.GetComponent<MapComponent_MouseDisasterPredation>().Register(group, mapGroup);
         }
 
         public bool TryGetGroup(Pawn pawn, out MouseDisasterEventGroup group)
@@ -260,7 +265,12 @@ namespace MouseDisaster
             {
                 var pending = pendingSpawn.ToList(); pendingSpawn.Clear();
                 foreach (Pawn pawn in pending)
-                    if (TryGetGroup(pawn, out var group)) Apply(group, new[] { pawn });
+                    if (TryGetGroup(pawn, out var group))
+                    {
+                        Apply(group, new[] { pawn });
+                        if (pawn.Map?.IsPlayerHome == true)
+                            pawn.Map.GetComponent<MapComponent_MouseDisasterPredation>().Register(group, new[] { pawn });
+                    }
             }
             if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
             for (int i = groups.Count - 1; i >= 0; i--)

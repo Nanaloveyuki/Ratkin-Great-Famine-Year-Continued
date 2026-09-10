@@ -33,6 +33,22 @@ namespace MouseDisaster
         public const float ScavengeToxicBuildupAbuse = 0.05f;
 
         public bool enableNewContent = true;
+        public float refugeePredationChancePercent = 10f;
+        public bool refugeePredationFightBack = true;
+        public bool outsidePredatorsFollowDifficulty = false;
+        public bool leaveAfterFed = true;
+        public bool countWithoutSuin = true;
+        public bool endingsWithoutSuin = true;
+        public float positiveIncidentDays = 3f;
+        public float negativeIncidentDays = 3f;
+        public Dictionary<string, bool> positiveIncidents = new Dictionary<string, bool>();
+        public Dictionary<string, bool> raidReplacementIncidents = new Dictionary<string, bool>();
+
+        public bool IsPositiveIncident(RimWorld.IncidentDef def) =>
+            positiveIncidents.TryGetValue(def.defName, out bool positive) ? positive :
+            def.letterDef == RimWorld.LetterDefOf.PositiveEvent;
+
+        public bool ReplacesRaid(string name) => raidReplacementIncidents.TryGetValue(name, out bool replace) && replace;
         public bool allowColonistAutoGiveFood = false;
         public Dictionary<string, MouseDisasterEventAttitude> eventAttitudes = new Dictionary<string, MouseDisasterEventAttitude>();
 
@@ -101,6 +117,13 @@ namespace MouseDisaster
 
         public void ResetToDefaults()
         {
+            refugeePredationChancePercent = 10f;
+            refugeePredationFightBack = true;
+            outsidePredatorsFollowDifficulty = false;
+            leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
+            positiveIncidentDays = negativeIncidentDays = 3f;
+            positiveIncidents.Clear();
+            raidReplacementIncidents.Clear();
             eventAttitudes.Clear();
             enableNewContent = true;
             allowColonistAutoGiveFood = false;
@@ -173,6 +196,9 @@ namespace MouseDisaster
 
         public void ClampValues()
         {
+            refugeePredationChancePercent = float.IsNaN(refugeePredationChancePercent) ? 10f : Mathf.Clamp(refugeePredationChancePercent, 0f, 100f);
+            positiveIncidentDays = Mathf.Clamp(positiveIncidentDays, 0f, 60f);
+            negativeIncidentDays = Mathf.Clamp(negativeIncidentDays, 0f, 60f);
             narrativeProgressGoal = Mathf.Clamp(narrativeProgressGoal, 1, 50);
             narrativeRewardGoal = Mathf.Clamp(narrativeRewardGoal, 1, 50);
             narrativeTheftGoal = Mathf.Clamp(narrativeTheftGoal, 1, 20);
@@ -218,6 +244,18 @@ namespace MouseDisaster
 
         public override void ExposeData()
         {
+            Scribe_Values.Look(ref refugeePredationChancePercent, "refugeePredationChancePercent", 10f);
+            Scribe_Values.Look(ref refugeePredationFightBack, "refugeePredationFightBack", true);
+            Scribe_Values.Look(ref outsidePredatorsFollowDifficulty, "outsidePredatorsFollowDifficulty", false);
+            Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
+            Scribe_Values.Look(ref countWithoutSuin, "countWithoutSuin", true);
+            Scribe_Values.Look(ref endingsWithoutSuin, "endingsWithoutSuin", true);
+            Scribe_Values.Look(ref positiveIncidentDays, "positiveIncidentDays", 3f);
+            Scribe_Values.Look(ref negativeIncidentDays, "negativeIncidentDays", 3f);
+            Scribe_Collections.Look(ref positiveIncidents, "positiveIncidents", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref raidReplacementIncidents, "raidReplacementIncidents", LookMode.Value, LookMode.Value);
+            positiveIncidents ??= new Dictionary<string, bool>();
+            raidReplacementIncidents ??= new Dictionary<string, bool>();
             Scribe_Collections.Look(ref eventAttitudes, "eventAttitudes", LookMode.Value, LookMode.Value);
             eventAttitudes ??= new Dictionary<string, MouseDisasterEventAttitude>();
             Scribe_Values.Look(ref enableNarrative, "enableNarrative", true);

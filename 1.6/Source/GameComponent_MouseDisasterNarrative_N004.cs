@@ -323,6 +323,7 @@ namespace MouseDisaster
 
         private void ChangeNarratorTrust(int amount)
         {
+            if (!CountsNarrativeState) return;
             narratorTrust = Mathf.Clamp(narratorTrust + amount, -100, 100);
         }
 

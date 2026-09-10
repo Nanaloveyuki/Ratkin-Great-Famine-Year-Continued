@@ -8,6 +8,7 @@ namespace MouseDisaster
     {
         public static MouseDisasterSettings Settings;
         private Vector2 settingsScrollPosition;
+        private float settingsContentHeight = 1920f;
 
         public MouseDisasterMod(ModContentPack content) : base(content)
         {
@@ -22,15 +23,14 @@ namespace MouseDisaster
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            float incidentSectionHeight = MouseDisasterIncidentCatalog.AllEntries.Count * 60f;
-            float narrativeSectionHeight = MouseDisasterNarrativePolicy.SettingIds.Length * 30f + 1070f;
-            Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, Mathf.Max(1920f + incidentSectionHeight + narrativeSectionHeight, inRect.height + 900f + incidentSectionHeight + narrativeSectionHeight));
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, Mathf.Max(settingsContentHeight, inRect.height));
             Widgets.BeginScrollView(inRect, ref settingsScrollPosition, viewRect);
 
-            Listing_Standard listing = new Listing_Standard();
+            Listing_Standard listing = new Listing_Standard { maxOneColumn = true };
             listing.Begin(new Rect(0f, 0f, viewRect.width - 16f, viewRect.height));
 
             DrawSettings(listing);
+            settingsContentHeight = listing.CurHeight + 16f;
 
             listing.End();
             Widgets.EndScrollView();
@@ -46,22 +46,50 @@ namespace MouseDisaster
         private static void DrawSettings(Listing_Standard listing, SettingsPage? page = null)
         {
             if (page == null || page == SettingsPage.Safety) DrawSafetySettings(listing);
-            if (page == null || page == SettingsPage.General) DrawGeneralSettings(listing, page == null);
+            if (page == null || page == SettingsPage.General) DrawGeneralSettings(listing);
+            if (page == null || page == SettingsPage.PawnBehavior) DrawPawnSettings(listing);
             if (page == null) DrawIncidentSection(listing);
             else if (page == SettingsPage.OriginalEvents || page == SettingsPage.ContinuedEvents)
                 DrawIncidentSection(listing, page == SettingsPage.OriginalEvents);
             if (page == null || page == SettingsPage.ContinuedEvents) DrawNarrativeControls(listing, page != null);
             if (page == null || page == SettingsPage.Endings) DrawEndingSettings(listing, page != null);
-            if (page == null || page == SettingsPage.General) DrawBiologySettings(listing, page == null);
-            if (page == SettingsPage.Experimental)
-            {
-                DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
-                if (Settings.enableChaosRoomPregnancy)
-                    DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalIdentityInheritance", ref Settings.enableExperimentalIdentityInheritance, "MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip");
-                else listing.Label("MouseDisaster_Settings_ChaosDisabledHint".Translate());
-            }
+            if (page == SettingsPage.Developer || (page == null && Prefs.DevMode)) DrawDeveloperSettings(listing);
             if (page == null || page == SettingsPage.Safety) DrawSettingsFooter(listing);
             Settings.ClampValues();
+        }
+
+        private static void DrawPawnSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_IrisMenus_PawnBehavior");
+            listing.CheckboxLabeled("MouseDisaster_Settings_LeaveAfterFed".Translate(), ref Settings.leaveAfterFed);
+            DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
+            DrawBiologySettings(listing);
+            DrawSectionTitle(listing, "MouseDisaster_Predation_Settings");
+            DrawPercentSlider(listing, "MouseDisaster_Predation_Chance", ref Settings.refugeePredationChancePercent, 0f, 100f);
+            DrawCheckbox(listing, "MouseDisaster_Predation_FightBack", ref Settings.refugeePredationFightBack, "MouseDisaster_Predation_FightBack_Tip");
+            DrawCheckbox(listing, "MouseDisaster_Predation_FollowDifficulty", ref Settings.outsidePredatorsFollowDifficulty, "MouseDisaster_Predation_FollowDifficulty_Tip");
+        }
+
+        private static void DrawDeveloperSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_IrisMenus_Developer");
+            if (!Prefs.DevMode) { listing.Label("MouseDisaster_Developer_Disabled".Translate()); return; }
+            DrawCheckbox(listing, "MouseDisaster_Developer_Logging", ref Settings.enablePrisonerScavengeDebugLog, "MouseDisaster_Developer_LoggingTip");
+            if (Current.ProgramState != ProgramState.Playing || Current.Game == null)
+            { listing.Label("MouseDisaster_Developer_NoGame".Translate()); return; }
+            foreach (bool original in new[] { true, false })
+            {
+                DrawSectionTitle(listing, original ? "MouseDisaster_Story_DebugOriginal" : "MouseDisaster_Story_DebugContinued");
+                foreach (var entry in MouseDisasterIncidentCatalog.AllEntries)
+                    if (entry.IsOriginal == original && listing.ButtonText(entry.DisplayLabel))
+                        GameComponent_MouseDisasterNarrative.RunNarrativeDebug(entry.DefName);
+            }
+            DrawSectionTitle(listing, "MouseDisaster_Story_DebugNarratives");
+            foreach (string id in GameComponent_MouseDisasterNarrative.NarrativeDebugIds)
+                if (listing.ButtonText(("MouseDisaster_Story_Debug" + id).Translate()))
+                    GameComponent_MouseDisasterNarrative.RunNarrativeDebug(id);
         }
 
         private static void DrawSafetySettings(Listing_Standard listing)
@@ -87,17 +115,21 @@ namespace MouseDisaster
             listing.GapLine();
         }
 
-        private static void DrawGeneralSettings(Listing_Standard listing, bool legacy)
+        private static void DrawGeneralSettings(Listing_Standard listing)
         {
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_General");
-            DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
-            DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
-            if (legacy) DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
+            DrawDecimalSlider(listing, "MouseDisaster_Settings_PositiveDays", ref Settings.positiveIncidentDays, 0, 60, "0.0");
+            DrawDecimalSlider(listing, "MouseDisaster_Settings_NegativeDays", ref Settings.negativeIncidentDays, 0, 60, "0.0");
             DrawDaysSlider(listing, "MouseDisaster_Settings_BroadcastHopeCooldown", ref Settings.broadcastHopeCooldownDays, 0, 10);
+            DrawFamineSettings(listing);
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_DisplayDebug");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnableFloatingText", ref Settings.enableFloatingText, "MouseDisaster_Settings_EnableFloatingText_Tooltip");
         }
 
         private static void DrawEndingSettings(Listing_Standard listing, bool hosted)
         {
+            listing.CheckboxLabeled("MouseDisaster_Settings_CountWithoutSuin".Translate(), ref Settings.countWithoutSuin);
+            listing.CheckboxLabeled("MouseDisaster_Settings_EndingsWithoutSuin".Translate(), ref Settings.endingsWithoutSuin);
             if (hosted) DrawDaysSlider(listing, "MouseDisaster_Story_EndingDelay", ref Settings.narrativeEndingDelayDays, 0, 120);
             DrawSectionTitle(listing, "MouseDisaster_Story_Settings");
             listing.Label("MouseDisaster_Story_AidGoal".Translate(Settings.narrativeAidGoal));
@@ -110,7 +142,7 @@ namespace MouseDisaster
             Settings.narrativeAdultGoal = Mathf.RoundToInt(listing.Slider(Settings.narrativeAdultGoal, 1, 500));
         }
 
-        private static void DrawBiologySettings(Listing_Standard listing, bool legacy)
+        private static void DrawFamineSettings(Listing_Standard listing)
         {
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_FamineYear");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableFamineYearSystem", ref Settings.enableFamineYearSystem, "MouseDisaster_Settings_EnableFamineYearSystem_Tooltip");
@@ -124,6 +156,10 @@ namespace MouseDisaster
                 listing.Label("MouseDisaster_Settings_FamineYearDisabledHint".Translate());
             }
 
+        }
+
+        private static void DrawBiologySettings(Listing_Standard listing)
+        {
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_Age");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableAgeCap", ref Settings.enableAgeCapAdjustment, "MouseDisaster_Settings_EnableAgeCap_Tooltip");
             if (Settings.enableAgeCapAdjustment)
@@ -139,10 +175,10 @@ namespace MouseDisaster
             }
 
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_Genes");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalIdentityInheritance", ref Settings.enableExperimentalIdentityInheritance, "MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_ChaosPregnancyEnabled", ref Settings.enableChaosRoomPregnancy, "MouseDisaster_Settings_ChaosPregnancyEnabled_Tooltip");
             if (Settings.enableChaosRoomPregnancy)
             {
-                if (legacy) DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalIdentityInheritance", ref Settings.enableExperimentalIdentityInheritance, "MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip");
                 DrawDecimalSlider(listing, "MouseDisaster_Settings_ChaosChance", ref Settings.chaosPregnancyChancePercent, MouseDisasterSettings.MinChaosPregnancyChancePercent, MouseDisasterSettings.MaxChaosPregnancyChancePercent, "0.0");
                 DrawSecondsSlider(listing, "MouseDisaster_Settings_ChaosInterval", ref Settings.chaosPregnancyCheckIntervalTicks, MouseDisasterSettings.MinChaosPregnancyIntervalTicks, MouseDisasterSettings.MaxChaosPregnancyIntervalTicks);
             }
@@ -162,8 +198,6 @@ namespace MouseDisaster
                 listing.Label("MouseDisaster_Settings_CompatDisabledHint".Translate());
             }
 
-            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_DisplayDebug");
-            DrawCheckbox(listing, "MouseDisaster_Settings_EnableFloatingText", ref Settings.enableFloatingText, "MouseDisaster_Settings_EnableFloatingText_Tooltip");
         }
 
         private static void DrawSettingsFooter(Listing_Standard listing)
@@ -174,8 +208,6 @@ namespace MouseDisaster
                 Settings.ResetToDefaults();
             }
 
-            listing.GapLine();
-            listing.Label("MouseDisaster_Settings_ImplNote".Translate());
         }
 
         private static void DrawHeader(Listing_Standard listing)
@@ -216,13 +248,26 @@ namespace MouseDisaster
                 if (original.HasValue && entry.IsOriginal != original.Value) continue;
                 bool enabled = Settings.IsIncidentEnabled(entry.DefName);
                 bool newEnabled = enabled;
-                listing.CheckboxLabeled(entry.DisplayLabel, ref newEnabled, entry.DefName);
+                listing.CheckboxLabeled(entry.DisplayLabel, ref newEnabled);
                 if (newEnabled != enabled)
                 {
                     Settings.SetIncidentEnabled(entry.DefName, newEnabled);
                 }
                 DrawAttitudeControl(listing, Settings.GetEventAttitude(entry.DefName),
                     selected => Settings.eventAttitudes[entry.DefName] = selected);
+                var def = DefDatabase<RimWorld.IncidentDef>.GetNamedSilentFail(entry.DefName);
+                if (def != null)
+                {
+                    bool positive = Settings.IsPositiveIncident(def);
+                    if (listing.ButtonText((positive ? "MouseDisaster_Settings_Positive" : "MouseDisaster_Settings_Negative").Translate()))
+                        Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption> {
+                            new FloatMenuOption("MouseDisaster_Settings_Positive".Translate(), () => Settings.positiveIncidents[entry.DefName] = true),
+                            new FloatMenuOption("MouseDisaster_Settings_Negative".Translate(), () => Settings.positiveIncidents[entry.DefName] = false)
+                        }));
+                    bool replace = Settings.ReplacesRaid(entry.DefName);
+                    listing.CheckboxLabeled("MouseDisaster_Settings_ReplaceRaid".Translate(), ref replace);
+                    Settings.raidReplacementIncidents[entry.DefName] = replace;
+                }
                 listing.Gap(2f);
             }
 
@@ -292,8 +337,6 @@ namespace MouseDisaster
             DrawDaysSlider(listing, "MouseDisaster_Story_ReturnDelay", ref Settings.narrativeReturnDelayDays, 1, 120);
             DrawPercentSlider(listing, "MouseDisaster_Story_EchoChance", ref Settings.narrativeEchoChancePercent, 0, 100);
             DrawDaysSlider(listing, "MouseDisaster_Story_EchoCooldown", ref Settings.narrativeEchoCooldownDays, 1, 60);
-            if (Prefs.DevMode && Current.Game != null && listing.ButtonText("MouseDisaster_Story_DebugMenu".Translate()))
-                GameComponent_MouseDisasterNarrative.OpenNarrativeDebugMenu();
             if (Current.Game != null && listing.ButtonText("MouseDisaster_Story_AlertLabel".Translate()))
                 Current.Game.GetComponent<GameComponent_MouseDisasterNarrative>()?.OpenNarrativeJournal();
         }

@@ -59,6 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgePatches.cs" />
+    <Compile Include="Incidents\RefugeeMassacre.cs" />
+    <Compile Include="MapComponent_MouseDisasterPredation.cs" />
     <Compile Include="MouseDisasterFeeding.cs" />
     <Compile Include="MouseDisasterEventPolicy.cs" />
     <Compile Include="GameComponent_MouseDisasterEventBehavior.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="MouseDisasterVisitorChoicePolicy.cs" />
     <Compile Include="MouseDisasterVisitorHostilityPolicy.cs" />
     <Compile Include="IncidentChancePatches.cs" />
+    <Compile Include="MouseDisasterIncidentScheduling.cs" />
     <Compile Include="DefOfs.cs" />
     <Compile Include="FactionRelationPatches.cs" />
     <Compile Include="FloatMenuOptionProvider_MouseDisasterVisitorControl.cs" />

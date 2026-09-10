@@ -73,6 +73,7 @@ namespace MouseDisaster
     {
         private static readonly List<MouseDisasterIncidentEntry> Entries = new List<MouseDisasterIncidentEntry>
         {
+            new MouseDisasterIncidentEntry("N-047", "MouseDisaster_RefugeeMassacre", "MouseDisaster_RefugeeMassacre_MenuLabel", MouseDisasterIncidentCategory.MouseDisaster, MouseDisasterIncidentTargetKind.Map, MouseDisasterIncidentLegacyToggleGroup.None, false, 300f),
             new MouseDisasterIncidentEntry("O-001", "MouseDisaster_LargeRefugeeWave", "MouseDisaster_LargeRefugeeWave_MenuLabel", MouseDisasterIncidentCategory.MouseDisaster, MouseDisasterIncidentTargetKind.Map, MouseDisasterIncidentLegacyToggleGroup.Beggar, true, 700f) { IsOriginal = true, BroadcastEligible = true },
             new MouseDisasterIncidentEntry("O-002", "MouseDisaster_AbandonedRatkinChildren", "MouseDisaster_AbandonedRatkinChildren_MenuLabel", MouseDisasterIncidentCategory.MouseDisaster, MouseDisasterIncidentTargetKind.Map, MouseDisasterIncidentLegacyToggleGroup.None, false, 400f) { IsOriginal = true, BroadcastEligible = true },
             new MouseDisasterIncidentEntry("O-003", "MouseDisaster_ShatteredMother", "MouseDisaster_ShatteredMother_MenuLabel", MouseDisasterIncidentCategory.MouseDisaster, MouseDisasterIncidentTargetKind.Map, MouseDisasterIncidentLegacyToggleGroup.None, false, 400f) { IsOriginal = true, BroadcastEligible = true },

@@ -26,7 +26,7 @@ namespace MouseDisaster
             }
 
             bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn);
-            if (MouseDisasterFeeding.HasSatisfied(pawn))
+            if (MouseDisasterFeeding.ShouldLeaveAfterFed(pawn))
                 return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
             if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
             if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly))
@@ -47,7 +47,8 @@ namespace MouseDisaster
                     return extraFoodJob;
                 }
 
-                return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
+                return mustStayOnMap || MouseDisasterMod.Settings?.leaveAfterFed == false
+                    ? null : MouseDisasterUtility.ExitMapJob(pawn);
             }
 
             Job ingestJob = TryCreateFoodJob(pawn);

@@ -83,8 +83,13 @@ public static class Find { public static TickManager TickManager=new TickManager
 public class Lister { public List<Thing> foods=new List<Thing>(); public List<Thing> ThingsInGroup(ThingRequestGroup group)=>foods; }
 public class ReliefArea { public int TrueCount; public bool this[IntVec3 cell]=>false; }
 public class Map {
+    public bool IsPlayerHome;
     public Lister listerThings=new Lister(); public ReliefArea area=new ReliefArea(); public MapComponent_MouseDisasterFoodTargets cache;
     public T GetComponent<T>() where T:class { return cache as T; }
+}
+public class MapComponent_MouseDisasterPredation {
+    public void Register(MouseDisasterEventGroup group,IEnumerable<Pawn> pawns) {}
+    public static bool ShouldFlee(Pawn predator,Pawn victim)=>false;
 }
 public class MapComponent { protected Map map; public MapComponent(Map map) { this.map=map; } public virtual void MapComponentTick() {} }
 public class Game {

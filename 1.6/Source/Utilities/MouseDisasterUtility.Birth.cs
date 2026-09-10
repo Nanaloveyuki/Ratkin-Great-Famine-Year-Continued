@@ -24,6 +24,18 @@ namespace MouseDisaster
             TryGainNonStackingMemory(pawn, MouseDisasterDefOf.MouseDisaster_BloodlineRenewed);
         }
 
+        public static void TryInheritBirthStatus(Pawn newborn, Pawn mother)
+        {
+            if (MouseDisasterMod.Settings?.enableExperimentalIdentityInheritance != true ||
+                newborn == null || newborn.Dead || newborn.guest == null || mother == null ||
+                !IsRatkin(newborn) || !IsRatkin(mother) || !HasAnyMouseDisasterGene(mother) ||
+                !IsColonyBirthMother(mother)) return;
+            GuestStatus status = mother.IsPrisonerOfColony ? GuestStatus.Prisoner :
+                mother.IsSlaveOfColony ? GuestStatus.Slave : GuestStatus.Guest;
+            if (newborn.Faction != mother.Faction) newborn.SetFaction(mother.Faction);
+            newborn.guest.SetGuestStatus(status == GuestStatus.Guest ? null : Faction.OfPlayer, status);
+        }
+
         public static void TryNormalizeColonyBornRatkinBabyBackstory(Pawn newborn, Pawn mother)
         {
             if (newborn?.story == null || !IsRatkin(newborn) || !IsColonyBirthMother(mother))

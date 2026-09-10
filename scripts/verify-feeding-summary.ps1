@@ -74,6 +74,8 @@ public static class MouseDisasterDefOf {
 }
 public static class MouseDisasterRuntime { public static bool AllowsNewContent = true; }
 public enum MouseDisasterPawnBehavior { SeekFood }
+public class MouseDisasterSettings { public bool leaveAfterFed = true; }
+public static class MouseDisasterMod { public static MouseDisasterSettings Settings = new MouseDisasterSettings(); }
 public class GameComponent_MouseDisasterEventBehavior {
     public static GameComponent_MouseDisasterEventBehavior Component=new GameComponent_MouseDisasterEventBehavior();
     HashSet<int> fed=new HashSet<int>(), refed=new HashSet<int>();
@@ -109,6 +111,16 @@ public static class FeedingHarness {
         p.health.hediffSet.entries[HediffDefOf.Malnutrition].Severity=0.4f;
         MouseDisasterFeeding.Evaluate(p,0.9f);
         Check(MouseDisasterFeeding.HasSatisfied(p),"fed marker missing");
+        Check(MouseDisasterFeeding.ShouldLeaveAfterFed(p),"default departure disabled");
+        MouseDisasterMod.Settings.leaveAfterFed=false;
+        Check(!MouseDisasterFeeding.ShouldLeaveAfterFed(p),"departure ignores toggle");
+        Check(!MouseDisasterFeeding.IsSeekingSuppressed(p),"disabled departure permanently prevents feeding");
+        Check(MouseDisasterFeeding.HasSatisfied(p),"toggle erased feeding history");
+        var staying = new Pawn { MentalStateDef=MouseDisasterDefOf.MouseDisaster_ThievingState };
+        MouseDisasterFeeding.Evaluate(staying,0.9f);
+        Check(staying.mindState.mentalStateHandler.resets==0,"disabled departure reset visitor state");
+        MouseDisasterMod.Settings.leaveAfterFed=true;
+        Check(MouseDisasterFeeding.ShouldLeaveAfterFed(staying),"reenabling departure ignored saved completion");
         Check(p.mindState.mentalStateHandler.resets==1,"food-seeking mental state not cleared");
         Check(p.health.hediffSet.HasHediff(MouseDisasterDefOf.MouseDisaster_RefeedingSyndrome),"syndrome missing");
         Check(p.health.hediffSet.HasHediff(HediffDefOf.Malnutrition),"malnutrition removed");

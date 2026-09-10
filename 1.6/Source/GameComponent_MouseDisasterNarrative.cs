@@ -85,7 +85,7 @@ namespace MouseDisaster
                 foreach (Pawn pawn in participants)
                     if (MouseDisasterUtility.IsChildExchangeTrader(pawn) && !n005StartedTraderIds.Contains(pawn.thingIDNumber))
                         n005StartedTraderIds.Add(pawn.thingIDNumber);
-            if (!ContainsObservedIncident(incidentDef.defName)) observedIncidentDefNames.Add(incidentDef.defName);
+            if (CountsNarrativeState && !ContainsObservedIncident(incidentDef.defName)) observedIncidentDefNames.Add(incidentDef.defName);
             ProcessOpeningNarrative(ResolvePlayerHomeMap(parms));
         }
 
@@ -128,6 +128,8 @@ namespace MouseDisaster
         {
             return DebugForcing || Find.Storyteller?.def?.defName == NarratorDefName;
         }
+
+        private static bool CountsNarrativeState => IsNarratorActive() || MouseDisasterMod.Settings?.countWithoutSuin != false;
 
         private bool ContainsObservedIncident(string defName)
         {

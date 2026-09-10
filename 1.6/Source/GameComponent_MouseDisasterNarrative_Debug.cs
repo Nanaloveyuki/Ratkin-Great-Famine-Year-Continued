@@ -77,7 +77,7 @@ namespace MouseDisaster
             return root;
         }
 
-        private static void RunNarrativeDebug(string id)
+        internal static void RunNarrativeDebug(string id)
         {
             var component = Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>();
             if (component == null || !Prefs.DevMode) return;

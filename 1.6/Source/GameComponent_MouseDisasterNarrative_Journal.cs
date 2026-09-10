@@ -126,6 +126,7 @@ namespace MouseDisaster
 
         private void ExposeJournalData()
         {
+            Scribe_Collections.Look(ref countedNarrativeFlags, "countedNarrativeFlags", LookMode.Value);
             Scribe_Collections.Look(ref narrativeVisits, "narrativeVisits", LookMode.Deep);
             Scribe_Collections.Look(ref narrativeVisitSummaries, "narrativeVisitSummaries", LookMode.Deep);
             Scribe_Collections.Look(ref narrativeFlags, "narrativeFlags", LookMode.Value);
@@ -142,6 +143,7 @@ namespace MouseDisaster
                 narrativeVisits ??= new List<NarrativeVisit>();
                 narrativeVisits.RemoveAll(v => v == null);
                 narrativeFlags ??= new List<string>();
+                countedNarrativeFlags ??= new List<string>(narrativeFlags);
                 narrativeFlags.RemoveAll(string.IsNullOrWhiteSpace);
                 narrativeVisitSummaries ??= new List<NarrativeVisitSummary>();
                 narrativeVisitSummaries.RemoveAll(v => v == null);
@@ -169,7 +171,7 @@ namespace MouseDisaster
                 .Select(p => new NarrativePawnObservation { pawn = p }).ToList();
             if (visit.people.Count == 0) return -1;
             narrativeVisits.Add(visit);
-            if (firstNarrativeTick < 0) firstNarrativeTick = CurrentNarrativeTick;
+            if (CountsNarrativeState && firstNarrativeTick < 0) firstNarrativeTick = CurrentNarrativeTick;
             return visit.id;
         }
 
@@ -190,12 +192,12 @@ namespace MouseDisaster
             {
                 visit.driven = true;
                 visit.drivenTick = CurrentNarrativeTick;
-                forceDepartures++;
+                if (CountsNarrativeState) forceDepartures++;
                 ChangeNarratorTrust(-2);
             }
         }
 
-        public void NotifyNarrativeBroadcast() { successfulBroadcasts++; }
+        public void NotifyNarrativeBroadcast() { if (CountsNarrativeState) successfulBroadcasts++; }
 
         public void NotifyNarrativeExit(Pawn pawn, int mapId)
         {
@@ -219,10 +221,14 @@ namespace MouseDisaster
             if (NarrativeEnabled("S12")) SendJournalOnce(key, null);
         }
 
+        private List<string> countedNarrativeFlags = new List<string>();
+
         private void CompleteNarrativeFlag(string key)
         {
+            // Operational flags always deduplicate rewards; only progression respects the counter toggle.
+            if (CountsNarrativeState && !countedNarrativeFlags.Contains(key)) countedNarrativeFlags.Add(key);
             if (!narrativeFlags.Contains(key)) narrativeFlags.Add(key);
-            if (firstNarrativeTick < 0) firstNarrativeTick = CurrentNarrativeTick;
+            if (CountsNarrativeState && firstNarrativeTick < 0) firstNarrativeTick = CurrentNarrativeTick;
         }
 
         private void SendJournalOnce(string key, Map map, params NamedArgument[] args)
@@ -310,7 +316,7 @@ namespace MouseDisaster
                 var summary = NarrativeVisitSummary.FromVisit(visit, CurrentNarrativeTick);
                 int left = summary.left, settled = summary.settled, dead = summary.dead,
                     detained = summary.detained, missing = summary.missing;
-                if (MouseDisasterNarrativePolicy.IsAidComplete(visit.delivered && visit.scene != "S07", visit.driven, visit.people.Count, left, settled))
+                if (CountsNarrativeState && MouseDisasterNarrativePolicy.IsAidComplete(visit.delivered && visit.scene != "S07", visit.driven, visit.people.Count, left, settled))
                 {
                     visit.counted = true;
                     summary.counted = true;
@@ -344,7 +350,7 @@ namespace MouseDisaster
         private void ProcessNarrativeEndings()
         {
             if (!NarrativeEnabled("N010")) return;
-            if (CurrentNarrativeTick >= nextPopulationTick)
+            if (CountsNarrativeState && CurrentNarrativeTick >= nextPopulationTick)
             {
                 nextPopulationTick = CurrentNarrativeTick + GenDate.TicksPerYear;
                 adultRatkinCount = Find.Maps.Where(m => m.IsPlayerHome).Select(m => m.mapPawns.FreeColonists
@@ -352,7 +358,8 @@ namespace MouseDisaster
                         MouseDisasterUtility.IsMouseDisasterPawn(p))).DefaultIfEmpty(0).Max();
             }
             var settings = MouseDisasterMod.Settings;
-            int completed = narrativeFlags.Count(f => (f.Length == 3 && f[0] == 'S') || (f.Length == 4 && f[0] == 'N'));
+            if (!IsNarratorActive() && settings?.endingsWithoutSuin == false) return;
+            int completed = countedNarrativeFlags.Count(f => (f.Length == 3 && f[0] == 'S') || (f.Length == 4 && f[0] == 'N'));
             bool mature = completed >= 6 && firstNarrativeTick >= 0 && CurrentNarrativeTick - firstNarrativeTick >=
                 GenDate.TicksPerDay * (settings?.narrativeEndingDelayDays ?? 30);
             if (completed > 0 && narratorTrust <= -75) mature = true;
