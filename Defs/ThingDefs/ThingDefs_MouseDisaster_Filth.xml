@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
   <ThingDef ParentName="BaseFilth">
     <defName>Filth_MouseDisasterPoop</defName>
-    <label>鐏</label>
+    <label>鼠粪</label>
     <statBases>
       <Beauty>-40</Beauty>
       <Cleanliness>-15</Cleanliness>

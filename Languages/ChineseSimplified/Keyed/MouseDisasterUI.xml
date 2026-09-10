@@ -27,7 +27,7 @@
   <MouseDisaster_UI_BroadcastSolarFlare>{0}（太阳耀斑）</MouseDisaster_UI_BroadcastSolarFlare>
   <MouseDisaster_UI_BroadcastUnreachable>{0}（无法到达）</MouseDisaster_UI_BroadcastUnreachable>
   <MouseDisaster_UI_IncidentDisabled>该事件已在设置中禁用。</MouseDisaster_UI_IncidentDisabled>
-  <MouseDisaster_UI_IncidentDefMissing>未找到目标事件定义。</MouseDisaster_UI_IncidentDefMissing>
+  <MouseDisaster_UI_IncidentDefMissing>当前无法使用这个事件。</MouseDisaster_UI_IncidentDefMissing>
   <MouseDisaster_UI_NoPlayerCaravan>当前没有可用的玩家商队。</MouseDisaster_UI_NoPlayerCaravan>
   <MouseDisaster_UI_NoCurrentMap>当前不在地图上，无法触发地图事件。</MouseDisaster_UI_NoCurrentMap>
   <MouseDisaster_UI_CaravanMuggersLabel>流民抢夺商队</MouseDisaster_UI_CaravanMuggersLabel>
@@ -38,7 +38,7 @@
   <MouseDisaster_UI_ThievesArrived>一帮饥饿的鼠族偷偷摸进了殖民地，它们只在找食物。</MouseDisaster_UI_ThievesArrived>
   <MouseDisaster_UI_BroadcastFailed>广播失败：当前地图无法安排鼠灾事件。</MouseDisaster_UI_BroadcastFailed>
   <MouseDisaster_UI_BroadcastScheduled>广播已安排：将在{0}h后开始，之后每6h触发一次，共{1}次鼠灾事件。</MouseDisaster_UI_BroadcastScheduled>
-  <MouseDisaster_UI_SettingsSummary>新事件/Pawn: {0}  事件: {1}/{2}  啃食: {3}  咬尾巴: {4}</MouseDisaster_UI_SettingsSummary>
+  <MouseDisaster_UI_SettingsSummary>新来客：{0}  事件：{1}/{2}  啃食：{3}  咬尾巴：{4}</MouseDisaster_UI_SettingsSummary>
   <MouseDisaster_UI_AidTimeoutHint>\n若长时间不处理，对方会像原版乞丐一样自行离开。</MouseDisaster_UI_AidTimeoutHint>
   <MouseDisaster_UI_AidDepartureHint>\n交付完成后，对方会带着物资离开。</MouseDisaster_UI_AidDepartureHint>
   <MouseDisaster_UI_AidIntelHint>\n交付完成后，对方会留下对应情报并离开。</MouseDisaster_UI_AidIntelHint>

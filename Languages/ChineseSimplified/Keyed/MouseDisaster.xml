@@ -8,13 +8,13 @@
   <MouseDisaster_Settings_Section_FamineYear>大荒年</MouseDisaster_Settings_Section_FamineYear>
   <MouseDisaster_Settings_Section_Age>年龄与疾病</MouseDisaster_Settings_Section_Age>
   <MouseDisaster_Settings_Section_Genes>繁殖基因</MouseDisaster_Settings_Section_Genes>
-  <MouseDisaster_Settings_Section_DisplayDebug>显示与调试</MouseDisaster_Settings_Section_DisplayDebug>
+  <MouseDisaster_Settings_Section_DisplayDebug>显示</MouseDisaster_Settings_Section_DisplayDebug>
   <MouseDisaster_Settings_Section_Compat>联动兼容</MouseDisaster_Settings_Section_Compat>
   <MouseDisaster_Settings_Status_On>开启</MouseDisaster_Settings_Status_On>
   <MouseDisaster_Settings_Status_Off>关闭</MouseDisaster_Settings_Status_Off>
-  <MouseDisaster_Settings_EnableNewContent>允许生成新的鼠灾事件与 Pawn</MouseDisaster_Settings_EnableNewContent>
-  <MouseDisaster_Settings_EnableNewContent_Tooltip>可在游戏运行期间即时切换。关闭后不再触发新的鼠灾事件、生成新的鼠灾 Pawn 或建立新的鼠灾受孕；已经存在的 Pawn、工作、信件、区域和状态不受影响并继续运行。</MouseDisaster_Settings_EnableNewContent_Tooltip>
-  <MouseDisaster_Settings_NewContentDisabledHint>新内容生成已关闭。现有 Pawn 与事件状态仍会继续正常工作。</MouseDisaster_Settings_NewContentDisabledHint>
+  <MouseDisaster_Settings_EnableNewContent>允许新的鼠灾事件与来客</MouseDisaster_Settings_EnableNewContent>
+  <MouseDisaster_Settings_EnableNewContent_Tooltip>关闭后不再触发新的鼠灾事件、来客或自发受孕。已有角色、任务、信件与赈灾区继续保留。</MouseDisaster_Settings_EnableNewContent_Tooltip>
+  <MouseDisaster_Settings_NewContentDisabledHint>新事件与来客已关闭，已有角色和正在进行的事件仍会继续。</MouseDisaster_Settings_NewContentDisabledHint>
   <MouseDisaster_Settings_NewContentDisabledDebugMessage>鼠灾新内容生成已关闭，无法触发新事件。</MouseDisaster_Settings_NewContentDisabledDebugMessage>
   <MouseDisaster_Narrative_OpeningLabel>穗音的来信</MouseDisaster_Narrative_OpeningLabel>
   <MouseDisaster_Narrative_OpeningText>“我叫穗音。你那边的消息，我能收到一些。慢，有时还不准。\n\n最近路上多了很多鼠族。有人找吃的，有人做买卖，也有人会抢。别因为我写了这封信就放他们进门，我不替他们担保。\n\n等事情有了下文，我还会来信。”</MouseDisaster_Narrative_OpeningText>
@@ -107,25 +107,25 @@
   <MouseDisaster_Settings_FamineYearDisabledHint>大荒年系统已关闭：不再进行年度与每日 6 点灾害强化判定。</MouseDisaster_Settings_FamineYearDisabledHint>
   <MouseDisaster_Settings_EnableFloatingText>启用头顶浮动文字</MouseDisaster_Settings_EnableFloatingText>
   <MouseDisaster_Settings_EnableFloatingText_Tooltip>关闭后，不再显示鼠族行为的头顶文字提示。</MouseDisaster_Settings_EnableFloatingText_Tooltip>
-  <MouseDisaster_Settings_EnableExperimentalTailBite>启用鼠灾咬尾巴（实验性）</MouseDisaster_Settings_EnableExperimentalTailBite>
-  <MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip>高风险功能，可能引发性能或兼容问题。建议排查卡死时先关闭。</MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip>
+  <MouseDisaster_Settings_EnableExperimentalTailBite>允许咬尾巴</MouseDisaster_Settings_EnableExperimentalTailBite>
+  <MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip>饥饿且找不到食物的鼠族囚犯可能咬伤熟睡或无法反抗的 3 岁以下鼠族囚犯，并可能咬断其天然尾巴。</MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip>
   <MouseDisaster_Settings_BroadcastHopeCooldown>广播希望冷却：{0} 天</MouseDisaster_Settings_BroadcastHopeCooldown>
   <MouseDisaster_Settings_MaxAge>鼠族年龄上限：{0}</MouseDisaster_Settings_MaxAge>
   <MouseDisaster_Settings_DiseaseMult>50 岁后老年病强化：x{0}</MouseDisaster_Settings_DiseaseMult>
   <MouseDisaster_Settings_AgeDisabledHint>年龄改动已关闭：本项关闭时不再应用年龄上限与老年病强化。</MouseDisaster_Settings_AgeDisabledHint>
   <MouseDisaster_Settings_ChaosPregnancyEnabled>启用"鼠灾乱起"房间自发受孕</MouseDisaster_Settings_ChaosPregnancyEnabled>
   <MouseDisaster_Settings_ChaosPregnancyEnabled_Tooltip>在符合条件的房间中按设定间隔和概率判定受孕。</MouseDisaster_Settings_ChaosPregnancyEnabled_Tooltip>
-  <MouseDisaster_Settings_EnableExperimentalIdentityInheritance>实验性：身份继承（鼠灾怀孕）</MouseDisaster_Settings_EnableExperimentalIdentityInheritance>
-  <MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip>开启后，鼠灾基因导致的分娩会继承母体身份：囚犯生囚犯、奴隶生奴隶、殖民者生殖民者。</MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip>
+  <MouseDisaster_Settings_EnableExperimentalIdentityInheritance>新生儿继承母亲身份</MouseDisaster_Settings_EnableExperimentalIdentityInheritance>
+  <MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip>携带鼠灾基因的母亲分娩后，新生鼠族继承她在殖民地中的身份：囚犯、奴隶或殖民者。其他出生不受影响。</MouseDisaster_Settings_EnableExperimentalIdentityInheritance_Tooltip>
   <MouseDisaster_Settings_ChaosChance>乱起受孕概率（每次判定）：{0}%</MouseDisaster_Settings_ChaosChance>
   <MouseDisaster_Settings_ChaosInterval>乱起判定间隔：{0} 秒</MouseDisaster_Settings_ChaosInterval>
   <MouseDisaster_Settings_ChaosDisabledHint>乱起受孕已关闭：不再执行房间内的自发受孕判定。</MouseDisaster_Settings_ChaosDisabledHint>
   <MouseDisaster_Settings_RatEggTraitBridge>启用"鼠蛋特性拓展"兼容赋特</MouseDisaster_Settings_RatEggTraitBridge>
-  <MouseDisaster_Settings_RatEggTraitBridge_Tooltip>开启后，幼年灾鼠会尝试获得额外特质。候选池限原版特质及通过 MouseDisasterGenerationExtension 明确授权的扩展特质。</MouseDisaster_Settings_RatEggTraitBridge_Tooltip>
+  <MouseDisaster_Settings_RatEggTraitBridge_Tooltip>幼年灾鼠可能获得额外特质，来自原版及支持的特质模组。</MouseDisaster_Settings_RatEggTraitBridge_Tooltip>
   <MouseDisaster_Settings_RatEggTraitChance>兼容特性生成概率：{0}%</MouseDisaster_Settings_RatEggTraitChance>
-  <MouseDisaster_Settings_CompatDisabledHint>特性桥接已关闭：不再注入鼠蛋特性拓展兼容逻辑。</MouseDisaster_Settings_CompatDisabledHint>
+  <MouseDisaster_Settings_CompatDisabledHint>已关闭来自联动模组的额外特质。</MouseDisaster_Settings_CompatDisabledHint>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>
-  <MouseDisaster_Settings_ImplNote>当前内容包含野生鼠族、偷窃、乞讨、啃食、尾巴与耳朵交互、特殊事件、繁殖基因、50 岁后老年病强化、穗音的第一批叙事和隐藏奖励，以及粮仓鼠洞任务。后续将继续扩展婴儿囚犯、鼠疫和灾鼠派系相关内容。</MouseDisaster_Settings_ImplNote>
+  <MouseDisaster_Settings_ImplNote>按你的喜好调整鼠族的到访、行为与殖民地故事。</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>窝趴趴舔灰灰，肚肚咕咕叫，脏脏也系饭饭。</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_2>泥泥土土糊一嘴，窝还要叠着舌头舔。</MouseDisaster_PrisonerScavenge_Text_FloorDust_2>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_3>地缝缝里抠灰灰，窝小嘴最会刮渣渣。</MouseDisaster_PrisonerScavenge_Text_FloorDust_3>

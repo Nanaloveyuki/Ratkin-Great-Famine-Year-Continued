@@ -169,7 +169,7 @@
   <MouseDisaster_Story_DebugNeedHome>需要当前打开一张玩家家园地图。</MouseDisaster_Story_DebugNeedHome>
   <MouseDisaster_Story_DebugNeedReturn>没有可用的原回访对象，或缺少玩家远行队。不会生成替身或复活角色。</MouseDisaster_Story_DebugNeedReturn>
   <MouseDisaster_Story_DebugNeedFood>粮仓鼠洞需要现有储存区中可食用的食物。</MouseDisaster_Story_DebugNeedFood>
-  <MouseDisaster_Story_DebugSpawnFailed>未能触发：请检查地图/远行队、派系、种族定义和可用入口；基础 Worker 也可能返回失败。</MouseDisaster_Story_DebugSpawnFailed>
+  <MouseDisaster_Story_DebugSpawnFailed>事件未能开始。当前可能缺少合适的地图、远行队、派系或到访地点。</MouseDisaster_Story_DebugSpawnFailed>
   <MouseDisaster_Story_DebugNoNarrative>基础事件已执行，但未生成对应剧情。请检查感染者、访客登记或洞口位置，并查看日志。</MouseDisaster_Story_DebugNoNarrative>
   <MouseDisaster_Story_DebugCheck>检查到期任务（不跳过时间、不增加照料进度）</MouseDisaster_Story_DebugCheck>
   <MouseDisaster_Story_DebugInspect>输出剧情状态和计数</MouseDisaster_Story_DebugInspect>

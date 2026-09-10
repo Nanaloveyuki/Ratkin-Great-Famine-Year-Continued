@@ -40,15 +40,5 @@ foreach ($file in Get-ChildItem (Join-Path $root 'Languages/ChineseSimplified/De
     }
 }
 foreach ($path in $changed) { $documents[$path].Save($path) }
-# Preserve the formerly hard-coded Chinese UI for users without a translation.
-foreach ($name in 'MouseDisasterUI.xml','MouseDisasterIncidents.xml') {
-    $source = Join-Path $root "Languages/ChineseSimplified/Keyed/$name"
-    $target = Join-Path $root "Languages/English/Keyed/$name"
-    $expected = [IO.File]::ReadAllText($source)
-    if (!(Test-Path $target) -or [IO.File]::ReadAllText($target) -cne $expected) {
-        if ($Check) { throw "Stale Keyed fallback: $name. Run scripts/sync-language-fallbacks.ps1." }
-        [void][IO.Directory]::CreateDirectory((Split-Path $target -Parent))
-        [IO.File]::WriteAllText($target, $expected, [Text.UTF8Encoding]::new($false))
-    }
-}
-"PASS: $count Def fallbacks and 2 Keyed fallback files; $($changed.Count) Def files updated."
+# English translations are maintained independently; never replace them with Chinese.
+"PASS: $count Def fallbacks; $($changed.Count) Def files updated."

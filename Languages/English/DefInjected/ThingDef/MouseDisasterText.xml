@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <MouseDisaster_RecordCache.label>old record chest</MouseDisaster_RecordCache.label>
+  <MouseDisaster_RecordCache.description>A chest of ration lists and migration records. Once a colonist can reach it, you may decide what to do with it.</MouseDisaster_RecordCache.description>
+  <MouseDisaster_GrainBurrow.label>granary hole</MouseDisaster_GrainBurrow.label>
+  <MouseDisaster_GrainBurrow.description>A small hole near the food stores. Left open, it costs at most one unit of food each day, up to three in total. Use the granary letter to seal or clear it.</MouseDisaster_GrainBurrow.description>
+  <MouseDisaster_RecordPages.label>migration records</MouseDisaster_RecordPages.label>
+  <MouseDisaster_RecordPages.description>Preserved ration lists and migration records. Some figures were corrected several times. These pages grant no special abilities; keep them or pass them on.</MouseDisaster_RecordPages.description>
+  <Filth_MouseDisasterPoop.label>Ratkin droppings</Filth_MouseDisasterPoop.label>
+  <MouseDisaster_GuanyinTu.label>Guanyin clay</MouseDisaster_GuanyinTu.label>
+  <MouseDisaster_GuanyinTu.description>Simply prepared chalky clay. It can temporarily fill the stomach, but cannot replace proper food.</MouseDisaster_GuanyinTu.description>
+</LanguageData>
