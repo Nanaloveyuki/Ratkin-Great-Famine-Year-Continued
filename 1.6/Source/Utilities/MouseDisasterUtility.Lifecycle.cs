@@ -350,6 +350,8 @@ namespace MouseDisaster
 
         private static void TryEnsureToddlerCompatibilityHediffs(Pawn pawn)
         {
+            // Run at identity/age transitions, not from RemoveHediff: providers may
+            // intentionally remove completed learning or unsupported infant states.
             if (pawn?.health?.hediffSet == null)
             {
                 return;

@@ -76,21 +76,4 @@ namespace MouseDisaster
         }
     }
 
-    [HarmonyPatch(typeof(Pawn_HealthTracker), nameof(Pawn_HealthTracker.RemoveHediff))]
-    public static class MouseDisasterHealthTrackerRemoveHediffPatch
-    {
-        private static readonly AccessTools.FieldRef<Pawn_HealthTracker, Pawn> PawnField =
-            AccessTools.FieldRefAccess<Pawn_HealthTracker, Pawn>("pawn");
-
-        public static void Postfix(Pawn_HealthTracker __instance, Hediff hediff)
-        {
-            if (hediff?.def == null || !MouseDisasterUtility.IsToddlerCompatibilityHediffDef(hediff.def))
-            {
-                return;
-            }
-
-            Pawn pawn = PawnField(__instance);
-            MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
-        }
-    }
 }

@@ -48,7 +48,10 @@ namespace MouseDisaster
                 return false;
             }
 
-            return GetActiveMouseDisasterGenes(pawn).Count > 0;
+            List<GeneDef> pool = GetMouseDisasterGenePool();
+            for (int i = 0; i < pool.Count; i++)
+                if (pawn.genes.HasActiveGene(pool[i])) return true;
+            return false;
         }
 
         public static void TryAssignBirthMouseDisasterGenes(Pawn newborn, Pawn parent)
@@ -259,15 +262,5 @@ namespace MouseDisaster
             }
         }
 
-        private static List<GeneDef> GetActiveMouseDisasterGenes(Pawn pawn)
-        {
-            if (!ModsConfig.BiotechActive || pawn?.genes == null)
-            {
-                return new List<GeneDef>();
-            }
-
-            List<GeneDef> pool = GetMouseDisasterGenePool();
-            return pool.Where(pawn.genes.HasActiveGene).ToList();
-        }
     }
 }
