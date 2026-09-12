@@ -109,6 +109,7 @@ namespace MouseDisaster
         public Dictionary<string, float> temperatureApparelInsulation = new Dictionary<string, float>();
         public List<string> disabledTemperatureApparelDefNames = new List<string>();
         public bool enablePrisonerScavengeDebugLog = false;
+        public bool enableDetailedTraceLog = false;
         public bool enableExperimentalTailBite = false;
         public PrisonerScavengePoisonMode prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
         public bool enableChaosRoomPregnancy = true;
@@ -175,6 +176,7 @@ namespace MouseDisaster
             temperatureApparelInsulation = new Dictionary<string, float>();
             disabledTemperatureApparelDefNames = new List<string>();
             enablePrisonerScavengeDebugLog = false;
+            enableDetailedTraceLog = false;
             enableExperimentalTailBite = false;
             prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
             enableChaosRoomPregnancy = true;
@@ -433,6 +435,7 @@ namespace MouseDisaster
             Scribe_Collections.Look(ref temperatureApparelInsulation, "temperatureApparelInsulation", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref disabledTemperatureApparelDefNames, "disabledTemperatureApparelDefNames", LookMode.Value);
             Scribe_Values.Look(ref enablePrisonerScavengeDebugLog, "enablePrisonerScavengeDebugLog", false);
+            Scribe_Values.Look(ref enableDetailedTraceLog, "enableDetailedTraceLog", false);
             Scribe_Values.Look(ref enableExperimentalTailBite, "enableExperimentalTailBite", false);
             int poisonModeRaw = (int)prisonerScavengePoisonMode;
             Scribe_Values.Look(ref poisonModeRaw, "prisonerScavengePoisonMode", (int)PrisonerScavengePoisonMode.Normal);

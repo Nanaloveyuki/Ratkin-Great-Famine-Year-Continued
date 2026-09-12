@@ -142,6 +142,7 @@
     <Compile Include="MouseDisasterVisitorHostilityPolicy.cs" />
     <Compile Include="IncidentChancePatches.cs" />
     <Compile Include="MouseDisasterIncidentScheduling.cs" />
+    <Compile Include="MouseDisasterTrace.cs" />
     <Compile Include="DefOfs.cs" />
     <Compile Include="FactionRelationPatches.cs" />
     <Compile Include="FloatMenuOptionProvider_MouseDisasterVisitorControl.cs" />

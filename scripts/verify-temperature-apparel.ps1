@@ -57,12 +57,15 @@ if ($settings -notmatch 'DefaultMouseDisasterMinimumEnvironmentTemperature = -35
     $settings -notmatch 'enableTemperatureProtectionApparel' -or
     $settings -notmatch 'temperatureApparelInsulation' -or
     $settings -notmatch 'disabledTemperatureApparelDefNames' -or
+    $settings -notmatch 'enableDetailedTraceLog = false' -or
     $settings -notmatch 'Scribe_Values\.Look\(ref mouseDisasterMinimumEnvironmentTemperature' -or
-    $settings -notmatch 'Scribe_Collections\.Look\(ref temperatureApparelInsulation') {
+    $settings -notmatch 'Scribe_Collections\.Look\(ref temperatureApparelInsulation' -or
+    $settings -notmatch 'Scribe_Values\.Look\(ref enableDetailedTraceLog') {
     throw 'Temperature adaptation settings are not persisted with the expected defaults.'
 }
 if ($mod -notmatch 'SettingsPage\.Environment' -or
     $mod -notmatch 'DrawEnvironmentSettings' -or
+    $mod -notmatch 'enableDetailedTraceLog' -or
     $iris -notmatch 'Environment' -or
     $targetPolicy -notmatch 'ShouldBlockEnvironmentTemperature' -or
     $chance -notmatch 'ShouldBlockEnvironmentTemperature') {

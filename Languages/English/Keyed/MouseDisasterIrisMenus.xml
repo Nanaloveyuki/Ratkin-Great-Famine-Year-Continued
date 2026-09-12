@@ -13,4 +13,6 @@
   <MouseDisaster_Developer_NoGame>No game is loaded.</MouseDisaster_Developer_NoGame>
   <MouseDisaster_Developer_Logging>Log scavenging and tail biting</MouseDisaster_Developer_Logging>
   <MouseDisaster_Developer_LoggingTip>Write details of these actions to the game log.</MouseDisaster_Developer_LoggingTip>
+  <MouseDisaster_Developer_DetailedTraceLogging>Enable detailed Trace logging</MouseDisaster_Developer_DetailedTraceLogging>
+  <MouseDisaster_Developer_DetailedTraceLoggingTip>When enabled, write key Mouse Disaster incident, Pawn generation and temperature adaptation decisions to the game log with a [MouseDisaster Trace] prefix. Off by default.</MouseDisaster_Developer_DetailedTraceLoggingTip>
 </LanguageData>

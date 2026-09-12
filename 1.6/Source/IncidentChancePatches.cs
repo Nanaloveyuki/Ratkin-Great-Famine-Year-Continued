@@ -48,6 +48,8 @@ namespace MouseDisaster
 
             if (MouseDisasterIncidentTargetPolicy.ShouldBlockEnvironmentTemperature(__instance?.def?.defName, parms?.target))
             {
+                MouseDisasterTrace.Log("incident CanFireNow blocked by map temperature; def=" +
+                    (__instance?.def?.defName ?? "unknown") + "; " + MouseDisasterTrace.DescribeTarget(parms?.target));
                 __result = false;
                 return false;
             }
@@ -91,6 +93,9 @@ namespace MouseDisaster
                 return true;
             }
 
+            MouseDisasterTrace.Log("incident execute begin; def=" + defName + "; " +
+                MouseDisasterTrace.DescribeTarget(parms?.target) + "; forced=" + (parms?.forced ?? false));
+
             if (MouseDisasterRuntime.AllowsNewContent &&
                 (GameComponent_MouseDisasterNarrative.DebugForcing || MouseDisasterIncidentCatalog.IsIncidentEnabled(defName, MouseDisasterMod.Settings?.disabledIncidentDefNames)))
             {
@@ -121,6 +126,8 @@ namespace MouseDisaster
                     if (!__state.before.Contains(pawn)) participants.Add(pawn);
             if (__state != null) GameComponent_MouseDisasterEventBehavior.Component?.Register(__state.groupId, participants);
             Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordIncidentExecuted(__instance.def, parms, participants);
+            MouseDisasterTrace.Log("incident execute end; def=" + __instance.def.defName + "; success=" +
+                __result + "; participants=" + participants.Count + "; " + MouseDisasterTrace.DescribeTarget(parms?.target));
         }
 
         public static void Finalizer(MouseDisasterEventExecution __state)

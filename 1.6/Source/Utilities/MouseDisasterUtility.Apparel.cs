@@ -63,6 +63,8 @@ namespace MouseDisaster
             MouseDisasterSettings settings = MouseDisasterMod.Settings;
             if (settings?.enableTemperatureProtectionApparel == false)
             {
+                MouseDisasterTrace.Log("temperature apparel skipped; " + MouseDisasterTrace.DescribePawn(pawn) +
+                    "; reason=feature-disabled");
                 return;
             }
 
@@ -71,6 +73,8 @@ namespace MouseDisaster
             float outdoorTemperature = map.mapTemperature.OutdoorTemp;
             if (float.IsNaN(outdoorTemperature) || float.IsInfinity(outdoorTemperature))
             {
+                MouseDisasterTrace.Log("temperature apparel skipped; " + MouseDisasterTrace.DescribePawn(pawn) +
+                    "; " + MouseDisasterTrace.DescribeMap(map) + "; reason=invalid-outdoor-temperature");
                 return;
             }
 
@@ -79,27 +83,43 @@ namespace MouseDisaster
                 outdoorTemperature,
                 settings?.mouseDisasterMinimumEnvironmentTemperature ?? MinimumGeneratedComfortTemperature,
                 settings?.mouseDisasterMaximumEnvironmentTemperature ?? MaximumGeneratedComfortTemperature);
+            bool needsColdProtection = outdoorTemperature < currentRange.min;
+            bool needsHeatProtection = outdoorTemperature > currentRange.max;
+            float requiredInsulation = needsColdProtection
+                ? currentRange.min - targetTemperature
+                : needsHeatProtection ? targetTemperature - currentRange.max : 0f;
             TemperatureApparelOption selected = null;
-            if (outdoorTemperature < currentRange.min)
+            if (needsColdProtection)
             {
                 selected = FindTemperatureApparelOption(
                     ColdTemperatureApparelOptions,
-                    currentRange.min - targetTemperature);
+                    requiredInsulation);
             }
-            else if (outdoorTemperature > currentRange.max)
+            else if (needsHeatProtection)
             {
                 selected = FindTemperatureApparelOption(
                     HeatTemperatureApparelOptions,
-                    targetTemperature - currentRange.max);
+                    requiredInsulation);
             }
 
             if (selected == null)
             {
+                MouseDisasterTrace.Log("temperature apparel decision; " + MouseDisasterTrace.DescribePawn(pawn) +
+                    "; " + MouseDisasterTrace.DescribeMap(map) + "; comfort=" + currentRange.min.ToString("0.0") +
+                    ".." + currentRange.max.ToString("0.0") + "; target=" + targetTemperature.ToString("0.0") +
+                    "; required=" + requiredInsulation.ToString("0.0") + "; selected=none");
                 return;
             }
 
             ThingDef apparelDef = DefDatabase<ThingDef>.GetNamedSilentFail(selected.DefName);
-            TryWearTemperatureApparel(pawn, apparelDef);
+            bool equipped = TryWearTemperatureApparel(pawn, apparelDef);
+            float configuredInsulation = settings?.GetTemperatureApparelInsulation(
+                selected.DefName, selected.Insulation) ?? selected.Insulation;
+            MouseDisasterTrace.Log("temperature apparel decision; " + MouseDisasterTrace.DescribePawn(pawn) +
+                "; " + MouseDisasterTrace.DescribeMap(map) + "; comfort=" + currentRange.min.ToString("0.0") +
+                ".." + currentRange.max.ToString("0.0") + "; target=" + targetTemperature.ToString("0.0") +
+                "; required=" + requiredInsulation.ToString("0.0") + "; selected=" + selected.DefName +
+                "; insulation=" + configuredInsulation.ToString("0.0") + "; equipped=" + equipped);
         }
 
         private static TemperatureApparelOption FindTemperatureApparelOption(

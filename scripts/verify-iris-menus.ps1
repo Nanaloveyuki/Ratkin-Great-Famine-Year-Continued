@@ -65,6 +65,7 @@ namespace MouseDisaster {
     public partial class MouseDisasterMod : Verse.Mod {
         private class FakeSettings {
             public bool enablePrisonerScavengeDebugLog = false;
+            public bool enableDetailedTraceLog = false;
             public void ClampValues() { }
         }
         private static FakeSettings Settings = new FakeSettings();

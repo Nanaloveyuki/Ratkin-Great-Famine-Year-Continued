@@ -269,6 +269,9 @@ namespace MouseDisaster
                 return false;
             }
 
+            MouseDisasterTrace.Log("pawn batch start; kind=" + batch.kind + "; requested=" + totalCount +
+                "; incident=" + batch.incidentDef.defName + "; " + MouseDisasterTrace.DescribeMap(batch.map) +
+                "; entry=" + batch.entryCell);
             batch.intervalTicks = Mathf.Max(1, Mathf.RoundToInt(TargetGenerationTicks / (float)totalCount));
             batch.randomSeed = Rand.Int;
             batch.deadlineTick = tickManager.TicksGame + MaxBatchLifetimeTicks;
@@ -297,6 +300,10 @@ namespace MouseDisaster
                 batch.nextSpawnTick = tickManager.TicksGame + batch.intervalTicks;
                 component.batches.Add(batch);
             }
+
+            MouseDisasterTrace.Log("pawn batch staged; kind=" + batch.kind + "; generated=" + batch.generatedSlots +
+                "; pawns=" + batch.pawns.Count + "; remaining=" + batch.remainingCount +
+                "; intervalTicks=" + batch.intervalTicks);
 
             return true;
         }
@@ -369,6 +376,8 @@ namespace MouseDisaster
                     GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(batch.incidentDef) ?? 0;
             int firstNewPawn = batch.pawns.Count;
             int slot = batch.generatedSlots++;
+            MouseDisasterTrace.Log("pawn generation slot begin; kind=" + batch.kind + "; slot=" + slot +
+                "; existingPawns=" + firstNewPawn + "; " + MouseDisasterTrace.DescribeMap(batch.map));
             Rand.PushState(Gen.HashCombineInt(batch.randomSeed, slot));
             try
             {
@@ -396,6 +405,9 @@ namespace MouseDisaster
             if (batch.pawns.Count > firstNewPawn)
                 GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId,
                     batch.pawns.GetRange(firstNewPawn, batch.pawns.Count - firstNewPawn));
+            MouseDisasterTrace.Log("pawn generation slot end; kind=" + batch.kind + "; slot=" + slot +
+                "; created=" + (batch.pawns.Count - firstNewPawn) + "; totalPawns=" + batch.pawns.Count +
+                "; remaining=" + batch.remainingCount);
         }
 
         private static void GenerateLargeRefugee(MouseDisasterPawnBatch batch)
@@ -769,6 +781,9 @@ namespace MouseDisaster
             ReleaseTraderGatheringLord(batch);
             TryRestoreTraderCaravanMembers(batch);
             List<Pawn> pawns = ActivePawns(batch);
+            MouseDisasterTrace.Log("pawn batch finalize; kind=" + (batch?.kind.ToString() ?? "unknown") +
+                "; generated=" + (batch?.generatedSlots ?? 0) + "; activePawns=" + pawns.Count +
+                "; " + MouseDisasterTrace.DescribeMap(batch?.map));
             if (pawns.Count == 0)
             {
                 Log.Warning("[MouseDisaster] Staged pawn generation completed without any active pawns for " + batch.kind + ".");

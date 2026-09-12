@@ -16,6 +16,14 @@ namespace MouseDisaster
         {
             var settings = MouseDisasterMod.Settings;
             if (settings == null || !MouseDisasterRuntime.AllowsNewContent) return null;
+            if (target is Map map && map.mapTemperature != null &&
+                !settings.IsMouseDisasterEnvironmentTemperatureAllowed(map.mapTemperature.OutdoorTemp))
+            {
+                MouseDisasterTrace.Log("incident pool skipped; " + MouseDisasterTrace.DescribeMap(map) +
+                    "; allowedRange=" + settings.mouseDisasterMinimumEnvironmentTemperature.ToString("0.0") +
+                    ".." + settings.mouseDisasterMaximumEnvironmentTemperature.ToString("0.0"));
+                return null;
+            }
             var candidates = new List<FiringIncident>();
             foreach (var entry in MouseDisasterIncidentCatalog.AllEntries)
             {
