@@ -23,6 +23,7 @@
       <layers>
         <li>OnSkin</li>
       </layers>
+      <developmentalStageFilter>Baby, Child, Adult</developmentalStageFilter>
       <countsAsClothingForNudity>false</countsAsClothingForNudity>
       <canBeGeneratedToSatisfyWarmth>false</canBeGeneratedToSatisfyWarmth>
       <canBeDesiredForIdeo>false</canBeDesiredForIdeo>

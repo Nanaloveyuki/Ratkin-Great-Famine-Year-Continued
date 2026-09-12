@@ -19,8 +19,11 @@ $baseDef = @($defsDocument.Defs.ThingDef | Where-Object { $_.Name -eq 'MouseDisa
 if ($null -eq $baseDef -or
     $baseDef.graphicData.texPath -ne 'Things/Pawn/Humanlike/Apparel/TribalA/TribalA' -or
     $baseDef.apparel.wornGraphicPath -ne 'Things/Pawn/Humanlike/Apparel/TribalA/TribalA' -or
-    @($baseDef.apparel.bodyPartGroups.li) -notcontains 'Waist') {
-    throw 'Temperature apparel does not use the expected TribalA graphics and Waist slot.'
+    @($baseDef.apparel.bodyPartGroups.li) -notcontains 'Waist' -or
+    [string]$baseDef.apparel.developmentalStageFilter -notmatch '\bBaby\b' -or
+    [string]$baseDef.apparel.developmentalStageFilter -notmatch '\bChild\b' -or
+    [string]$baseDef.apparel.developmentalStageFilter -notmatch '\bAdult\b') {
+    throw 'Temperature apparel does not use the expected graphics, Waist slot, and developmental stages.'
 }
 
 $expected = @(
@@ -45,11 +48,14 @@ $iris = Get-Content -LiteralPath $irisPath -Raw
 $targetPolicy = Get-Content -LiteralPath $targetPolicyPath -Raw
 $chance = Get-Content -LiteralPath $chancePath -Raw
 $patch = Get-Content -LiteralPath $patchPath -Raw
-if ($source -notmatch 'map\.mapTemperature\.OutdoorTemp' -or
+if ($source -notmatch 'GenTemperature\.TryGetTemperatureForCell' -or
     $source -notmatch 'MinimumGeneratedComfortTemperature' -or
     $source -notmatch 'MaximumGeneratedComfortTemperature' -or
-    $patch -notmatch 'MouseDisasterTemperatureApparelSpawnPatch' -or
-    $patch -notmatch 'ApplyTemperatureProtectionApparel\(pawn, map\)') {
+    $source -notmatch 'HasTemperatureProtectionApparel' -or
+    $patch -notmatch 'bool respawningAfterLoad' -or
+    $patch -notmatch '!respawningAfterLoad' -or
+    $patch -notmatch 'ApplyTemperatureProtectionApparel\(\s*__instance, __instance\.Map, __instance\.Position\)' -or
+    $patch -match 'MouseDisasterTemperatureApparelSpawnPatch') {
     throw 'Temperature apparel is not connected to the spawned MouseDisaster pawn path.'
 }
 if ($settings -notmatch 'DefaultMouseDisasterMinimumEnvironmentTemperature = -35f' -or
@@ -103,4 +109,4 @@ if ($coldForMinus35 -gt 56.0 -or $heatFor70 -gt 44.0) {
     throw 'Temperature apparel does not cover the requested -35C to 70C boundary for the current Ratkin baseline.'
 }
 
-"PASS: 12 temperature apparel defs, native TribalA graphics, spawn hookup, and -35C/70C boundary coverage verified."
+"PASS: 12 temperature apparel defs, developmental-stage support, cell-temperature spawn hookup, lifecycle preservation, and -35C/70C boundary coverage verified."

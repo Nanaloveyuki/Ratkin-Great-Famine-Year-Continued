@@ -53,7 +53,7 @@ namespace MouseDisaster
             }
         }
 
-        internal static void ApplyTemperatureProtectionApparel(Pawn pawn, Map map)
+        internal static void ApplyTemperatureProtectionApparel(Pawn pawn, Map map, IntVec3 cell)
         {
             if (pawn == null || map?.mapTemperature == null || pawn.Dead || pawn.apparel == null)
             {
@@ -68,23 +68,43 @@ namespace MouseDisaster
                 return;
             }
 
-            RemoveTemperatureProtectionApparel(pawn);
-
-            float outdoorTemperature = map.mapTemperature.OutdoorTemp;
-            if (float.IsNaN(outdoorTemperature) || float.IsInfinity(outdoorTemperature))
+            // Keep generated protection apparel across map transfers and normal respawns.
+            if (HasTemperatureProtectionApparel(pawn))
             {
                 MouseDisasterTrace.Log("temperature apparel skipped; " + MouseDisasterTrace.DescribePawn(pawn) +
-                    "; " + MouseDisasterTrace.DescribeMap(map) + "; reason=invalid-outdoor-temperature");
+                    "; reason=existing-temperature-apparel");
+                return;
+            }
+
+            float environmentTemperature = 0f;
+            bool usedCellTemperature = false;
+            if (cell.InBounds(map))
+            {
+                usedCellTemperature = GenTemperature.TryGetTemperatureForCell(
+                    cell, map, out environmentTemperature) &&
+                    !float.IsNaN(environmentTemperature) &&
+                    !float.IsInfinity(environmentTemperature);
+            }
+
+            if (!usedCellTemperature)
+            {
+                environmentTemperature = map.mapTemperature.OutdoorTemp;
+            }
+
+            if (float.IsNaN(environmentTemperature) || float.IsInfinity(environmentTemperature))
+            {
+                MouseDisasterTrace.Log("temperature apparel skipped; " + MouseDisasterTrace.DescribePawn(pawn) +
+                    "; " + MouseDisasterTrace.DescribeMap(map) + "; reason=invalid-environment-temperature");
                 return;
             }
 
             FloatRange currentRange = pawn.ComfortableTemperatureRange();
             float targetTemperature = Mathf.Clamp(
-                outdoorTemperature,
+                environmentTemperature,
                 settings?.mouseDisasterMinimumEnvironmentTemperature ?? MinimumGeneratedComfortTemperature,
                 settings?.mouseDisasterMaximumEnvironmentTemperature ?? MaximumGeneratedComfortTemperature);
-            bool needsColdProtection = outdoorTemperature < currentRange.min;
-            bool needsHeatProtection = outdoorTemperature > currentRange.max;
+            bool needsColdProtection = environmentTemperature < currentRange.min;
+            bool needsHeatProtection = environmentTemperature > currentRange.max;
             float requiredInsulation = needsColdProtection
                 ? currentRange.min - targetTemperature
                 : needsHeatProtection ? targetTemperature - currentRange.max : 0f;
@@ -107,7 +127,8 @@ namespace MouseDisaster
                 MouseDisasterTrace.Log("temperature apparel decision; " + MouseDisasterTrace.DescribePawn(pawn) +
                     "; " + MouseDisasterTrace.DescribeMap(map) + "; comfort=" + currentRange.min.ToString("0.0") +
                     ".." + currentRange.max.ToString("0.0") + "; target=" + targetTemperature.ToString("0.0") +
-                    "; required=" + requiredInsulation.ToString("0.0") + "; selected=none");
+                    "; required=" + requiredInsulation.ToString("0.0") + "; temperatureSource=" +
+                    (usedCellTemperature ? "cell" : "outdoor") + "; selected=none");
                 return;
             }
 
@@ -119,7 +140,8 @@ namespace MouseDisaster
                 "; " + MouseDisasterTrace.DescribeMap(map) + "; comfort=" + currentRange.min.ToString("0.0") +
                 ".." + currentRange.max.ToString("0.0") + "; target=" + targetTemperature.ToString("0.0") +
                 "; required=" + requiredInsulation.ToString("0.0") + "; selected=" + selected.DefName +
-                "; insulation=" + configuredInsulation.ToString("0.0") + "; equipped=" + equipped);
+                "; insulation=" + configuredInsulation.ToString("0.0") + "; equipped=" + equipped +
+                "; temperatureSource=" + (usedCellTemperature ? "cell" : "outdoor"));
         }
 
         private static TemperatureApparelOption FindTemperatureApparelOption(
@@ -154,19 +176,10 @@ namespace MouseDisaster
             return fallback;
         }
 
-        private static void RemoveTemperatureProtectionApparel(Pawn pawn)
+        private static bool HasTemperatureProtectionApparel(Pawn pawn)
         {
-            for (int index = pawn.apparel.WornApparel.Count - 1; index >= 0; index--)
-            {
-                Apparel worn = pawn.apparel.WornApparel[index];
-                if (!IsTemperatureProtectionApparel(worn?.def))
-                {
-                    continue;
-                }
-
-                pawn.apparel.Remove(worn);
-                worn.Destroy();
-            }
+            return pawn?.apparel?.WornApparel.Any(worn =>
+                IsTemperatureProtectionApparel(worn?.def)) == true;
         }
 
         private static bool IsTemperatureProtectionApparel(ThingDef apparelDef)

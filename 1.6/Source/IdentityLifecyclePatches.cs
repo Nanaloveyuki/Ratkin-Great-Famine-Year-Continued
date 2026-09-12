@@ -7,34 +7,18 @@ namespace MouseDisaster
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.SpawnSetup))]
     public static class MouseDisasterSpawnSetupPatch
     {
-        public static void Postfix(Pawn __instance)
+        public static void Postfix(Pawn __instance, bool respawningAfterLoad)
         {
             // SpawnSetup 会和并行渲染交错发生，这里只标记缓存失效，
             // 避免在生成期做基因/身份/兼容状态重写，把 Verse 的共享缓存打坏。
             MouseDisasterUtility.MarkMapPawnCacheDirty(__instance);
-            GameComponent_MouseDisasterEventBehavior.Component?.NotifySpawned(__instance);
-        }
-    }
-
-    [HarmonyPatch(typeof(GenSpawn), nameof(GenSpawn.Spawn), new[]
-    {
-        typeof(Thing),
-        typeof(IntVec3),
-        typeof(Map),
-        typeof(Rot4),
-        typeof(WipeMode),
-        typeof(bool),
-        typeof(bool)
-    })]
-    public static class MouseDisasterTemperatureApparelSpawnPatch
-    {
-        public static void Prefix(Thing newThing, Map map)
-        {
-            Pawn pawn = newThing as Pawn;
-            if (pawn != null && MouseDisasterUtility.IsMouseDisasterPawn(pawn))
+            if (!respawningAfterLoad && __instance != null && __instance.Spawned &&
+                MouseDisasterUtility.IsMouseDisasterPawn(__instance))
             {
-                MouseDisasterUtility.ApplyTemperatureProtectionApparel(pawn, map);
+                MouseDisasterUtility.ApplyTemperatureProtectionApparel(
+                    __instance, __instance.Map, __instance.Position);
             }
+            GameComponent_MouseDisasterEventBehavior.Component?.NotifySpawned(__instance);
         }
     }
 
