@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -503,6 +504,11 @@ namespace MouseDisaster
                 return;
             }
 
+            if (batch.Complete)
+            {
+                return;
+            }
+
             if (batch.gatheringLord != null && !IsValidTraderGatheringLord(batch, batch.gatheringLord))
             {
                 ReleaseTraderGatheringLord(batch);
@@ -516,7 +522,12 @@ namespace MouseDisaster
             foreach (Pawn pawn in batch.pawns)
             {
                 if (pawn == null || pawn.Dead || pawn.Destroyed || !pawn.Spawned || pawn.Map != batch.map) continue;
-                if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) || pawn.GetLord() != null) continue;
+                if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn)) continue;
+                Lord currentLord = pawn.GetLord();
+                if (!TryDetachTraderCaravanPawn(pawn, batch.gatheringLord, "gathering"))
+                {
+                    continue;
+                }
                 if (batch.gatheringLord == null)
                     batch.gatheringLord = LordMaker.MakeNewLord(batch.faction ?? pawn.Faction,
                         new LordJob_DefendPoint(batch.entryCell, wanderRadius: 3f), batch.map);
@@ -525,9 +536,80 @@ namespace MouseDisaster
                     continue;
                 }
 
+                if (currentLord == batch.gatheringLord && batch.gatheringLord.ownedPawns?.Contains(pawn) == true)
+                {
+                    continue;
+                }
                 batch.gatheringLord.AddPawn(pawn);
                 pawn.jobs?.StopAll();
             }
+        }
+
+        private static bool TryDetachTraderCaravanPawn(Pawn pawn, Lord expectedLord, string phase)
+        {
+            if (pawn == null)
+            {
+                return false;
+            }
+
+            Lord currentLord = pawn.GetLord();
+            if (currentLord == null)
+            {
+                return true;
+            }
+
+            if (currentLord == expectedLord && currentLord.ownedPawns?.Contains(pawn) == true)
+            {
+                return true;
+            }
+
+            try
+            {
+                currentLord.RemovePawn(pawn);
+            }
+            catch (Exception exception)
+            {
+                Log.Warning("[MouseDisaster] Could not detach trader caravan pawn " + pawn +
+                    " from an existing lord during " + phase + ": " + exception);
+                return false;
+            }
+
+            if (pawn.GetLord() != null)
+            {
+                Log.Warning("[MouseDisaster] Trader caravan pawn " + pawn +
+                    " remained in another lord during " + phase + ".");
+                return false;
+            }
+
+            try
+            {
+                pawn.jobs?.StopAll();
+            }
+            catch (Exception exception)
+            {
+                Log.Warning("[MouseDisaster] Could not stop a detached trader caravan pawn: " + exception);
+            }
+
+            return true;
+        }
+
+        private static bool TryClaimTraderCaravanPawns(IEnumerable<Pawn> pawns, string phase)
+        {
+            foreach (Pawn pawn in pawns ?? Enumerable.Empty<Pawn>())
+            {
+                if (pawn == null || MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn))
+                {
+                    continue;
+                }
+
+                if (!TryDetachTraderCaravanPawn(pawn, expectedLord: null, phase))
+                {
+                    Log.Warning("[MouseDisaster] Could not claim trader caravan pawn " + pawn + " during " + phase + ".");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static bool TryEnsureTraderGatheringLord(MouseDisasterPawnBatch batch)
@@ -606,9 +688,86 @@ namespace MouseDisaster
                 ", map=" + pawn.Map + ", heldMap=" + pawn.MapHeld + ")";
         }
 
+        private static void TryRestoreTraderCaravanMembers(MouseDisasterPawnBatch batch)
+        {
+            if (batch?.kind != MouseDisasterPawnBatchKind.TraderCaravan || batch.map == null || batch.pawns == null)
+            {
+                return;
+            }
+
+            // Only the trader and escort are recoverable requirements. Children that are dead,
+            // carried, or already traveling remain outside the active trade group.
+            foreach (Pawn pawn in new[] { batch.traderPawn, batch.escortPawn })
+            {
+                if (pawn == null || pawn.Dead || pawn.Destroyed || MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn))
+                {
+                    continue;
+                }
+
+                TryRestoreTraderCaravanMember(batch, pawn);
+            }
+        }
+
+        private static bool TryRestoreTraderCaravanMember(MouseDisasterPawnBatch batch, Pawn pawn)
+        {
+            if (pawn.Spawned)
+            {
+                if (pawn.Map != batch.map)
+                {
+                    return false;
+                }
+
+                return TryDetachTraderCaravanPawn(pawn, expectedLord: null, "member recovery");
+            }
+
+            // Do not pull a pawn out of a caravan or a live holder. Those states need their owner to
+            // release the pawn first; forcing a map spawn here would corrupt that container.
+            if (pawn.Map != null || pawn.MapHeld != null || pawn.ParentHolder != null || pawn.IsCaravanMember())
+            {
+                return false;
+            }
+
+            if (!TryDetachTraderCaravanPawn(pawn, expectedLord: null, "member recovery"))
+            {
+                return false;
+            }
+
+            try
+            {
+                IntVec3 cell = CellFinder.RandomClosewalkCellNear(batch.entryCell, batch.map, 6);
+                if (!cell.InBounds(batch.map) || !cell.Standable(batch.map))
+                {
+                    Log.Warning("[MouseDisaster] Could not find a recovery cell for trader caravan pawn " + pawn + ".");
+                    return false;
+                }
+
+                GenSpawn.Spawn(pawn, cell, batch.map);
+                if (!pawn.Spawned || pawn.Map != batch.map)
+                {
+                    return false;
+                }
+
+                if (pawn == batch.traderPawn)
+                {
+                    MouseDisasterUtility.EnsureTradeLeader(pawn, MouseDisasterUtility.ResolveSlaveTraderKind());
+                }
+
+                pawn.mindState?.mentalStateHandler?.Reset();
+                pawn.jobs?.StopAll();
+                Log.Message("[MouseDisaster] Restored missing trader caravan pawn " + pawn + " before finalization.");
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Log.Warning("[MouseDisaster] Could not restore missing trader caravan pawn " + pawn + ": " + exception);
+                return false;
+            }
+        }
+
         private static void FinalizeBatch(MouseDisasterPawnBatch batch)
         {
             ReleaseTraderGatheringLord(batch);
+            TryRestoreTraderCaravanMembers(batch);
             List<Pawn> pawns = ActivePawns(batch);
             if (pawns.Count == 0)
             {
@@ -625,7 +784,7 @@ namespace MouseDisaster
                 case MouseDisasterPawnBatchKind.TraderCaravan:
                     if (!FinalizeTraderCaravan(batch, pawns))
                     {
-                        SendIncompleteTraderCaravanAway(batch, pawns);
+                        SendIncompleteTraderCaravanAway(batch, ActivePawns(batch));
                     }
                     break;
             }
@@ -675,6 +834,7 @@ namespace MouseDisaster
         private static void TruncateBatch(MouseDisasterPawnBatch batch, string reason)
         {
             ReleaseTraderGatheringLord(batch);
+            TryRestoreTraderCaravanMembers(batch);
             Log.Warning("[MouseDisaster] Truncating staged pawn generation for " + batch.kind + ": " + reason + ".");
             List<Pawn> pawns = ActivePawns(batch);
             if (pawns.Count == 0 || !IsBatchMapAvailable(batch))
@@ -686,7 +846,7 @@ namespace MouseDisaster
             {
                 if (!HasRequiredState(batch) || !FinalizeTraderCaravan(batch, pawns))
                 {
-                    SendIncompleteTraderCaravanAway(batch, pawns);
+                    SendIncompleteTraderCaravanAway(batch, ActivePawns(batch));
                 }
                 return;
             }
@@ -738,6 +898,8 @@ namespace MouseDisaster
             }
 
             ReleaseTraderGatheringLord(batch);
+            TryRestoreTraderCaravanMembers(batch);
+            pawns = ActivePawns(batch);
             Pawn traderPawn = batch.traderPawn;
             Pawn escortPawn = batch.escortPawn;
             List<Pawn> children = batch.pawns?
@@ -753,6 +915,11 @@ namespace MouseDisaster
                     "; remaining=" + batch.remainingCount + "; map=" + batch.map +
                     (children.Count == 0 ? "; children=" + string.Join(", ", batch.pawns
                         .Where(pawn => pawn != traderPawn && pawn != escortPawn).Select(DescribeTraderMember)) : ""));
+                return false;
+            }
+
+            if (!TryClaimTraderCaravanPawns(pawns, "trade finalization"))
+            {
                 return false;
             }
 

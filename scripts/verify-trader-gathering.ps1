@@ -15,21 +15,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace TraderGatheringTests {
-public struct IntVec3 { }
+public struct IntVec3 {
+    public bool InBounds(Map map) => true;
+    public bool Standable(Map map) => true;
+}
 public class Faction { }
 public class Map { public IntVec3 Center; public LordManager lordManager = new LordManager(); }
 public class LordManager { public List<Lord> lords = new List<Lord>(); }
 public class Jobs { public int stops; public void StopAll() { stops++; } }
 public class Pawn {
-    public bool Dead, Destroyed, Spawned=true, player;
+    public bool Dead, Destroyed, Spawned=true, player, caravan;
     public string ThingID="pawn";
     public Map Map, MapHeld;
+    public object ParentHolder;
     public Faction Faction=new Faction();
     public IntVec3 Position;
     public Jobs jobs=new Jobs();
+    public MindState mindState=new MindState();
     public Lord lord;
     public Lord GetLord() => lord;
+    public bool IsCaravanMember() => caravan;
 }
+public class MindState { public MentalStateHandler mentalStateHandler=new MentalStateHandler(); }
+public class MentalStateHandler { public void Reset() { } }
 public class LordJob_DefendPoint {
     public LordJob_DefendPoint(IntVec3 cell, float wanderRadius) { }
 }
@@ -60,10 +68,13 @@ public class MouseDisasterPawnBatch {
     public MouseDisasterPawnBatchKind kind;
     public Map map=new Map(); public Faction faction=new Faction(); public IntVec3 entryCell;
     public List<Pawn> pawns=new List<Pawn>(); public Pawn traderPawn, escortPawn;
-    public Lord gatheringLord; public int generatedSlots, remainingCount;
+    public Lord gatheringLord; public int generatedSlots, remainingCount=1;
     public IncidentDef incidentDef=new IncidentDef(); public object parms;
+    public bool Complete => remainingCount <= 0;
 }
-public static class Log { public static string warning; public static void Warning(string s) { warning=s; } public static void Error(string s) { warning=s; } }
+public static class Log { public static string warning; public static void Warning(string s) { warning=s; } public static void Error(string s) { warning=s; } public static void Message(string s) { warning=s; } }
+public static class CellFinder { public static IntVec3 RandomClosewalkCellNear(IntVec3 cell, Map map, int radius) => cell; }
+public static class GenSpawn { public static void Spawn(Pawn pawn, IntVec3 cell, Map map) { pawn.Spawned=true; pawn.Map=map; pawn.MapHeld=map; } }
 public static class MouseDisasterUtility {
     public static int exits;
     public static bool IsPlayerAffiliatedRatkin(Pawn pawn) => pawn.player;
@@ -72,6 +83,8 @@ public static class MouseDisasterUtility {
     public static void TryStartLeadYourPetRelatedAdultLeashes(List<Pawn> pawns) { }
     public static void TryAssignLeadYourPetTravelMouseEggs(Lord lord) { }
     public static void EnsureMouseDisasterFactionNeutralOnMap(Map map, Faction faction) { }
+    public static void EnsureTradeLeader(Pawn pawn, object traderKind) { }
+    public static object ResolveSlaveTraderKind() => null;
     public static void MakeTravelAndExitLord(Map map, List<Pawn> pawns, IntVec3 cell) {
         if (pawns.Any(p=>p.lord!=null)) throw new Exception("Gathering lord retained on failure");
         exits++;
@@ -100,6 +113,9 @@ public static class Harness {
     static Pawn Add(MouseDisasterPawnBatch b) {
         var p=new Pawn { Map=b.map, MapHeld=b.map, Faction=b.faction }; b.pawns.Add(p); return p;
     }
+    static Pawn AddUnspawned(MouseDisasterPawnBatch b) {
+        var p=new Pawn { Spawned=false, Map=null, MapHeld=null, Faction=b.faction }; b.pawns.Add(p); return p;
+    }
     public static int Run() {
         var b=new MouseDisasterPawnBatch(); b.traderPawn=Add(b);
         EnsureTraderGatheringLord(b);
@@ -115,6 +131,7 @@ public static class Harness {
         scopedLord.RemovePawn(unrelated);
         b.escortPawn=Add(b); Add(b); EnsureTraderGatheringLord(b);
         Check(gathering.ownedPawns.Count==3,"later members not gathered");
+        b.remainingCount=0;
         Check(FinalizeTraderCaravan(b,ActivePawns(b)),"complete caravan rejected");
         Check(b.gatheringLord==null && gathering.ownedPawns.Count==0,"gathering not released");
         Check(b.pawns.All(p=>p.GetLord().job is LordJob_TradeWithColony),"normal trade lord not installed");
@@ -136,7 +153,15 @@ public static class Harness {
         captured.kind=MouseDisasterPawnBatchKind.TraderCaravan;
         var other=Add(captured); var otherLord=new Lord(); otherLord.AddPawn(other);
         EnsureTraderGatheringLord(captured);
-        Check(other.GetLord()==otherLord,"other event duty commandeered");
+        Check(other.GetLord()==captured.gatheringLord && other.GetLord()!=otherLord,"batch member was not reclaimed");
+
+        var recovered=new MouseDisasterPawnBatch();
+        recovered.traderPawn=AddUnspawned(recovered);
+        recovered.escortPawn=AddUnspawned(recovered);
+        Add(recovered);
+        Check(FinalizeTraderCaravan(recovered,ActivePawns(recovered)),"unspawned caravan members were not recovered");
+        Check(recovered.traderPawn.Spawned && recovered.escortPawn.Spawned,"recovered adults did not spawn");
+        Check(recovered.pawns.All(p=>p.GetLord().job is LordJob_TradeWithColony),"recovered caravan did not get one trade lord");
 
         var failed=new MouseDisasterPawnBatch(); failed.traderPawn=Add(failed); Add(failed);
         EnsureTraderGatheringLord(failed);
