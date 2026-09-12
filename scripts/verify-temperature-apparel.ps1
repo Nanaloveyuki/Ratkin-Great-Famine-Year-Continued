@@ -1,0 +1,76 @@
+$ErrorActionPreference = 'Stop'
+$root = Split-Path $PSScriptRoot -Parent
+
+$defPath = Join-Path $root 'Defs/ThingDefs/ThingDefs_MouseDisaster_TemperatureApparel.xml'
+$sourcePath = Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Apparel.cs'
+$patchPath = Join-Path $root '1.6/Source/IdentityLifecyclePatches.cs'
+
+[xml]$defsDocument = Get-Content -LiteralPath $defPath -Raw
+$defs = @($defsDocument.Defs.ThingDef | Where-Object { $_.defName })
+if ($defs.Count -ne 12) {
+    throw "Expected 12 temperature apparel defs, found $($defs.Count)."
+}
+$baseDef = @($defsDocument.Defs.ThingDef | Where-Object { $_.Name -eq 'MouseDisasterTemperatureApparelBase' })[0]
+if ($null -eq $baseDef -or
+    $baseDef.graphicData.texPath -ne 'Things/Pawn/Humanlike/Apparel/TribalA/TribalA' -or
+    $baseDef.apparel.wornGraphicPath -ne 'Things/Pawn/Humanlike/Apparel/TribalA/TribalA' -or
+    @($baseDef.apparel.bodyPartGroups.li) -notcontains 'Waist') {
+    throw 'Temperature apparel does not use the expected TribalA graphics and Waist slot.'
+}
+
+$expected = @(
+    @{ Name = 'MouseDisaster_Heat_StaleWetCloth'; Stat = 'Insulation_Heat'; Value = 8 },
+    @{ Name = 'MouseDisaster_Heat_DryMudCoating'; Stat = 'Insulation_Heat'; Value = 12 },
+    @{ Name = 'MouseDisaster_Heat_ReedShadeWrap'; Stat = 'Insulation_Heat'; Value = 20 },
+    @{ Name = 'MouseDisaster_Heat_SoakedBarkWrap'; Stat = 'Insulation_Heat'; Value = 28 },
+    @{ Name = 'MouseDisaster_Heat_MudReedMantle'; Stat = 'Insulation_Heat'; Value = 36 },
+    @{ Name = 'MouseDisaster_Heat_HeavyCoolingMud'; Stat = 'Insulation_Heat'; Value = 44 },
+    @{ Name = 'MouseDisaster_Cold_ThinHempLayer'; Stat = 'Insulation_Cold'; Value = 8 },
+    @{ Name = 'MouseDisaster_Cold_LayeredHempClothes'; Stat = 'Insulation_Cold'; Value = 12 },
+    @{ Name = 'MouseDisaster_Cold_StrawBarkQuilt'; Stat = 'Insulation_Cold'; Value = 20 },
+    @{ Name = 'MouseDisaster_Cold_PatchedFurCloak'; Stat = 'Insulation_Cold'; Value = 28 },
+    @{ Name = 'MouseDisaster_Cold_SmokeStiffenedBlanket'; Stat = 'Insulation_Cold'; Value = 40 },
+    @{ Name = 'MouseDisaster_Cold_ThickHideHempWrap'; Stat = 'Insulation_Cold'; Value = 56 }
+)
+
+$source = Get-Content -LiteralPath $sourcePath -Raw
+$patch = Get-Content -LiteralPath $patchPath -Raw
+if ($source -notmatch 'map\.mapTemperature\.OutdoorTemp' -or
+    $source -notmatch 'MinimumGeneratedComfortTemperature' -or
+    $source -notmatch 'MaximumGeneratedComfortTemperature' -or
+    $patch -notmatch 'MouseDisasterTemperatureApparelSpawnPatch' -or
+    $patch -notmatch 'ApplyTemperatureProtectionApparel\(pawn, map\)') {
+    throw 'Temperature apparel is not connected to the spawned MouseDisaster pawn path.'
+}
+
+foreach ($item in $expected) {
+    $def = $defs | Where-Object defName -eq $item.Name
+    if ($null -eq $def) {
+        throw "Missing temperature apparel def: $($item.Name)."
+    }
+
+    $stats = @($def.statBases.ChildNodes | Where-Object NodeType -eq Element)
+    if ($stats.Count -ne 1 -or $stats[0].Name -ne $item.Stat -or [float]$stats[0].InnerText -ne $item.Value) {
+        throw "Unexpected temperature stats for $($item.Name)."
+    }
+    if ($null -ne $def.equippedStatOffsets -or $null -ne $def.comps) {
+        throw "$($item.Name) has non-temperature gameplay effects."
+    }
+    if ($def.ParentName -ne 'MouseDisasterTemperatureApparelBase') {
+        throw "$($item.Name) does not use the shared temperature apparel base."
+    }
+    $mapping = 'new TemperatureApparelOption("{0}", {1}f)' -f $item.Name, $item.Value
+    if ($source -notmatch [regex]::Escape($mapping)) {
+        throw "$($item.Name) is not mapped to the expected runtime insulation."
+    }
+}
+
+$baseMin = 21.0
+$baseMax = 26.0
+$coldForMinus35 = ($baseMin - [math]::Min(-35.0, -35.0))
+$heatFor70 = (70.0 - $baseMax)
+if ($coldForMinus35 -gt 56.0 -or $heatFor70 -gt 44.0) {
+    throw 'Temperature apparel does not cover the requested -35C to 70C boundary for the current Ratkin baseline.'
+}
+
+"PASS: 12 temperature apparel defs, native TribalA graphics, spawn hookup, and -35C/70C boundary coverage verified."

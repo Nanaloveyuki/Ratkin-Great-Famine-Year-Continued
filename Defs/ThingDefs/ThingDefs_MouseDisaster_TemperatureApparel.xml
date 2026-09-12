@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef Name="MouseDisasterTemperatureApparelBase" ParentName="ApparelBase" Abstract="True">
+    <thingClass>Apparel</thingClass>
+    <techLevel>Neolithic</techLevel>
+    <graphicData>
+      <texPath>Things/Pawn/Humanlike/Apparel/TribalA/TribalA</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>0.9</drawSize>
+    </graphicData>
+    <statBases>
+      <MaxHitPoints>45</MaxHitPoints>
+      <Mass>0.1</Mass>
+    </statBases>
+    <thingCategories>
+      <li>ApparelMisc</li>
+    </thingCategories>
+    <apparel>
+      <bodyPartGroups>
+        <li>Waist</li>
+      </bodyPartGroups>
+      <wornGraphicPath>Things/Pawn/Humanlike/Apparel/TribalA/TribalA</wornGraphicPath>
+      <layers>
+        <li>OnSkin</li>
+      </layers>
+      <countsAsClothingForNudity>false</countsAsClothingForNudity>
+      <canBeGeneratedToSatisfyWarmth>false</canBeGeneratedToSatisfyWarmth>
+      <canBeDesiredForIdeo>false</canBeDesiredForIdeo>
+    </apparel>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Heat_StaleWetCloth</defName>
+    <label>stale wet cloth</label>
+    <description>An absorbent cloth draped over the body. No one knows how long it has been used. It cools the wearer, and in this heat, staying alive matters more than health.</description>
+    <statBases>
+      <Insulation_Heat>8</Insulation_Heat>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Heat_DryMudCoating</defName>
+    <label>dry hardened mud coating</label>
+    <description>Although it feels terrible against the skin, it at least helps the wearer endure heat.</description>
+    <statBases>
+      <Insulation_Heat>12</Insulation_Heat>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Heat_ReedShadeWrap</defName>
+    <label>reed shade wrap</label>
+    <description>A loose wrap woven from dry reeds. It barely counts as clothing, but it keeps the sun off and lets hot air through.</description>
+    <statBases>
+      <Insulation_Heat>20</Insulation_Heat>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Heat_SoakedBarkWrap</defName>
+    <label>soaked bark shade wrap</label>
+    <description>Bark strips soaked in water and tied across the body. The smell is awful, but the first hours of heat are easier.</description>
+    <statBases>
+      <Insulation_Heat>28</Insulation_Heat>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Heat_MudReedMantle</defName>
+    <label>mud and reed cooling mantle</label>
+    <description>A heavy mat of mud and reeds. It is ugly, damp, and surprisingly useful under a merciless sun.</description>
+    <statBases>
+      <Insulation_Heat>36</Insulation_Heat>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Heat_HeavyCoolingMud</defName>
+    <label>thick cooling mud shell</label>
+    <description>Several layers of dried mud cover the body. It cracks with every movement, but it keeps unbearable heat away.</description>
+    <statBases>
+      <Insulation_Heat>44</Insulation_Heat>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Cold_ThinHempLayer</defName>
+    <label>single hemp warming layer</label>
+    <description>A thin piece of rough hemp cloth. It is not much, but it is better than bare skin.</description>
+    <statBases>
+      <Insulation_Cold>8</Insulation_Cold>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Cold_LayeredHempClothes</defName>
+    <label>layered hemp warming clothes</label>
+    <description>The most primitive hemp cloth, woven layer upon layer. It is ugly, but warm enough.</description>
+    <statBases>
+      <Insulation_Cold>12</Insulation_Cold>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Cold_StrawBarkQuilt</defName>
+    <label>straw and bark quilt</label>
+    <description>Dry straw and bark stitched between old cloth. It crackles when the wearer moves, yet holds a little precious warmth.</description>
+    <statBases>
+      <Insulation_Cold>20</Insulation_Cold>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Cold_PatchedFurCloak</defName>
+    <label>patched fur scrap cloak</label>
+    <description>Scraps of fur sewn into a short cloak. The seams are open and the smell is worse, but wind cannot pass through easily.</description>
+    <statBases>
+      <Insulation_Cold>28</Insulation_Cold>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Cold_SmokeStiffenedBlanket</defName>
+    <label>smoke stiffened blanket</label>
+    <description>A blanket hardened by smoke and grease. It is coarse and dirty, but it keeps the cold away.</description>
+    <statBases>
+      <Insulation_Cold>40</Insulation_Cold>
+    </statBases>
+  </ThingDef>
+
+  <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
+    <defName>MouseDisaster_Cold_ThickHideHempWrap</defName>
+    <label>thick hide and hemp wrap</label>
+    <description>Several layers of hide and hemp tied around the body. It restricts no vital movement and holds warmth better than it looks.</description>
+    <statBases>
+      <Insulation_Cold>56</Insulation_Cold>
+    </statBases>
+  </ThingDef>
+</Defs>

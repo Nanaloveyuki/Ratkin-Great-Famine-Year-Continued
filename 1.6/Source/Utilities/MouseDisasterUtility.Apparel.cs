@@ -13,6 +13,164 @@ namespace MouseDisaster
 {
     public static partial class MouseDisasterUtility
     {
+        private const float MinimumGeneratedComfortTemperature = -35f;
+        private const float MaximumGeneratedComfortTemperature = 70f;
+
+        private static readonly TemperatureApparelOption[] ColdTemperatureApparelOptions =
+        {
+            new TemperatureApparelOption("MouseDisaster_Cold_ThinHempLayer", 8f),
+            new TemperatureApparelOption("MouseDisaster_Cold_LayeredHempClothes", 12f),
+            new TemperatureApparelOption("MouseDisaster_Cold_StrawBarkQuilt", 20f),
+            new TemperatureApparelOption("MouseDisaster_Cold_PatchedFurCloak", 28f),
+            new TemperatureApparelOption("MouseDisaster_Cold_SmokeStiffenedBlanket", 40f),
+            new TemperatureApparelOption("MouseDisaster_Cold_ThickHideHempWrap", 56f)
+        };
+
+        private static readonly TemperatureApparelOption[] HeatTemperatureApparelOptions =
+        {
+            new TemperatureApparelOption("MouseDisaster_Heat_StaleWetCloth", 8f),
+            new TemperatureApparelOption("MouseDisaster_Heat_DryMudCoating", 12f),
+            new TemperatureApparelOption("MouseDisaster_Heat_ReedShadeWrap", 20f),
+            new TemperatureApparelOption("MouseDisaster_Heat_SoakedBarkWrap", 28f),
+            new TemperatureApparelOption("MouseDisaster_Heat_MudReedMantle", 36f),
+            new TemperatureApparelOption("MouseDisaster_Heat_HeavyCoolingMud", 44f)
+        };
+
+        private sealed class TemperatureApparelOption
+        {
+            public readonly string DefName;
+            public readonly float Insulation;
+
+            public TemperatureApparelOption(string defName, float insulation)
+            {
+                DefName = defName;
+                Insulation = insulation;
+            }
+        }
+
+        internal static void ApplyTemperatureProtectionApparel(Pawn pawn, Map map)
+        {
+            if (pawn == null || map?.mapTemperature == null || pawn.Dead || pawn.apparel == null)
+            {
+                return;
+            }
+
+            RemoveTemperatureProtectionApparel(pawn);
+
+            float outdoorTemperature = map.mapTemperature.OutdoorTemp;
+            if (float.IsNaN(outdoorTemperature) || float.IsInfinity(outdoorTemperature))
+            {
+                return;
+            }
+
+            FloatRange currentRange = pawn.ComfortableTemperatureRange();
+            float targetTemperature = Mathf.Clamp(
+                outdoorTemperature,
+                MinimumGeneratedComfortTemperature,
+                MaximumGeneratedComfortTemperature);
+            TemperatureApparelOption selected = null;
+            if (outdoorTemperature < currentRange.min)
+            {
+                selected = FindTemperatureApparelOption(
+                    ColdTemperatureApparelOptions,
+                    currentRange.min - targetTemperature);
+            }
+            else if (outdoorTemperature > currentRange.max)
+            {
+                selected = FindTemperatureApparelOption(
+                    HeatTemperatureApparelOptions,
+                    targetTemperature - currentRange.max);
+            }
+
+            if (selected == null)
+            {
+                return;
+            }
+
+            ThingDef apparelDef = DefDatabase<ThingDef>.GetNamedSilentFail(selected.DefName);
+            TryWearTemperatureApparel(pawn, apparelDef);
+        }
+
+        private static TemperatureApparelOption FindTemperatureApparelOption(
+            TemperatureApparelOption[] options,
+            float requiredInsulation)
+        {
+            TemperatureApparelOption fallback = null;
+            for (int i = 0; i < options.Length; i++)
+            {
+                TemperatureApparelOption option = options[i];
+                ThingDef apparelDef = DefDatabase<ThingDef>.GetNamedSilentFail(option.DefName);
+                if (apparelDef == null || !apparelDef.IsApparel)
+                {
+                    continue;
+                }
+
+                fallback = option;
+                if (option.Insulation >= requiredInsulation - 0.001f)
+                {
+                    return option;
+                }
+            }
+
+            return fallback;
+        }
+
+        private static void RemoveTemperatureProtectionApparel(Pawn pawn)
+        {
+            for (int index = pawn.apparel.WornApparel.Count - 1; index >= 0; index--)
+            {
+                Apparel worn = pawn.apparel.WornApparel[index];
+                if (!IsTemperatureProtectionApparel(worn?.def))
+                {
+                    continue;
+                }
+
+                pawn.apparel.Remove(worn);
+                worn.Destroy();
+            }
+        }
+
+        private static bool IsTemperatureProtectionApparel(ThingDef apparelDef)
+        {
+            if (apparelDef == null)
+            {
+                return false;
+            }
+
+            return ColdTemperatureApparelOptions.Any(option => option.DefName == apparelDef.defName) ||
+                   HeatTemperatureApparelOptions.Any(option => option.DefName == apparelDef.defName);
+        }
+
+        private static bool TryWearTemperatureApparel(Pawn pawn, ThingDef apparelDef)
+        {
+            if (pawn?.apparel == null || apparelDef == null || !apparelDef.IsApparel)
+            {
+                return false;
+            }
+
+            Apparel apparel = null;
+            try
+            {
+                apparel = ThingMaker.MakeThing(apparelDef) as Apparel;
+                if (apparel == null ||
+                    !apparel.PawnCanWear(pawn, ignoreGender: true) ||
+                    !ApparelUtility.HasPartsToWear(pawn, apparel.def) ||
+                    !pawn.apparel.CanWearWithoutDroppingAnything(apparel.def))
+                {
+                    apparel?.Destroy();
+                    return false;
+                }
+
+                pawn.apparel.Wear(apparel, dropReplacedApparel: false);
+                return pawn.apparel.WornApparel.Contains(apparel);
+            }
+            catch (Exception exception)
+            {
+                apparel?.Destroy();
+                Log.Warning("[MouseDisaster] Could not equip temperature protection apparel on " + pawn + ": " + exception);
+                return false;
+            }
+        }
 
         private static void AssignDisasterApparel(Pawn pawn, DevelopmentalStage stage)
         {

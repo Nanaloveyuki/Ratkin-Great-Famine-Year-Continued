@@ -16,6 +16,28 @@ namespace MouseDisaster
         }
     }
 
+    [HarmonyPatch(typeof(GenSpawn), nameof(GenSpawn.Spawn), new[]
+    {
+        typeof(Thing),
+        typeof(IntVec3),
+        typeof(Map),
+        typeof(Rot4),
+        typeof(WipeMode),
+        typeof(bool),
+        typeof(bool)
+    })]
+    public static class MouseDisasterTemperatureApparelSpawnPatch
+    {
+        public static void Prefix(Thing newThing, Map map)
+        {
+            Pawn pawn = newThing as Pawn;
+            if (pawn != null && MouseDisasterUtility.IsMouseDisasterPawn(pawn))
+            {
+                MouseDisasterUtility.ApplyTemperatureProtectionApparel(pawn, map);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.SetFaction))]
     public static class MouseDisasterSetFactionPatch
     {
