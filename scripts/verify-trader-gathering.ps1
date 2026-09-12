@@ -37,14 +37,16 @@ public class LordJob_TradeWithColony {
     public LordJob_TradeWithColony(Faction faction, IntVec3 cell) { }
 }
 public class Lord {
+    public Faction faction;
     public object job;
+    public object LordJob => job;
     public List<Pawn> ownedPawns=new List<Pawn>();
     public void AddPawn(Pawn pawn) { ownedPawns.Add(pawn); pawn.lord=this; }
     public void RemovePawn(Pawn pawn) { ownedPawns.Remove(pawn); if (pawn.lord==this) pawn.lord=null; }
 }
 public static class LordMaker {
     public static Lord MakeNewLord(Faction faction, object job, Map map, IEnumerable<Pawn> pawns=null) {
-        var lord=new Lord { job=job }; map.lordManager.lords.Add(lord);
+        var lord=new Lord { faction=faction, job=job }; map.lordManager.lords.Add(lord);
         if (pawns!=null) foreach (var pawn in pawns) {
             if (pawn.lord!=null) throw new Exception("Pawn still belongs to gathering lord");
             lord.AddPawn(pawn);
@@ -61,7 +63,7 @@ public class MouseDisasterPawnBatch {
     public Lord gatheringLord; public int generatedSlots, remainingCount;
     public IncidentDef incidentDef=new IncidentDef(); public object parms;
 }
-public static class Log { public static string warning; public static void Warning(string s) { warning=s; } }
+public static class Log { public static string warning; public static void Warning(string s) { warning=s; } public static void Error(string s) { warning=s; } }
 public static class MouseDisasterUtility {
     public static int exits;
     public static bool IsPlayerAffiliatedRatkin(Pawn pawn) => pawn.player;
@@ -96,7 +98,7 @@ public static class Harness {
     static int checks;
     static void Check(bool value,string message) { if (!value) throw new Exception(message); checks++; }
     static Pawn Add(MouseDisasterPawnBatch b) {
-        var p=new Pawn { Map=b.map, MapHeld=b.map }; b.pawns.Add(p); return p;
+        var p=new Pawn { Map=b.map, MapHeld=b.map, Faction=b.faction }; b.pawns.Add(p); return p;
     }
     public static int Run() {
         var b=new MouseDisasterPawnBatch(); b.traderPawn=Add(b);
@@ -106,6 +108,11 @@ public static class Harness {
         Check(b.traderPawn.GetLord()==gathering && b.traderPawn.jobs.stops==1,"old exit job not cleared");
         EnsureTraderGatheringLord(b);
         Check(gathering.ownedPawns.Count==1 && b.traderPawn.jobs.stops==1,"repeated tick resets jobs");
+        var scoped=new MouseDisasterPawnBatch(); var scopedPawn=Add(scoped); EnsureTraderGatheringLord(scoped);
+        var scopedLord=scoped.gatheringLord; var unrelated=new Pawn { Map=scoped.map, MapHeld=scoped.map };
+        scopedLord.AddPawn(unrelated); ReleaseTraderGatheringLord(scoped);
+        Check(scopedPawn.GetLord()==null && unrelated.GetLord()==scopedLord && scopedLord.ownedPawns.Count==1,"release removed an unrelated lord member");
+        scopedLord.RemovePawn(unrelated);
         b.escortPawn=Add(b); Add(b); EnsureTraderGatheringLord(b);
         Check(gathering.ownedPawns.Count==3,"later members not gathered");
         Check(FinalizeTraderCaravan(b,ActivePawns(b)),"complete caravan rejected");
@@ -114,8 +121,12 @@ public static class Harness {
         var trade=b.traderPawn.GetLord(); EnsureTraderGatheringLord(b);
         Check(b.pawns.All(p=>p.GetLord()==trade),"existing trade duty overwritten");
 
-        var oldSave=new MouseDisasterPawnBatch(); Add(oldSave); EnsureTraderGatheringLord(oldSave);
-        Check(oldSave.pawns[0].GetLord()!=null,"old batch without saved lord not recovered");
+        var oldSave=new MouseDisasterPawnBatch(); Add(oldSave);
+        var savedLord=LordMaker.MakeNewLord(oldSave.faction,new LordJob_DefendPoint(oldSave.entryCell,3f),oldSave.map);
+        savedLord.AddPawn(oldSave.pawns[0]); EnsureTraderGatheringLord(oldSave);
+        Check(oldSave.gatheringLord==savedLord,"saved gathering lord not recovered");
+        var noLordSave=new MouseDisasterPawnBatch(); Add(noLordSave); EnsureTraderGatheringLord(noLordSave);
+        Check(noLordSave.pawns[0].GetLord()!=null,"old batch without saved lord not recovered");
         var captured=new MouseDisasterPawnBatch(); var player=Add(captured); player.player=true;
         EnsureTraderGatheringLord(captured);
         Check(player.GetLord()==null && captured.gatheringLord==null,"player pawn commandeered");
@@ -162,5 +173,18 @@ foreach ($signature in 'private static void FinalizeBatch', 'private static void
 }
 if ($code -notmatch 'Scribe_References.Look\(ref gatheringLord, "gatheringLord"\)') {
     throw 'Gathering lord not saved'
+}
+if ($code -match 'Scribe.mode == LoadSaveMode.Saving[\s\S]{0,180}batches.Remove') {
+    throw 'Save path mutates pending batches'
+}
+$tradeCode = Get-Content (Join-Path $root '1.6/Source/TradePatches.cs') -Raw
+if (!$tradeCode.Contains('[HarmonyPatch(typeof(Pawn), nameof(Pawn.ExitMap), new[] { typeof(bool), typeof(Rot4) })]') -or
+    !$tradeCode.Contains('child.ExitMap(false, exitDir)') -or
+    !$tradeCode.Contains('LordJob_TravelAndExit')) {
+    throw 'Trader departure does not carry generated children through vanilla ExitMap'
+}
+$leashCode = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Leashes.cs') -Raw
+if (!$leashCode.Contains('GetLinksForMaster') -or !$leashCode.Contains('GetLeadYourPetLinkedPawns')) {
+    throw 'Lead Your Pet linked departure fallback is missing'
 }
 "PASS: $checks trader gathering checks and cleanup/save wiring. Unity AI and save round trips require in-game verification."

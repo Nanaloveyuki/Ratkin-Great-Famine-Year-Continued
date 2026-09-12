@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,6 +14,7 @@ namespace MouseDisaster
 {
     public static partial class MouseDisasterUtility
     {
+        private static bool leadYourPetInvocationFailureLogged;
 
         public static void LinkIncidentParentToChildren(Pawn adult, IEnumerable<Pawn> children)
         {
@@ -69,7 +71,7 @@ namespace MouseDisaster
                 return;
             }
 
-            object component = gameGetComponentMethod.MakeGenericMethod(leadYourPetComponentType).Invoke(Current.Game, null);
+            object component = TryGetLeadYourPetComponent();
             if (component == null)
             {
                 return;
@@ -112,9 +114,9 @@ namespace MouseDisaster
             switch (leashMode)
             {
                 case MouseDisasterBabyLeashMode.RatkinMother:
-                    return leadYourPetTryStartRatkinMotherLeashMethod.Invoke(component, new object[] { adult, baby, false });
+                    return InvokeLeadYourPet(leadYourPetTryStartRatkinMotherLeashMethod, component, new object[] { adult, baby, false });
                 case MouseDisasterBabyLeashMode.GenericMouseEgg:
-                    return leadYourPetStartLeashMethod.Invoke(component, new object[] { adult, baby, true, false });
+                    return InvokeLeadYourPet(leadYourPetStartLeashMethod, component, new object[] { adult, baby, true, false });
                 default:
                     return false;
             }
@@ -147,13 +149,67 @@ namespace MouseDisaster
                 return;
             }
 
-            object component = gameGetComponentMethod.MakeGenericMethod(leadYourPetComponentType).Invoke(Current.Game, null);
+            object component = TryGetLeadYourPetComponent();
             if (component == null)
             {
                 return;
             }
 
-            leadYourPetTryAssignTravelMouseEggsMethod.Invoke(component, new object[] { lord });
+            InvokeLeadYourPet(leadYourPetTryAssignTravelMouseEggsMethod, component, new object[] { lord });
+        }
+
+        internal static List<Pawn> GetLeadYourPetLinkedPawns(Pawn master)
+        {
+            // Lead Your Pet is optional, so inspect its public link list only at departure time.
+            List<Pawn> linkedPawns = new List<Pawn>();
+            if (master == null || !IsLeadYourPetEnabled || Current.Game == null)
+            {
+                return linkedPawns;
+            }
+
+            try
+            {
+                EnsureLeadYourPetReflection();
+                if (leadYourPetComponentType == null || leadYourPetGetLinksForMasterMethod == null || gameGetComponentMethod == null)
+                {
+                    return linkedPawns;
+                }
+
+                object component = TryGetLeadYourPetComponent();
+                if (component == null)
+                {
+                    return linkedPawns;
+                }
+
+                object links = InvokeLeadYourPet(leadYourPetGetLinksForMasterMethod, component, new object[] { master });
+                if (!(links is IEnumerable enumerable))
+                {
+                    return linkedPawns;
+                }
+
+                foreach (object link in enumerable)
+                {
+                    try
+                    {
+                        FieldInfo petField = link == null ? null : AccessTools.Field(link.GetType(), "Pet");
+                        Pawn pet = petField?.GetValue(link) as Pawn;
+                        if (pet != null && !linkedPawns.Contains(pet))
+                        {
+                            linkedPawns.Add(pet);
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        LogLeadYourPetInvocationFailure(exception);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                LogLeadYourPetInvocationFailure(exception);
+            }
+
+            return linkedPawns;
         }
 
         public static void TryStartLeadYourPetAbandonedDropoff(Pawn mother, IEnumerable<Pawn> babies, IntVec3 dropoffCell)
@@ -180,13 +236,13 @@ namespace MouseDisaster
                 return;
             }
 
-            object component = gameGetComponentMethod.MakeGenericMethod(leadYourPetComponentType).Invoke(Current.Game, null);
+            object component = TryGetLeadYourPetComponent();
             if (component == null)
             {
                 return;
             }
 
-            leadYourPetAnchorLeashedPetsToCellMethod.Invoke(component, new object[] { master, cell });
+            InvokeLeadYourPet(leadYourPetAnchorLeashedPetsToCellMethod, component, new object[] { master, cell });
         }
 
         internal static void TryEndLeadYourPetLeashForPet(Pawn pet)
@@ -202,18 +258,55 @@ namespace MouseDisaster
                 return;
             }
 
-            object component = gameGetComponentMethod.MakeGenericMethod(leadYourPetComponentType).Invoke(Current.Game, null);
+            object component = TryGetLeadYourPetComponent();
             if (component == null)
             {
                 return;
             }
 
-            leadYourPetEndLeashForPetMethod.Invoke(component, new object[] { pet, false });
+            InvokeLeadYourPet(leadYourPetEndLeashForPetMethod, component, new object[] { pet, false });
         }
 
         public static void TryReleaseLeadYourPetTradePawn(Pawn pawn)
         {
             TryEndLeadYourPetLeashForPet(pawn);
+        }
+
+        private static object TryGetLeadYourPetComponent()
+        {
+            try
+            {
+                return gameGetComponentMethod.MakeGenericMethod(leadYourPetComponentType).Invoke(Current.Game, null);
+            }
+            catch (Exception exception)
+            {
+                LogLeadYourPetInvocationFailure(exception);
+                return null;
+            }
+        }
+
+        private static object InvokeLeadYourPet(MethodInfo method, object component, object[] arguments)
+        {
+            try
+            {
+                return method.Invoke(component, arguments);
+            }
+            catch (Exception exception)
+            {
+                LogLeadYourPetInvocationFailure(exception);
+                return null;
+            }
+        }
+
+        private static void LogLeadYourPetInvocationFailure(Exception exception)
+        {
+            if (leadYourPetInvocationFailureLogged)
+            {
+                return;
+            }
+
+            leadYourPetInvocationFailureLogged = true;
+            Log.Warning("[MouseDisaster] Lead Your Pet integration was skipped after a reflection call failed: " + exception);
         }
 
         private static void EnsureLeadYourPetReflection()
@@ -236,6 +329,11 @@ namespace MouseDisaster
             if (leadYourPetTryAssignTravelMouseEggsMethod == null && leadYourPetComponentType != null)
             {
                 leadYourPetTryAssignTravelMouseEggsMethod = AccessTools.Method(leadYourPetComponentType, "TryAssignTravelMouseEggs", new[] { typeof(Lord) });
+            }
+
+            if (leadYourPetGetLinksForMasterMethod == null && leadYourPetComponentType != null)
+            {
+                leadYourPetGetLinksForMasterMethod = AccessTools.Method(leadYourPetComponentType, "GetLinksForMaster", new[] { typeof(Pawn) });
             }
 
             if (leadYourPetAnchorLeashedPetsToCellMethod == null && leadYourPetComponentType != null)

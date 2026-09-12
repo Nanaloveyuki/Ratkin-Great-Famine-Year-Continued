@@ -31,7 +31,13 @@ namespace MouseDisaster
             MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
             MouseDisasterUtility.EnsureMouseDisasterFactionNeutralOnMap(map, faction);
 
-            Pawn trader = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_TraderRatkinAdult, faction, DevelopmentalStage.Adult, 0.35f);
+            Pawn trader = MouseDisasterUtility.GenerateFactionRatkinPawn(
+                MouseDisasterDefOf.MouseDisaster_TraderRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult,
+                0.35f,
+                allowViolenceDisabledTraits: false,
+                fixedGender: Gender.Female);
             if (trader == null)
             {
                 return false;

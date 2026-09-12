@@ -149,7 +149,13 @@ namespace MouseDisaster
             int adultCount = Mathf.Clamp(1 + Mathf.RoundToInt(map.mapPawns.FreeColonistsSpawnedCount * 0.15f), 1, 3);
             int childCount = Find.Storyteller.difficulty.ChildrenAllowed ? Mathf.Clamp(Mathf.RoundToInt(adultCount * 0.5f), 0, 2) : 0;
 
-            targetPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, faction, DevelopmentalStage.Adult, 0.3f);
+            targetPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(
+                MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult,
+                0.3f,
+                allowViolenceDisabledTraits: false,
+                fixedGender: Gender.Female);
             if (targetPawn == null)
             {
                 failureReason = "MouseDisaster_UI_AidPawnGenerationFailed".Translate().Resolve();
@@ -198,7 +204,14 @@ namespace MouseDisaster
                 idleSpot = map.Center;
             }
 
-            LordMaker.MakeNewLord(faction, new LordJob_BegForItems(faction, idleSpot, targetPawn, requestedThingDef, amount), map, allPawns);
+            LordJob_MouseDisasterBegForItems.MakeOrReplaceLord(
+                faction,
+                idleSpot,
+                targetPawn,
+                requestedThingDef,
+                amount,
+                map,
+                allPawns);
             RegisterAidRequest(targetPawn, allPawns, kind, amount, createsIntelSite, intelSiteKind);
             return true;
         }

@@ -72,7 +72,13 @@ namespace MouseDisaster
             MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
             MouseDisasterUtility.TryFindAbandonedDeliveryFoodCell(map, entryCell, out IntVec3 foodCell);
 
-            Pawn mother = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, faction, DevelopmentalStage.Adult, 0.35f);
+            Pawn mother = MouseDisasterUtility.GenerateFactionRatkinPawn(
+                MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult,
+                0.35f,
+                allowViolenceDisabledTraits: false,
+                fixedGender: Gender.Female);
             if (mother == null)
             {
                 return false;
@@ -163,7 +169,13 @@ namespace MouseDisaster
             MouseDisasterUtility.EnsureMouseDisasterFactionNeutralOnMap(map, faction);
 
             List<Pawn> pawns = new List<Pawn>();
-            Pawn traderPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_TraderRatkinAdult, faction, DevelopmentalStage.Adult, 0.65f);
+            Pawn traderPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(
+                MouseDisasterDefOf.MouseDisaster_TraderRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult,
+                0.65f,
+                allowViolenceDisabledTraits: false,
+                fixedGender: Gender.Female);
             if (traderPawn == null)
             {
                 return false;

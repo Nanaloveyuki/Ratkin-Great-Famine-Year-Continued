@@ -11,6 +11,7 @@ namespace MouseDisaster
             Safety,
             General,
             PawnBehavior,
+            Predation,
             OriginalEvents,
             ContinuedEvents,
             Endings,

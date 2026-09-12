@@ -180,7 +180,12 @@ namespace MouseDisaster
 
         public static Pawn GenerateWildPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false)
         {
-            Pawn pawn = GenerateRatkinPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits);
+            return GenerateWildPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, null);
+        }
+
+        private static Pawn GenerateWildPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits, Gender? fixedGender)
+        {
+            Pawn pawn = GenerateRatkinPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, fixedGender);
             if (pawn == null)
             {
                 return null;
@@ -197,7 +202,12 @@ namespace MouseDisaster
 
         public static Pawn GenerateThiefPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false)
         {
-            Pawn pawn = GenerateWildPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits);
+            return GenerateThiefPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, null);
+        }
+
+        private static Pawn GenerateThiefPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits, Gender? fixedGender)
+        {
+            Pawn pawn = GenerateWildPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, fixedGender);
             if (pawn == null)
             {
                 return null;
@@ -215,7 +225,17 @@ namespace MouseDisaster
 
         public static Pawn GenerateBeggarPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false)
         {
-            Pawn pawn = GenerateThiefPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits);
+            return GenerateBeggarPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, null);
+        }
+
+        internal static Pawn GenerateMotherPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false)
+        {
+            return GenerateBeggarPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, Gender.Female);
+        }
+
+        private static Pawn GenerateBeggarPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits, Gender? fixedGender)
+        {
+            Pawn pawn = GenerateThiefPawn(kindDef, formerFaction, stage, allowViolenceDisabledTraits, fixedGender);
             if (pawn == null)
             {
                 return null;

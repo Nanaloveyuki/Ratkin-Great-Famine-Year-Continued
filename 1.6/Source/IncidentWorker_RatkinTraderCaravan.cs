@@ -9,15 +9,20 @@ namespace MouseDisaster
     {
         protected override bool CanFireNowSub(IncidentParms parms)
         {
-            return base.CanFireNowSub(parms) &&
+            return parms?.target is Map map &&
+                   base.CanFireNowSub(parms) &&
                    Find.Storyteller.difficulty.ChildrenAllowed &&
-                   MouseDisasterUtility.TryFindEntryCell((Map)parms.target, out _) &&
+                   MouseDisasterUtility.TryFindEntryCell(map, out _) &&
                    MouseDisasterUtility.TryFindFormerFaction(out _);
         }
 
         protected override bool TryExecuteWorker(IncidentParms parms)
         {
-            Map map = (Map)parms.target;
+            if (!(parms?.target is Map map))
+            {
+                return false;
+            }
+
             if (!MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 cell) || !MouseDisasterUtility.TryFindFormerFaction(out Faction faction))
             {
                 return false;

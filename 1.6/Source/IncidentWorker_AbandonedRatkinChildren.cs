@@ -53,7 +53,13 @@ namespace MouseDisaster
                 children.Add(child);
             }
 
-            Pawn adult = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, faction, DevelopmentalStage.Adult, 0.35f);
+            Pawn adult = MouseDisasterUtility.GenerateFactionRatkinPawn(
+                MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult,
+                0.35f,
+                allowViolenceDisabledTraits: false,
+                fixedGender: Gender.Female);
             if (adult == null || children.Count == 0)
             {
                 MouseDisasterUtility.DestroyFailedIncidentPawns(children);

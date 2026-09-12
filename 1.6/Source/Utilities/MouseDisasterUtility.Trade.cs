@@ -217,11 +217,23 @@ namespace MouseDisaster
             }
 
             int requestedCount = Mathf.Clamp(validRecipients.Count, 1, 12);
-            LordMaker.MakeNewLord(lordFaction, new LordJob_BegForItems(lordFaction, idleSpot, requester, requestedFoodDef, requestedCount), map, validRecipients);
+            Lord lord = LordJob_MouseDisasterBegForItems.MakeOrReplaceLord(
+                lordFaction,
+                idleSpot,
+                requester,
+                requestedFoodDef,
+                requestedCount,
+                map,
+                validRecipients);
+            if (lord == null)
+            {
+                message = "MouseDisaster_FoodGive_Fail".Translate();
+                return false;
+            }
 
             Job job = JobMaker.MakeJob(JobDefOf.GiveToPawn, foodThing, requester);
             job.haulMode = HaulMode.ToContainer;
-            job.lord = requester.GetLord();
+            job.lord = lord;
             worker.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 
             message = "MouseDisaster_FoodGive_Success".Translate(worker.Named("PAWN"), requester.Named("TARGET"), requestedFoodDef.LabelCap);

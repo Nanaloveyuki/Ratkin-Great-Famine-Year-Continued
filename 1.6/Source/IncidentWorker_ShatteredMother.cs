@@ -32,7 +32,10 @@ namespace MouseDisaster
                 exitCell = map.Center;
             }
 
-            Pawn mother = MouseDisasterUtility.GenerateBeggarPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, formerFaction, DevelopmentalStage.Adult);
+            Pawn mother = MouseDisasterUtility.GenerateMotherPawn(
+                MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                formerFaction,
+                DevelopmentalStage.Adult);
             if (mother == null)
             {
                 return false;

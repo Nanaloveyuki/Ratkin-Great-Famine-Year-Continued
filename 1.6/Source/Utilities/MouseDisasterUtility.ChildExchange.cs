@@ -64,7 +64,12 @@ namespace MouseDisaster
             return pawn != null && (IsMarkedTradableChattel(pawn) || IsForcedPrisonerOnPurchase(pawn));
         }
 
-        public static void ApplyPurchasedTradePawnPrisonerState(Pawn pawn)
+        public static MouseDisasterTradePawnJoinMode GetRatkinYoungTradeJoinMode()
+        {
+            return MouseDisasterMod.Settings?.GetRatkinYoungTradeJoinMode() ?? MouseDisasterTradePawnJoinMode.Slave;
+        }
+
+        public static void PreparePurchasedTradePawnJoinStatus(Pawn pawn)
         {
             if (pawn == null)
             {
@@ -77,6 +82,25 @@ namespace MouseDisaster
                 return;
             }
 
+            pawn.guest.joinStatus = GetRatkinYoungTradeJoinMode() == MouseDisasterTradePawnJoinMode.Slave
+                ? JoinStatus.JoinAsSlave
+                : JoinStatus.JoinAsColonist;
+        }
+
+        public static void ApplyPurchasedTradePawnState(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                return;
+            }
+
+            MouseDisasterTradePawnJoinMode joinMode = GetRatkinYoungTradeJoinMode();
+            PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, actAsIfSpawned: true);
+            if (pawn.guest == null && joinMode != MouseDisasterTradePawnJoinMode.Colonist)
+            {
+                PawnComponentsUtility.CreateInitialComponents(pawn);
+            }
+
             TryReleaseLeadYourPetTradePawn(pawn);
             RemoveAllIncidentVisitorHediffs(pawn);
             ClearTradeLeaderState(pawn);
@@ -85,14 +109,48 @@ namespace MouseDisaster
             ChildExchangeMoodPawnIds.Remove(pawn.thingIDNumber);
             pawn.jobs?.StopAll();
             pawn.GetLord()?.RemovePawn(pawn);
-            pawn.guest.joinStatus = JoinStatus.JoinAsColonist;
 
-            if (pawn.Faction == Faction.OfPlayer)
+            if (pawn.guest == null)
             {
-                pawn.SetFaction(null);
+                if (joinMode == MouseDisasterTradePawnJoinMode.Colonist && pawn.Faction != Faction.OfPlayer)
+                {
+                    pawn.SetFaction(Faction.OfPlayer);
+                }
+
+                NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+                return;
             }
 
-            pawn.guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Prisoner);
+            switch (joinMode)
+            {
+                case MouseDisasterTradePawnJoinMode.Slave:
+                    pawn.guest.joinStatus = JoinStatus.JoinAsSlave;
+                    if (pawn.Faction != Faction.OfPlayer || pawn.guest.GuestStatus != GuestStatus.Slave)
+                    {
+                        pawn.guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Slave);
+                    }
+                    break;
+                case MouseDisasterTradePawnJoinMode.Colonist:
+                    pawn.guest.joinStatus = JoinStatus.JoinAsColonist;
+                    if (pawn.Faction != Faction.OfPlayer)
+                    {
+                        pawn.SetFaction(Faction.OfPlayer);
+                    }
+                    if (pawn.guest.GuestStatus != GuestStatus.Guest)
+                    {
+                        pawn.guest.SetGuestStatus(null, GuestStatus.Guest);
+                    }
+                    break;
+                default:
+                    pawn.guest.joinStatus = JoinStatus.JoinAsColonist;
+                    if (pawn.Faction == Faction.OfPlayer)
+                    {
+                        pawn.SetFaction(null);
+                    }
+                    pawn.guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Prisoner);
+                    break;
+            }
+
             NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
         }
 

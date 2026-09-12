@@ -12,6 +12,13 @@ namespace MouseDisaster
         Abuse = 2
     }
 
+    public enum MouseDisasterTradePawnJoinMode
+    {
+        Slave = 0,
+        Prisoner = 1,
+        Colonist = 2
+    }
+
     public class MouseDisasterSettings : ModSettings
     {
         public const int MinRatkinAge = 30;
@@ -31,16 +38,24 @@ namespace MouseDisaster
         public const float ScavengeToxicBuildupSafe = 0f;
         public const float ScavengeToxicBuildupNormal = 0.02f;
         public const float ScavengeToxicBuildupAbuse = 0.05f;
+        public const int MinWildPredatorSearchIntervalTicks = 60;
+        public const int MaxWildPredatorSearchIntervalTicks = 1200;
+        public const int DefaultWildPredatorSearchIntervalTicks = 250;
 
         public bool enableNewContent = true;
         public float refugeePredationChancePercent = 10f;
         public bool refugeePredationFightBack = true;
         public bool outsidePredatorsFollowDifficulty = false;
+        public bool wildPredatorsAvoidRatkinWhenFed = true;
+        public bool wildPredatorsLeaveAfterFed = false;
+        public bool wildPredatorsHuntHomeAreaRatkin = false;
+        public int wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
         public bool leaveAfterFed = true;
         public bool countWithoutSuin = true;
         public bool endingsWithoutSuin = true;
         public float positiveIncidentDays = 3f;
         public float negativeIncidentDays = 3f;
+        public bool allowColonistChildcareForMouseDisasterEggs = false;
         public Dictionary<string, bool> positiveIncidents = new Dictionary<string, bool>();
         public Dictionary<string, bool> raidReplacementIncidents = new Dictionary<string, bool>();
 
@@ -50,6 +65,7 @@ namespace MouseDisaster
 
         public bool ReplacesRaid(string name) => raidReplacementIncidents.TryGetValue(name, out bool replace) && replace;
         public bool allowColonistAutoGiveFood = false;
+        public MouseDisasterTradePawnJoinMode ratkinYoungTradeJoinMode = MouseDisasterTradePawnJoinMode.Slave;
         public Dictionary<string, MouseDisasterEventAttitude> eventAttitudes = new Dictionary<string, MouseDisasterEventAttitude>();
 
         public MouseDisasterEventAttitude GetEventAttitude(string defName)
@@ -120,6 +136,10 @@ namespace MouseDisaster
             refugeePredationChancePercent = 10f;
             refugeePredationFightBack = true;
             outsidePredatorsFollowDifficulty = false;
+            wildPredatorsAvoidRatkinWhenFed = true;
+            wildPredatorsLeaveAfterFed = false;
+            wildPredatorsHuntHomeAreaRatkin = false;
+            wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
             leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
             positiveIncidentDays = negativeIncidentDays = 3f;
             positiveIncidents.Clear();
@@ -127,6 +147,8 @@ namespace MouseDisaster
             eventAttitudes.Clear();
             enableNewContent = true;
             allowColonistAutoGiveFood = false;
+            ratkinYoungTradeJoinMode = MouseDisasterTradePawnJoinMode.Slave;
+            allowColonistChildcareForMouseDisasterEggs = false;
             enableAgeCapAdjustment = true;
             enableWildRatkinIncidents = true;
             enableThiefIncidents = true;
@@ -219,6 +241,8 @@ namespace MouseDisaster
             ageDiseaseMultiplier = Mathf.Clamp(ageDiseaseMultiplier, MinAgeDiseaseMultiplier, MaxAgeDiseaseMultiplier);
             chaosPregnancyChancePercent = Mathf.Clamp(chaosPregnancyChancePercent, MinChaosPregnancyChancePercent, MaxChaosPregnancyChancePercent);
             chaosPregnancyCheckIntervalTicks = Mathf.Clamp(chaosPregnancyCheckIntervalTicks, MinChaosPregnancyIntervalTicks, MaxChaosPregnancyIntervalTicks);
+            wildPredatorSearchIntervalTicks = Mathf.Clamp(wildPredatorSearchIntervalTicks,
+                MinWildPredatorSearchIntervalTicks, MaxWildPredatorSearchIntervalTicks);
             broadcastHopeCooldownDays = MouseDisasterBroadcastHopePolicy.NormalizeCooldownDays(broadcastHopeCooldownDays);
             famineYearChancePercent = Mathf.Clamp(famineYearChancePercent, MinFamineYearChancePercent, MaxFamineYearChancePercent);
             famineYearDisasterBonusPercent = Mathf.Clamp(famineYearDisasterBonusPercent, MinFamineYearDisasterBonusPercent, MaxFamineYearDisasterBonusPercent);
@@ -227,6 +251,17 @@ namespace MouseDisaster
             {
                 prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
             }
+            if (!System.Enum.IsDefined(typeof(MouseDisasterTradePawnJoinMode), ratkinYoungTradeJoinMode))
+            {
+                ratkinYoungTradeJoinMode = MouseDisasterTradePawnJoinMode.Slave;
+            }
+        }
+
+        public MouseDisasterTradePawnJoinMode GetRatkinYoungTradeJoinMode()
+        {
+            return System.Enum.IsDefined(typeof(MouseDisasterTradePawnJoinMode), ratkinYoungTradeJoinMode)
+                ? ratkinYoungTradeJoinMode
+                : MouseDisasterTradePawnJoinMode.Slave;
         }
 
         public float GetPrisonerScavengeToxicBuildupPerEat()
@@ -247,6 +282,10 @@ namespace MouseDisaster
             Scribe_Values.Look(ref refugeePredationChancePercent, "refugeePredationChancePercent", 10f);
             Scribe_Values.Look(ref refugeePredationFightBack, "refugeePredationFightBack", true);
             Scribe_Values.Look(ref outsidePredatorsFollowDifficulty, "outsidePredatorsFollowDifficulty", false);
+            Scribe_Values.Look(ref wildPredatorsAvoidRatkinWhenFed, "wildPredatorsAvoidRatkinWhenFed", true);
+            Scribe_Values.Look(ref wildPredatorsLeaveAfterFed, "wildPredatorsLeaveAfterFed", false);
+            Scribe_Values.Look(ref wildPredatorsHuntHomeAreaRatkin, "wildPredatorsHuntHomeAreaRatkin", false);
+            Scribe_Values.Look(ref wildPredatorSearchIntervalTicks, "wildPredatorSearchIntervalTicks", DefaultWildPredatorSearchIntervalTicks);
             Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
             Scribe_Values.Look(ref countWithoutSuin, "countWithoutSuin", true);
             Scribe_Values.Look(ref endingsWithoutSuin, "endingsWithoutSuin", true);
@@ -273,6 +312,12 @@ namespace MouseDisaster
             Scribe_Values.Look(ref narrativeEchoCooldownDays, "narrativeEchoCooldownDays", 3);
             Scribe_Values.Look(ref enableNewContent, "enableNewContent", true);
             Scribe_Values.Look(ref allowColonistAutoGiveFood, "allowColonistAutoGiveFood", false);
+            int ratkinYoungTradeJoinModeRaw = (int)ratkinYoungTradeJoinMode;
+            Scribe_Values.Look(ref ratkinYoungTradeJoinModeRaw, "ratkinYoungTradeJoinMode", (int)MouseDisasterTradePawnJoinMode.Slave);
+            ratkinYoungTradeJoinMode = System.Enum.IsDefined(typeof(MouseDisasterTradePawnJoinMode), ratkinYoungTradeJoinModeRaw)
+                ? (MouseDisasterTradePawnJoinMode)ratkinYoungTradeJoinModeRaw
+                : MouseDisasterTradePawnJoinMode.Slave;
+            Scribe_Values.Look(ref allowColonistChildcareForMouseDisasterEggs, "allowColonistChildcareForMouseDisasterEggs", false);
             Scribe_Values.Look(ref enableAgeCapAdjustment, "enableAgeCapAdjustment", true);
             Scribe_Values.Look(ref enableWildRatkinIncidents, "enableWildRatkinIncidents", true);
             Scribe_Values.Look(ref enableThiefIncidents, "enableThiefIncidents", true);

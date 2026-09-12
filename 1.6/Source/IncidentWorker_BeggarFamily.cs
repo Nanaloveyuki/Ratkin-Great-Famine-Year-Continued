@@ -31,7 +31,10 @@ namespace MouseDisaster
                 MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
             }
 
-            Pawn mother = MouseDisasterUtility.GenerateBeggarPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, faction, DevelopmentalStage.Adult);
+            Pawn mother = MouseDisasterUtility.GenerateMotherPawn(
+                MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult);
             if (mother == null)
             {
                 return false;
@@ -74,7 +77,14 @@ namespace MouseDisaster
 
             MouseDisasterUtility.LinkIncidentParentToChildren(mother, babies);
             MouseDisasterUtility.TryStartLeadYourPetMotherLeashes(mother, babies);
-            LordMaker.MakeNewLord(faction, new LordJob_DefendPoint(gatherCell, 8f, 12f, isCaravanSendable: false, addFleeToil: false), map, pawns);
+            LordJob_MouseDisasterBegForItems.MakeOrReplaceLord(
+                faction,
+                gatherCell,
+                mother,
+                ThingDefOf.MealSimple,
+                1,
+                map,
+                pawns);
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
             {

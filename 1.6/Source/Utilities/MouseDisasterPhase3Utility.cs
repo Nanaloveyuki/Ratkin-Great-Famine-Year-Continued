@@ -26,7 +26,13 @@ namespace MouseDisaster
 
         public static Pawn CreatePregnantVisitor(Faction faction, bool infect)
         {
-            Pawn pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult, faction, DevelopmentalStage.Adult, 0.24f);
+            Pawn pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(
+                MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                faction,
+                DevelopmentalStage.Adult,
+                0.24f,
+                allowViolenceDisabledTraits: false,
+                fixedGender: Gender.Female);
             if (pawn == null || !ModsConfig.BiotechActive || pawn.gender != Gender.Female)
             {
                 return pawn;

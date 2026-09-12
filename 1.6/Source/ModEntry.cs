@@ -48,6 +48,7 @@ namespace MouseDisaster
             if (page == null || page == SettingsPage.Safety) DrawSafetySettings(listing);
             if (page == null || page == SettingsPage.General) DrawGeneralSettings(listing);
             if (page == null || page == SettingsPage.PawnBehavior) DrawPawnSettings(listing);
+            if (page == null || page == SettingsPage.Predation) DrawPredationSettings(listing);
             if (page == null) DrawIncidentSection(listing);
             else if (page == SettingsPage.OriginalEvents || page == SettingsPage.ContinuedEvents)
                 DrawIncidentSection(listing, page == SettingsPage.OriginalEvents);
@@ -63,13 +64,45 @@ namespace MouseDisaster
             DrawSectionTitle(listing, "MouseDisaster_IrisMenus_PawnBehavior");
             listing.CheckboxLabeled("MouseDisaster_Settings_LeaveAfterFed".Translate(), ref Settings.leaveAfterFed);
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
+            DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs", ref Settings.allowColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip");
+            DrawRatkinYoungTradeSettings(listing);
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
             DrawBiologySettings(listing);
+        }
+
+        private static void DrawRatkinYoungTradeSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_Trade");
+            MouseDisasterTradePawnJoinMode current = Settings.GetRatkinYoungTradeJoinMode();
+            string currentLabel = ("MouseDisaster_Settings_RatkinYoungTradeJoinMode_" + current).Translate().ToString();
+            if (listing.ButtonText("MouseDisaster_Settings_RatkinYoungTradeJoinMode".Translate(currentLabel).ToString()))
+            {
+                var options = new List<FloatMenuOption>();
+                foreach (MouseDisasterTradePawnJoinMode mode in System.Enum.GetValues(typeof(MouseDisasterTradePawnJoinMode)))
+                {
+                    MouseDisasterTradePawnJoinMode selected = mode;
+                    options.Add(new FloatMenuOption(
+                        ("MouseDisaster_Settings_RatkinYoungTradeJoinMode_" + mode).Translate(),
+                        () => Settings.ratkinYoungTradeJoinMode = selected));
+                }
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+            listing.Gap(2f);
+        }
+
+        private static void DrawPredationSettings(Listing_Standard listing)
+        {
             DrawSectionTitle(listing, "MouseDisaster_Predation_Settings");
             DrawPercentSlider(listing, "MouseDisaster_Predation_Chance", ref Settings.refugeePredationChancePercent, 0f, 100f);
             DrawCheckbox(listing, "MouseDisaster_Predation_FightBack", ref Settings.refugeePredationFightBack, "MouseDisaster_Predation_FightBack_Tip");
             DrawCheckbox(listing, "MouseDisaster_Predation_FollowDifficulty", ref Settings.outsidePredatorsFollowDifficulty, "MouseDisaster_Predation_FollowDifficulty_Tip");
+            DrawSecondsSlider(listing, "MouseDisaster_Predation_SearchInterval", ref Settings.wildPredatorSearchIntervalTicks,
+                MouseDisasterSettings.MinWildPredatorSearchIntervalTicks, MouseDisasterSettings.MaxWildPredatorSearchIntervalTicks,
+                "MouseDisaster_Predation_SearchInterval_Tip");
+            DrawCheckbox(listing, "MouseDisaster_Predation_AvoidWhenFed", ref Settings.wildPredatorsAvoidRatkinWhenFed, "MouseDisaster_Predation_AvoidWhenFed_Tip");
+            DrawCheckbox(listing, "MouseDisaster_Predation_LeaveAfterFed", ref Settings.wildPredatorsLeaveAfterFed, "MouseDisaster_Predation_LeaveAfterFed_Tip");
+            DrawCheckbox(listing, "MouseDisaster_Predation_HuntHomeArea", ref Settings.wildPredatorsHuntHomeAreaRatkin, "MouseDisaster_Predation_HuntHomeArea_Tip");
         }
 
         private static void DrawDeveloperSettings(Listing_Standard listing)
@@ -355,8 +388,14 @@ namespace MouseDisaster
 
         private static void DrawSecondsSlider(Listing_Standard listing, string labelKey, ref int ticksValue, int min, int max)
         {
+            DrawSecondsSlider(listing, labelKey, ref ticksValue, min, max, null);
+        }
+
+        private static void DrawSecondsSlider(Listing_Standard listing, string labelKey, ref int ticksValue, int min, int max, string tooltipKey)
+        {
             float seconds = ticksValue / 60f;
-            listing.Label(labelKey.Translate(seconds.ToString("0.0")));
+            TipSignal? tip = tooltipKey == null ? (TipSignal?)null : new TipSignal(tooltipKey.Translate());
+            listing.Label(labelKey.Translate(seconds.ToString("0.0")), -1f, tip);
             ticksValue = Mathf.RoundToInt(listing.Slider(ticksValue, min, max));
         }
 

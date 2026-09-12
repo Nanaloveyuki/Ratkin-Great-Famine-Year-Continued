@@ -297,6 +297,7 @@ namespace MouseDisaster
         private static MethodInfo leadYourPetTryStartRatkinMotherLeashMethod;
         private static MethodInfo leadYourPetStartLeashMethod;
         private static MethodInfo leadYourPetTryAssignTravelMouseEggsMethod;
+        private static MethodInfo leadYourPetGetLinksForMasterMethod;
         private static MethodInfo leadYourPetAnchorLeashedPetsToCellMethod;
         private static MethodInfo leadYourPetEndLeashForPetMethod;
         private static MethodInfo gameGetComponentMethod;

@@ -2,6 +2,15 @@
 <LanguageData>
   <MouseDisaster_Settings_AllowColonistAutoGiveFood>Allow colonists to give food automatically</MouseDisaster_Settings_AllowColonistAutoGiveFood>
   <MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip>Off by default. When enabled, begging may prompt colonists to give food from their inventory. When disabled, begging continues without automatic gifts. Manual gifts, relief-area food and normal feeding are unchanged.</MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip>
+  <MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs>Allow colonists to care for Mouse Disaster babies</MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs>
+  <MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip>Off by default. When enabled, colonists may use vanilla childcare on Mouse Disaster babies from the neutral hidden faction. When disabled, vanilla faction restrictions remain; other factions and already-adopted Ratkin young are unchanged.</MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip>
+  <MouseDisaster_Settings_Section_Trade>Ratkin young trade</MouseDisaster_Settings_Section_Trade>
+  <MouseDisaster_Settings_RatkinYoungTradeJoinMode>Purchase identity: {0}</MouseDisaster_Settings_RatkinYoungTradeJoinMode>
+  <MouseDisaster_Settings_RatkinYoungTradeJoinMode_Slave>Slave</MouseDisaster_Settings_RatkinYoungTradeJoinMode_Slave>
+  <MouseDisaster_Settings_RatkinYoungTradeJoinMode_Prisoner>Prisoner</MouseDisaster_Settings_RatkinYoungTradeJoinMode_Prisoner>
+  <MouseDisaster_Settings_RatkinYoungTradeJoinMode_Colonist>Colonist</MouseDisaster_Settings_RatkinYoungTradeJoinMode_Colonist>
+  <MouseDisaster_UI_PurchasedAsLabel>Purchased as {0}</MouseDisaster_UI_PurchasedAsLabel>
+  <MouseDisaster_UI_PurchasedAsDescription>These Ratkin young will join the colony as {0} when purchased.</MouseDisaster_UI_PurchasedAsDescription>
   <MouseDisaster_UI_BroadcastHope>Broadcast Hope</MouseDisaster_UI_BroadcastHope>
   <MouseDisaster_UI_ExchangeTarget>{0} ({1})</MouseDisaster_UI_ExchangeTarget>
   <MouseDisaster_UI_ExchangeNoTarget>{0} (no eligible baby)</MouseDisaster_UI_ExchangeNoTarget>
@@ -62,8 +71,6 @@
   <MouseDisaster_UI_AirdropFactionRetaliation>Your airdrops to {0} provoked retaliation. Now {1} Ratkin young, all with harmful traits, have been dropped into your colony.</MouseDisaster_UI_AirdropFactionRetaliation>
   <MouseDisaster_UI_AirdropOverloadRetaliation>You recently sent away too many Ratkin babies by drop pod. Now {0} Ratkin young, all with harmful traits, have been dropped into your colony.</MouseDisaster_UI_AirdropOverloadRetaliation>
   <MouseDisaster_UI_AirdropRetaliationLabel>Airdrop retaliation</MouseDisaster_UI_AirdropRetaliationLabel>
-  <MouseDisaster_UI_PurchasedAsPrisonerDescription>These Ratkin will become prisoners when purchased.</MouseDisaster_UI_PurchasedAsPrisonerDescription>
-  <MouseDisaster_UI_PurchasedAsPrisonerLabel>Purchased as prisoners</MouseDisaster_UI_PurchasedAsPrisonerLabel>
   <MouseDisaster_UI_AbandonedChildrenRemain>After their mother left, the Ratkin young remained near the granary as wild wanderers.</MouseDisaster_UI_AbandonedChildrenRemain>
   <MouseDisaster_UI_AbandoningMotherLeft>Once her children had arrived, the mother turned and fled the map.</MouseDisaster_UI_AbandoningMotherLeft>
   <MouseDisaster_UI_AbandoningMotherTimedOut>Unable to reach the drop-off point, the mother gave up waiting and left.</MouseDisaster_UI_AbandoningMotherTimedOut>

@@ -3,7 +3,7 @@ $root = Split-Path $PSScriptRoot -Parent
 . (Join-Path $PSScriptRoot 'source-tools.ps1')
 $camp = Get-Content (Join-Path $root '1.6/Source/Incidents/RefugeeMassacre.cs') -Raw
 $predation = Get-Content (Join-Path $root '1.6/Source/MapComponent_MouseDisasterPredation.cs') -Raw
-$methods = @('Register','ForbiddenCorpse','WildPredator','Hungry','TryFoodJob','MapComponentTick','AddPredator') | ForEach-Object { Get-CSharpMethod $predation $_ }
+$methods = @('Register','ForbiddenCorpse','ForbiddenTarget','WildPredator','Hungry','TryFoodJob','MapComponentTick','AddPredator','IsPredatorFoodJob','BeginMealJob','ObserveMeal','TryMakeExitJob','TryStartExitJob','IsTracked','IsHomeCell','RefreshCandidateCache','CanTargetRatkin','FindVictim','FindCorpse','HasEventFoodOnMap') | ForEach-Object { Get-CSharpMethod $predation $_ }
 $methods += Get-CSharpMethod $camp 'AllowedWeapon'
 $methods += Get-CSharpMethod $camp 'Sponsors'
 $stub = @'
@@ -16,15 +16,15 @@ public enum FactionRelationKind { Neutral, Ally }
 public class Stuff { public List<string> categories = new List<string> { "Woody" }; }
 public class ThingDef { public bool IsWeapon=true, IsMeleeWeapon=true, MadeFromStuff; public TechLevel techLevel=TechLevel.Neolithic; public string defName="Club"; public List<string> stuffCategories=new List<string>{"Woody"}; public Stuff stuffProps=new Stuff(); }
 public static class ThingDefOf { public static ThingDef WoodLog=new ThingDef(); }
-public class Thing { public bool Spawned=true,Destroyed; public Map Map; public int Position; public Map MapHeld=>Map; public int PositionHeld=>Position; }
-public class Race { public bool Animal=true,predator=true,canBePredatorPrey=true; public float FoodLevelPercentageWantEat=0.3f; public ThingDef corpseDef=new ThingDef(); public bool CanEverEat(ThingDef def)=>true; public bool CanEverEat(Thing thing)=>true; }
+public class Thing { public bool Spawned=true,Destroyed; public Map Map; public IntVec3 Position; public Map MapHeld=>Map; public IntVec3 PositionHeld=>Position; }
+public class Race { public bool Animal=true,predator=true,canBePredatorPrey=true,IsFlesh=true; public float FoodLevelPercentageWantEat=0.3f; public float maxPreyBodySize=999; public ThingDef corpseDef=new ThingDef(); public bool CanEverEat(ThingDef def)=>true; public bool CanEverEat(Thing thing)=>true; }
 public class Melee { public object TryGetMeleeVerb(object target)=>this; }
 public class Age { public float AgeBiologicalYearsFloat=20; }
 public class Food { public float CurLevelPercentage=0.2f; }
 public class Needs { public Food food=new Food(); }
-public class Pawn:Thing { public Corpse Corpse; public bool ratkin=true,Dead,Downed,InMentalState,player,reachable=true; public Faction Faction; public Race RaceProps=new Race(); public Melee meleeVerbs=new Melee(); public Age ageTracker=new Age(); public Needs needs=new Needs(); public Job CurJob; public string CurJobDef=>CurJob?.def; public Jobs jobs=new Jobs(); public bool CanReach(Thing thing,PathEndMode mode,Danger danger)=>!(thing is Pawn p) || p.reachable; }
+public class Pawn:Thing { public Corpse Corpse; public bool ratkin=true,Dead,Downed,InMentalState,player,reachable=true; public float BodySize=0.5f; public Faction Faction; public Race RaceProps=new Race(); public Melee meleeVerbs=new Melee(); public Age ageTracker=new Age(); public Needs needs=new Needs(); public Job CurJob; public string CurJobDef=>CurJob?.def; public Jobs jobs=new Jobs(); public bool CanReach(Thing thing,PathEndMode mode,Danger danger)=>!(thing is Pawn p) || p.reachable; }
 public enum JobCondition { InterruptForced }
-public class Jobs { public void StartJob(Job job,JobCondition condition) {} }
+public class Jobs { public Job LastJob; public void StartJob(Job job,JobCondition condition) { LastJob=job; } }
 public class MapComponent { public virtual void MapComponentTick() {} }
 public class LookTargets { public LookTargets(List<Pawn> pawns) {} }
 public static class LetterDefOf { public static string ThreatSmall="small"; }
@@ -35,18 +35,19 @@ public enum Danger { Deadly } public enum PathEndMode { Touch } public enum Thin
 public class Job { public string def; public Thing target; public bool killIncappedTarget,exitMapOnArrival; public int count; }
 public static class JobDefOf { public const string PredatorHunt="hunt",Ingest="eat",Goto="go"; }
 public static class JobMaker { public static Job MakeJob(string def,Thing target)=>new Job{def=def,target=target}; public static Job MakeJob(string def,IntVec3 target)=>new Job{def=def}; }
-public struct IntVec3 {}
+public struct IntVec3 { public int value; public static implicit operator IntVec3(int value)=>new IntVec3{value=value}; }
 public static class RCellFinder { public static bool exitAvailable=true; public static bool TryFindRandomExitSpot(Pawn pawn,out IntVec3 exit) {exit=new IntVec3(); return exitAvailable;} }
-public static class Distances { public static int DistanceToSquared(this int a,int b)=>(a-b)*(a-b); }
+public static class Distances { public static int DistanceToSquared(this IntVec3 a,IntVec3 b)=>(a.value-b.value)*(a.value-b.value); }
 public class MapPawns { public List<Pawn> AllPawnsSpawned=new List<Pawn>(); }
 public class Lister { public List<Thing> corpses=new List<Thing>(); public List<Thing> ThingsInGroup(ThingRequestGroup group)=>corpses; }
 public class Areas { public HashSet<int> Home=new HashSet<int>(); }
-public class HomeArea { public HashSet<int> cells=new HashSet<int>(); public bool this[int cell]=>cells.Contains(cell); }
+public class HomeArea { public HashSet<IntVec3> cells=new HashSet<IntVec3>(); public bool this[IntVec3 cell]=>cells.Contains(cell); }
 public class AreaManager { public HomeArea Home=new HomeArea(); }
 public class Map { public int uniqueID; public AreaManager areaManager=new AreaManager(); public MapPawns mapPawns=new MapPawns(); public Lister listerThings=new Lister(); }
 public class MouseDisasterEventGroup { public int id; public List<int> predationRolledMaps=new List<int>(); }
 public static class MouseDisasterRuntime { public static bool AllowsNewContent=true; }
-public class Settings { public float refugeePredationChancePercent=10; public bool outsidePredatorsFollowDifficulty; }
+public static class MouseDisasterSettings { public const int MinWildPredatorSearchIntervalTicks=60, MaxWildPredatorSearchIntervalTicks=1200, DefaultWildPredatorSearchIntervalTicks=250; }
+public class Settings { public float refugeePredationChancePercent=10; public bool outsidePredatorsFollowDifficulty; public bool wildPredatorsAvoidRatkinWhenFed=true, wildPredatorsLeaveAfterFed, wildPredatorsHuntHomeAreaRatkin; public int wildPredatorSearchIntervalTicks=250; }
 public static class MouseDisasterMod { public static Settings Settings=new Settings(); }
 public static class Rand { public static int calls; public static float value; public static bool Chance(float chance) { calls++; return value < chance; } }
 public class TickManager { public int TicksGame=1000; }
@@ -57,13 +58,14 @@ public class FactionManager { public List<Faction> AllFactionsListForReading=new
 public class WorldObjects { public List<Settlement> Settlements=new List<Settlement>(); }
 public static class Find { public static TickManager TickManager=new TickManager(); public static FactionManager FactionManager=new FactionManager(); public static WorldObjects WorldObjects=new WorldObjects(); public static LetterStack LetterStack=new LetterStack(); }
 public static class MouseDisasterUtility { public static bool IsRatkin(Pawn pawn)=>pawn!=null && pawn.ratkin; public static bool IsPlayerAffiliatedRatkin(Pawn pawn)=>pawn.player; }
-public class MouseDisasterPredator { public Pawn pawn; public bool outside,firstHunt=true; }
+public class MouseDisasterPredator { public Pawn pawn; public bool outside,firstHunt=true,mealJobActive,fedAfterMeal; public float mealJobStartFoodLevel=-1; }
 public class Harness : MapComponent {
-private int nextTick, arrivals;
+ private const float MealDetectionEpsilon=0.001f; private int nextTick, arrivals, candidateCacheTick=-1;
+ private static int SearchIntervalTicks { get { int value=MouseDisasterMod.Settings?.wildPredatorSearchIntervalTicks ?? MouseDisasterSettings.DefaultWildPredatorSearchIntervalTicks; return Math.Max(MouseDisasterSettings.MinWildPredatorSearchIntervalTicks,Math.Min(MouseDisasterSettings.MaxWildPredatorSearchIntervalTicks,value)); } }
 private void SpawnOutside() { arrivals++; }
 private Map map=new Map(); private List<int> selectedGroups=new List<int>(); private List<Pawn> prey=new List<Pawn>(); private int pendingTick=-1;
 private Dictionary<Pawn,MouseDisasterPredator> byPawn=new Dictionary<Pawn,MouseDisasterPredator>();
-private Dictionary<Pawn,int> nextSearch=new Dictionary<Pawn,int>(); private HashSet<Pawn> vanillaFallback=new HashSet<Pawn>();
+ private Dictionary<Pawn,int> nextSearch=new Dictionary<Pawn,int>(); private HashSet<Pawn> vanillaFallback=new HashSet<Pawn>(); private List<Pawn> cachedWildPrey=new List<Pawn>(); private List<Corpse> cachedRatkinCorpses=new List<Corpse>();
 private List<MouseDisasterPredator> predators=new List<MouseDisasterPredator>();
 private static int checks;
 private static void Check(bool condition,string message) { checks++; if(!condition) throw new Exception(message); }
@@ -89,7 +91,9 @@ public static int Run() {
  Check(!AllowedWeapon(new ThingDef{MadeFromStuff=true,stuffCategories=new List<string>{"Metallic"}}),"incompatible material allowed");
  var corpse=new Corpse{InnerPawn=a,Map=first.map,Position=5}; a.Corpse=corpse;
  Check(!first.ForbiddenCorpse(corpse),"outside corpse forbidden"); first.map.areaManager.Home.cells.Add(5);
- Check(first.ForbiddenCorpse(corpse),"home corpse allowed"); Check(first.ForbiddenCorpse(a),"hunt transition bypassed home area");
+ Check(first.ForbiddenCorpse(corpse),"home corpse was not blocked by default"); MouseDisasterMod.Settings.wildPredatorsHuntHomeAreaRatkin=true;
+ Check(!first.ForbiddenCorpse(corpse),"home corpse setting did not allow hunting"); a.player=true; Check(first.ForbiddenCorpse(a),"player-affiliated Ratkin was exposed"); a.player=false; MouseDisasterMod.Settings.wildPredatorsHuntHomeAreaRatkin=false;
+ Check(first.ForbiddenCorpse(a),"hunt transition bypassed home area");
  corpse.Map=second.map; Check(!first.ForbiddenCorpse(corpse),"other map home area leaked"); corpse.Map=first.map;
  a.ratkin=false; Check(!first.ForbiddenCorpse(corpse),"non-ratkin affected"); a.ratkin=true; corpse.Spawned=false; Check(first.ForbiddenCorpse(corpse),"carried corpse bypassed home area");
  corpse.Map=null; Check(!first.ForbiddenCorpse(corpse),"off-map corpse affected");
@@ -115,6 +119,20 @@ public static int Run() {
  Check(hunting.TryFoodJob(hunter,out job) && job.exitMapOnArrival,"home corpse prevented exit");
  Find.TickManager.TicksGame+=250; hunter.needs.food.CurLevelPercentage=0.8f;
  Check(hunting.TryFoodJob(hunter,out job) && job==null,"fed outsider left early");
+ var nativeCorpseHarness=new Harness(); var nativeHunter=new Pawn{Map=nativeCorpseHarness.map,ratkin=false}; var nativeRecord=new MouseDisasterPredator{pawn=nativeHunter,outside=false}; nativeCorpseHarness.byPawn[nativeHunter]=nativeRecord; nativeCorpseHarness.predators.Add(nativeRecord);
+ var nativeVictim=new Pawn{Map=nativeCorpseHarness.map,Dead=true,Position=3}; var nativeCorpse=new Corpse{Map=nativeCorpseHarness.map,InnerPawn=nativeVictim,Position=3}; nativeVictim.Corpse=nativeCorpse; nativeCorpseHarness.prey.Add(nativeVictim); nativeCorpseHarness.map.areaManager.Home.cells.Add(3); MouseDisasterMod.Settings.wildPredatorsHuntHomeAreaRatkin=true;
+ Check(nativeCorpseHarness.TryFoodJob(nativeHunter,out job) && job.def==JobDefOf.Ingest && job.target==nativeCorpse,"event predator did not eat an allowed home corpse"); MouseDisasterMod.Settings.wildPredatorsHuntHomeAreaRatkin=false;
+ var blockedNative=new Harness(); var blockedHunter=new Pawn{Map=blockedNative.map,ratkin=false}; var blockedRecord=new MouseDisasterPredator{pawn=blockedHunter,outside=false}; blockedNative.byPawn[blockedHunter]=blockedRecord; blockedNative.predators.Add(blockedRecord); var blockedTarget=new Pawn{Map=blockedNative.map,Position=4}; blockedNative.map.areaManager.Home.cells.Add(4); blockedNative.prey.Add(blockedTarget);
+ Check(blockedNative.TryFoodJob(blockedHunter,out job) && job==null && blockedNative.byPawn.ContainsKey(blockedHunter),"event target released native predator to vanilla food search");
+ var fed=new Harness(); var fedHunter=new Pawn{Map=fed.map,ratkin=false}; var fedRecord=new MouseDisasterPredator{pawn=fedHunter,outside=true}; fed.byPawn[fedHunter]=fedRecord; fed.predators.Add(fedRecord);
+ var fedTarget=new Pawn{Map=fed.map,Position=1}; fed.map.mapPawns.AllPawnsSpawned.Add(fedTarget); fedHunter.needs.food.CurLevelPercentage=0.8f;
+ Check(fed.TryFoodJob(fedHunter,out job) && job==null,"fed predator ignored default avoidance setting"); MouseDisasterMod.Settings.wildPredatorsAvoidRatkinWhenFed=false;
+ Check(fed.TryFoodJob(fedHunter,out job) && job.target==fedTarget,"fed predator did not hunt when avoidance was disabled"); MouseDisasterMod.Settings.wildPredatorsAvoidRatkinWhenFed=true;
+ var leaving=new Harness(); var leavingHunter=new Pawn{Map=leaving.map,ratkin=false}; var leavingRecord=new MouseDisasterPredator{pawn=leavingHunter,outside=true}; leaving.byPawn[leavingHunter]=leavingRecord; leaving.predators.Add(leavingRecord);
+ var leavingTarget=new Pawn{Map=leaving.map,Position=1}; leaving.map.mapPawns.AllPawnsSpawned.Add(leavingTarget); leavingHunter.needs.food.CurLevelPercentage=0.2f;
+ Check(leaving.TryFoodJob(leavingHunter,out job) && job.target==leavingTarget,"meal tracking setup failed"); leavingHunter.CurJob=job; Find.TickManager.TicksGame+=250; leaving.MapComponentTick();
+ leavingHunter.needs.food.CurLevelPercentage=0.8f; MouseDisasterMod.Settings.wildPredatorsLeaveAfterFed=true; Find.TickManager.TicksGame+=250; leaving.MapComponentTick();
+ Check(leavingHunter.jobs.LastJob?.exitMapOnArrival==true,"fed predator did not leave when configured"); MouseDisasterMod.Settings.wildPredatorsLeaveAfterFed=false;
  Find.TickManager.TicksGame+=250; hunter.needs.food.CurLevelPercentage=0.2f; MouseDisasterMod.Settings.outsidePredatorsFollowDifficulty=true;
  Check(!hunting.TryFoodJob(hunter,out job),"difficulty mode did not return vanilla control");
  Check(!hunting.TryFoodJob(hunter,out job),"cooldown blocked vanilla fallback");
@@ -135,6 +153,8 @@ public static int Run() {
   Check(pending.arrivals==(state==0?1:0),"delayed predator arrival ignored visitor state: "+state);
   Check(pending.pendingTick==-1,"pending arrival was not consumed");
  }
+ var scheduled=new Harness(); scheduled.prey.Add(new Pawn{Map=scheduled.map}); scheduled.pendingTick=Find.TickManager.TicksGame+120; MouseDisasterMod.Settings.wildPredatorSearchIntervalTicks=1200; scheduled.MapComponentTick();
+ Check(scheduled.nextTick==Find.TickManager.TicksGame+120,"search interval delayed pending event arrival"); MouseDisasterMod.Settings.wildPredatorSearchIntervalTicks=250;
  var stopped=new Harness();stopped.prey.Add(new Pawn{Map=stopped.map});stopped.pendingTick=Find.TickManager.TicksGame;
  MouseDisasterRuntime.AllowsNewContent=false;stopped.MapComponentTick();
  Check(stopped.arrivals==0,"disabled content spawned a delayed predator");
@@ -151,9 +171,11 @@ foreach ($path in @('Languages/English/Keyed/MouseDisasterPredation.xml','Langua
 $settings = Get-Content (Join-Path $root '1.6/Source/MouseDisasterSettings.cs') -Raw
 $expose = Get-CSharpMethod $settings 'ExposeData'
 $reset = Get-CSharpMethod $settings 'ResetToDefaults'
-foreach ($name in @('refugeePredationChancePercent','refugeePredationFightBack','outsidePredatorsFollowDifficulty')) {
+foreach ($name in @('refugeePredationChancePercent','refugeePredationFightBack','outsidePredatorsFollowDifficulty','wildPredatorsAvoidRatkinWhenFed','wildPredatorsLeaveAfterFed','wildPredatorsHuntHomeAreaRatkin','wildPredatorSearchIntervalTicks')) {
     if ($expose -notmatch ('ref ' + $name + ', "' + $name + '"') -or $reset -notmatch $name) { throw "Missing settings persistence/reset: $name" }
 }
+$clamp = Get-CSharpMethod $settings 'ClampValues'
+if ($clamp -notmatch 'wildPredatorSearchIntervalTicks = Mathf\.Clamp') { throw 'Missing predation search interval clamp' }
 foreach ($name in @('prey','selectedGroups','predators','pendingTick')) {
     if ($predation -notmatch ('Scribe_\w+\.Look\(ref ' + $name + ',')) { throw "Missing map persistence: $name" }
 }
