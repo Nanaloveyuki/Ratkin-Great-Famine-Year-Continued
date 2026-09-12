@@ -41,6 +41,12 @@ namespace MouseDisaster
         public const int MinWildPredatorSearchIntervalTicks = 60;
         public const int MaxWildPredatorSearchIntervalTicks = 1200;
         public const int DefaultWildPredatorSearchIntervalTicks = 250;
+        public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
+        public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
+        public const float MinMouseDisasterEnvironmentTemperature = -35f;
+        public const float MaxMouseDisasterEnvironmentTemperature = 70f;
+        public const float MinTemperatureApparelInsulation = 0f;
+        public const float MaxTemperatureApparelInsulation = 100f;
 
         public bool enableNewContent = true;
         public float refugeePredationChancePercent = 10f;
@@ -97,6 +103,11 @@ namespace MouseDisaster
         public bool enablePrisonerScavenge = true;
         public bool prisonerScavengeMigrationApplied = false;
         public bool enableFloatingText = true;
+        public bool enableTemperatureProtectionApparel = true;
+        public float mouseDisasterMinimumEnvironmentTemperature = DefaultMouseDisasterMinimumEnvironmentTemperature;
+        public float mouseDisasterMaximumEnvironmentTemperature = DefaultMouseDisasterMaximumEnvironmentTemperature;
+        public Dictionary<string, float> temperatureApparelInsulation = new Dictionary<string, float>();
+        public List<string> disabledTemperatureApparelDefNames = new List<string>();
         public bool enablePrisonerScavengeDebugLog = false;
         public bool enableExperimentalTailBite = false;
         public PrisonerScavengePoisonMode prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
@@ -158,6 +169,11 @@ namespace MouseDisaster
             enablePrisonerScavenge = true;
             prisonerScavengeMigrationApplied = true;
             enableFloatingText = true;
+            enableTemperatureProtectionApparel = true;
+            mouseDisasterMinimumEnvironmentTemperature = DefaultMouseDisasterMinimumEnvironmentTemperature;
+            mouseDisasterMaximumEnvironmentTemperature = DefaultMouseDisasterMaximumEnvironmentTemperature;
+            temperatureApparelInsulation = new Dictionary<string, float>();
+            disabledTemperatureApparelDefNames = new List<string>();
             enablePrisonerScavengeDebugLog = false;
             enableExperimentalTailBite = false;
             prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
@@ -247,6 +263,17 @@ namespace MouseDisaster
             famineYearChancePercent = Mathf.Clamp(famineYearChancePercent, MinFamineYearChancePercent, MaxFamineYearChancePercent);
             famineYearDisasterBonusPercent = Mathf.Clamp(famineYearDisasterBonusPercent, MinFamineYearDisasterBonusPercent, MaxFamineYearDisasterBonusPercent);
             ratEggTraitGenerationChance = Mathf.Clamp(ratEggTraitGenerationChance, MinRatEggTraitGenerationChance, MaxRatEggTraitGenerationChance);
+            mouseDisasterMinimumEnvironmentTemperature = NormalizeTemperature(
+                mouseDisasterMinimumEnvironmentTemperature, DefaultMouseDisasterMinimumEnvironmentTemperature);
+            mouseDisasterMaximumEnvironmentTemperature = NormalizeTemperature(
+                mouseDisasterMaximumEnvironmentTemperature, DefaultMouseDisasterMaximumEnvironmentTemperature);
+            if (mouseDisasterMinimumEnvironmentTemperature > mouseDisasterMaximumEnvironmentTemperature)
+            {
+                float temperature = mouseDisasterMinimumEnvironmentTemperature;
+                mouseDisasterMinimumEnvironmentTemperature = mouseDisasterMaximumEnvironmentTemperature;
+                mouseDisasterMaximumEnvironmentTemperature = temperature;
+            }
+            NormalizeTemperatureApparelSettings();
             if (!System.Enum.IsDefined(typeof(PrisonerScavengePoisonMode), prisonerScavengePoisonMode))
             {
                 prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
@@ -275,6 +302,79 @@ namespace MouseDisaster
                 default:
                     return ScavengeToxicBuildupNormal;
             }
+        }
+
+        public bool IsMouseDisasterEnvironmentTemperatureAllowed(float temperature)
+        {
+            return !float.IsNaN(temperature) && !float.IsInfinity(temperature) &&
+                   temperature >= mouseDisasterMinimumEnvironmentTemperature - 0.001f &&
+                   temperature <= mouseDisasterMaximumEnvironmentTemperature + 0.001f;
+        }
+
+        public bool IsTemperatureApparelEnabled(string defName)
+        {
+            return !string.IsNullOrWhiteSpace(defName) &&
+                   !(disabledTemperatureApparelDefNames ?? new List<string>())
+                       .Any(entry => string.Equals(entry, defName, System.StringComparison.OrdinalIgnoreCase));
+        }
+
+        public void SetTemperatureApparelEnabled(string defName, bool enabled)
+        {
+            if (string.IsNullOrWhiteSpace(defName)) return;
+            disabledTemperatureApparelDefNames ??= new List<string>();
+            disabledTemperatureApparelDefNames.RemoveAll(entry =>
+                string.Equals(entry, defName, System.StringComparison.OrdinalIgnoreCase));
+            if (!enabled) disabledTemperatureApparelDefNames.Add(defName);
+            NormalizeTemperatureApparelSettings();
+        }
+
+        public float GetTemperatureApparelInsulation(string defName, float fallback)
+        {
+            if (temperatureApparelInsulation != null && temperatureApparelInsulation.TryGetValue(defName, out float value) &&
+                !float.IsNaN(value) && !float.IsInfinity(value))
+            {
+                return Mathf.Clamp(value, MinTemperatureApparelInsulation, MaxTemperatureApparelInsulation);
+            }
+
+            return Mathf.Clamp(fallback, MinTemperatureApparelInsulation, MaxTemperatureApparelInsulation);
+        }
+
+        public void SetTemperatureApparelInsulation(string defName, float value)
+        {
+            if (string.IsNullOrWhiteSpace(defName)) return;
+            temperatureApparelInsulation ??= new Dictionary<string, float>();
+            temperatureApparelInsulation[defName] = Mathf.Clamp(value,
+                MinTemperatureApparelInsulation, MaxTemperatureApparelInsulation);
+        }
+
+        private static float NormalizeTemperature(float value, float fallback)
+        {
+            return float.IsNaN(value) || float.IsInfinity(value)
+                ? fallback
+                : Mathf.Clamp(value, MinMouseDisasterEnvironmentTemperature, MaxMouseDisasterEnvironmentTemperature);
+        }
+
+        private void NormalizeTemperatureApparelSettings()
+        {
+            var normalizedInsulation = new Dictionary<string, float>(System.StringComparer.OrdinalIgnoreCase);
+            foreach (var option in MouseDisasterUtility.AllTemperatureApparelOptions)
+            {
+                float value = option.Insulation;
+                if (temperatureApparelInsulation != null && temperatureApparelInsulation.TryGetValue(option.DefName, out float configured))
+                    value = configured;
+                if (float.IsNaN(value) || float.IsInfinity(value)) value = option.Insulation;
+                normalizedInsulation[option.DefName] = Mathf.Clamp(value,
+                    MinTemperatureApparelInsulation, MaxTemperatureApparelInsulation);
+            }
+            temperatureApparelInsulation = normalizedInsulation;
+            disabledTemperatureApparelDefNames = (disabledTemperatureApparelDefNames ?? new List<string>())
+                .Where(defName => !string.IsNullOrWhiteSpace(defName))
+                .Select(defName => defName.Trim())
+                .Distinct(System.StringComparer.OrdinalIgnoreCase)
+                .Where(defName => MouseDisasterUtility.AllTemperatureApparelOptions.Any(option =>
+                    string.Equals(option.DefName, defName, System.StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(defName => defName)
+                .ToList();
         }
 
         public override void ExposeData()
@@ -327,6 +427,11 @@ namespace MouseDisaster
             Scribe_Values.Look(ref enablePrisonerScavenge, "enablePrisonerScavenge", true);
             Scribe_Values.Look(ref prisonerScavengeMigrationApplied, "prisonerScavengeMigrationApplied", false);
             Scribe_Values.Look(ref enableFloatingText, "enableFloatingText", true);
+            Scribe_Values.Look(ref enableTemperatureProtectionApparel, "enableTemperatureProtectionApparel", true);
+            Scribe_Values.Look(ref mouseDisasterMinimumEnvironmentTemperature, "mouseDisasterMinimumEnvironmentTemperature", DefaultMouseDisasterMinimumEnvironmentTemperature);
+            Scribe_Values.Look(ref mouseDisasterMaximumEnvironmentTemperature, "mouseDisasterMaximumEnvironmentTemperature", DefaultMouseDisasterMaximumEnvironmentTemperature);
+            Scribe_Collections.Look(ref temperatureApparelInsulation, "temperatureApparelInsulation", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref disabledTemperatureApparelDefNames, "disabledTemperatureApparelDefNames", LookMode.Value);
             Scribe_Values.Look(ref enablePrisonerScavengeDebugLog, "enablePrisonerScavengeDebugLog", false);
             Scribe_Values.Look(ref enableExperimentalTailBite, "enableExperimentalTailBite", false);
             int poisonModeRaw = (int)prisonerScavengePoisonMode;

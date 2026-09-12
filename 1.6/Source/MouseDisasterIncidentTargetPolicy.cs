@@ -1,10 +1,33 @@
 using System;
 using System.Linq;
+using RimWorld;
+using RimWorld.Planet;
+using Verse;
 
 namespace MouseDisaster
 {
     public static class MouseDisasterIncidentTargetPolicy
     {
+        public static bool ShouldBlockEnvironmentTemperature(string incidentDefName, IIncidentTarget target)
+        {
+            if (target is not Map map || map.mapTemperature == null ||
+                !MouseDisasterIncidentCatalog.IsKnownIncident(incidentDefName))
+            {
+                return false;
+            }
+
+            MouseDisasterIncidentEntry entry = MouseDisasterIncidentCatalog.AllEntries
+                .FirstOrDefault(candidate => candidate.DefName.Equals(incidentDefName, StringComparison.OrdinalIgnoreCase));
+            if (entry == null || entry.TargetKind != MouseDisasterIncidentTargetKind.Map)
+            {
+                return false;
+            }
+
+            MouseDisasterSettings settings = MouseDisasterMod.Settings;
+            return settings != null &&
+                   !settings.IsMouseDisasterEnvironmentTemperatureAllowed(map.mapTemperature.OutdoorTemp);
+        }
+
         public static bool ShouldBlockCanFireNowForInvalidTarget(
             string incidentDefName,
             bool hasTarget,

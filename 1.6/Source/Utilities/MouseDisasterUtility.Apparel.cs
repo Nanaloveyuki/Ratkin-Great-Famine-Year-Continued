@@ -13,44 +13,55 @@ namespace MouseDisaster
 {
     public static partial class MouseDisasterUtility
     {
-        private const float MinimumGeneratedComfortTemperature = -35f;
-        private const float MaximumGeneratedComfortTemperature = 70f;
+        internal const float MinimumGeneratedComfortTemperature = MouseDisasterSettings.DefaultMouseDisasterMinimumEnvironmentTemperature;
+        internal const float MaximumGeneratedComfortTemperature = MouseDisasterSettings.DefaultMouseDisasterMaximumEnvironmentTemperature;
 
-        private static readonly TemperatureApparelOption[] ColdTemperatureApparelOptions =
+        internal static readonly TemperatureApparelOption[] ColdTemperatureApparelOptions =
         {
-            new TemperatureApparelOption("MouseDisaster_Cold_ThinHempLayer", 8f),
-            new TemperatureApparelOption("MouseDisaster_Cold_LayeredHempClothes", 12f),
-            new TemperatureApparelOption("MouseDisaster_Cold_StrawBarkQuilt", 20f),
-            new TemperatureApparelOption("MouseDisaster_Cold_PatchedFurCloak", 28f),
-            new TemperatureApparelOption("MouseDisaster_Cold_SmokeStiffenedBlanket", 40f),
-            new TemperatureApparelOption("MouseDisaster_Cold_ThickHideHempWrap", 56f)
+            new TemperatureApparelOption("MouseDisaster_Cold_ThinHempLayer", 8f, true),
+            new TemperatureApparelOption("MouseDisaster_Cold_LayeredHempClothes", 12f, true),
+            new TemperatureApparelOption("MouseDisaster_Cold_StrawBarkQuilt", 20f, true),
+            new TemperatureApparelOption("MouseDisaster_Cold_PatchedFurCloak", 28f, true),
+            new TemperatureApparelOption("MouseDisaster_Cold_SmokeStiffenedBlanket", 40f, true),
+            new TemperatureApparelOption("MouseDisaster_Cold_ThickHideHempWrap", 56f, true)
         };
 
-        private static readonly TemperatureApparelOption[] HeatTemperatureApparelOptions =
+        internal static readonly TemperatureApparelOption[] HeatTemperatureApparelOptions =
         {
-            new TemperatureApparelOption("MouseDisaster_Heat_StaleWetCloth", 8f),
-            new TemperatureApparelOption("MouseDisaster_Heat_DryMudCoating", 12f),
-            new TemperatureApparelOption("MouseDisaster_Heat_ReedShadeWrap", 20f),
-            new TemperatureApparelOption("MouseDisaster_Heat_SoakedBarkWrap", 28f),
-            new TemperatureApparelOption("MouseDisaster_Heat_MudReedMantle", 36f),
-            new TemperatureApparelOption("MouseDisaster_Heat_HeavyCoolingMud", 44f)
+            new TemperatureApparelOption("MouseDisaster_Heat_StaleWetCloth", 8f, false),
+            new TemperatureApparelOption("MouseDisaster_Heat_DryMudCoating", 12f, false),
+            new TemperatureApparelOption("MouseDisaster_Heat_ReedShadeWrap", 20f, false),
+            new TemperatureApparelOption("MouseDisaster_Heat_SoakedBarkWrap", 28f, false),
+            new TemperatureApparelOption("MouseDisaster_Heat_MudReedMantle", 36f, false),
+            new TemperatureApparelOption("MouseDisaster_Heat_HeavyCoolingMud", 44f, false)
         };
 
-        private sealed class TemperatureApparelOption
+        internal static readonly TemperatureApparelOption[] AllTemperatureApparelOptions =
+            ColdTemperatureApparelOptions.Concat(HeatTemperatureApparelOptions).ToArray();
+
+        internal sealed class TemperatureApparelOption
         {
             public readonly string DefName;
             public readonly float Insulation;
+            public readonly bool IsCold;
 
-            public TemperatureApparelOption(string defName, float insulation)
+            public TemperatureApparelOption(string defName, float insulation, bool isCold)
             {
                 DefName = defName;
                 Insulation = insulation;
+                IsCold = isCold;
             }
         }
 
         internal static void ApplyTemperatureProtectionApparel(Pawn pawn, Map map)
         {
             if (pawn == null || map?.mapTemperature == null || pawn.Dead || pawn.apparel == null)
+            {
+                return;
+            }
+
+            MouseDisasterSettings settings = MouseDisasterMod.Settings;
+            if (settings?.enableTemperatureProtectionApparel == false)
             {
                 return;
             }
@@ -66,8 +77,8 @@ namespace MouseDisaster
             FloatRange currentRange = pawn.ComfortableTemperatureRange();
             float targetTemperature = Mathf.Clamp(
                 outdoorTemperature,
-                MinimumGeneratedComfortTemperature,
-                MaximumGeneratedComfortTemperature);
+                settings?.mouseDisasterMinimumEnvironmentTemperature ?? MinimumGeneratedComfortTemperature,
+                settings?.mouseDisasterMaximumEnvironmentTemperature ?? MaximumGeneratedComfortTemperature);
             TemperatureApparelOption selected = null;
             if (outdoorTemperature < currentRange.min)
             {
@@ -99,6 +110,12 @@ namespace MouseDisaster
             for (int i = 0; i < options.Length; i++)
             {
                 TemperatureApparelOption option = options[i];
+                if (MouseDisasterMod.Settings != null &&
+                    !MouseDisasterMod.Settings.IsTemperatureApparelEnabled(option.DefName))
+                {
+                    continue;
+                }
+
                 ThingDef apparelDef = DefDatabase<ThingDef>.GetNamedSilentFail(option.DefName);
                 if (apparelDef == null || !apparelDef.IsApparel)
                 {
@@ -106,7 +123,9 @@ namespace MouseDisaster
                 }
 
                 fallback = option;
-                if (option.Insulation >= requiredInsulation - 0.001f)
+                float insulation = MouseDisasterMod.Settings?.GetTemperatureApparelInsulation(
+                    option.DefName, option.Insulation) ?? option.Insulation;
+                if (insulation >= requiredInsulation - 0.001f)
                 {
                     return option;
                 }

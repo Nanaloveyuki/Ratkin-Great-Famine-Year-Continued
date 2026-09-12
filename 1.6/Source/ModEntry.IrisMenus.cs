@@ -10,6 +10,7 @@ namespace MouseDisaster
         {
             Safety,
             General,
+            Environment,
             PawnBehavior,
             Predation,
             OriginalEvents,

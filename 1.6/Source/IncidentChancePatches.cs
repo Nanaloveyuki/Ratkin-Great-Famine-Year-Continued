@@ -46,6 +46,12 @@ namespace MouseDisaster
                 return false;
             }
 
+            if (MouseDisasterIncidentTargetPolicy.ShouldBlockEnvironmentTemperature(__instance?.def?.defName, parms?.target))
+            {
+                __result = false;
+                return false;
+            }
+
             if (!MouseDisasterIncidentTargetPolicy.ShouldBlockCanFireNowForInvalidTarget(
                     __instance?.def?.defName,
                     parms?.target != null,

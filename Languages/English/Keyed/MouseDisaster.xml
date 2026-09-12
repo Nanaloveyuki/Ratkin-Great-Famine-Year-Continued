@@ -2,6 +2,19 @@
 <LanguageData>
   <MouseDisaster_ModName>Ratkin: Great Famine Year</MouseDisaster_ModName>
   <MouseDisaster_Settings_Section_General>Event frequency</MouseDisaster_Settings_Section_General>
+  <MouseDisaster_Settings_Section_Environment>Environment adaptation</MouseDisaster_Settings_Section_Environment>
+  <MouseDisaster_Settings_EnableTemperatureProtectionApparel>Equip adaptive temperature apparel for new Ratkin</MouseDisaster_Settings_EnableTemperatureProtectionApparel>
+  <MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip>When enabled, new Mouse Disaster Ratkin receive one custom apparel item when the map temperature is outside their comfortable range. The apparel only adds heat or cold insulation.</MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip>
+  <MouseDisaster_Settings_TemperatureMinimum>Minimum map temperature for new incidents: {0} C</MouseDisaster_Settings_TemperatureMinimum>
+  <MouseDisaster_Settings_TemperatureMaximum>Maximum map temperature for new incidents: {0} C</MouseDisaster_Settings_TemperatureMaximum>
+  <MouseDisaster_Settings_TemperatureRangeHint>New map-targeted Mouse Disaster incidents are not refreshed outside this range. Caravan incidents are unaffected.</MouseDisaster_Settings_TemperatureRangeHint>
+  <MouseDisaster_Settings_TemperatureProtectionDisabledHint>Adaptive temperature apparel is disabled. New Mouse Disaster Ratkin receive no temperature apparel.</MouseDisaster_Settings_TemperatureProtectionDisabledHint>
+  <MouseDisaster_Settings_Section_TemperatureApparel>Temperature apparel</MouseDisaster_Settings_Section_TemperatureApparel>
+  <MouseDisaster_Settings_TemperatureApparelEnabled>Use {0}</MouseDisaster_Settings_TemperatureApparelEnabled>
+  <MouseDisaster_Settings_TemperatureApparelEnabled_Tooltip>Allow this item to be generated for new Mouse Disaster Ratkin.</MouseDisaster_Settings_TemperatureApparelEnabled_Tooltip>
+  <MouseDisaster_Settings_TemperatureApparelInsulation>{0}: +{1} C {2} protection</MouseDisaster_Settings_TemperatureApparelInsulation>
+  <MouseDisaster_Settings_TemperatureCold>cold</MouseDisaster_Settings_TemperatureCold>
+  <MouseDisaster_Settings_TemperatureHeat>heat</MouseDisaster_Settings_TemperatureHeat>
   <MouseDisaster_Settings_Section_Incidents>Incidents</MouseDisaster_Settings_Section_Incidents>
   <MouseDisaster_Settings_IncidentCategory_MouseDisaster>Ratkin crises</MouseDisaster_Settings_IncidentCategory_MouseDisaster>
   <MouseDisaster_Settings_IncidentCategory_Plague>Ratkin plague</MouseDisaster_Settings_IncidentCategory_Plague>

@@ -3,6 +3,11 @@ $root = Split-Path $PSScriptRoot -Parent
 
 $defPath = Join-Path $root 'Defs/ThingDefs/ThingDefs_MouseDisaster_TemperatureApparel.xml'
 $sourcePath = Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Apparel.cs'
+$settingsPath = Join-Path $root '1.6/Source/MouseDisasterSettings.cs'
+$modPath = Join-Path $root '1.6/Source/ModEntry.cs'
+$irisPath = Join-Path $root '1.6/Source/ModEntry.IrisMenus.cs'
+$targetPolicyPath = Join-Path $root '1.6/Source/MouseDisasterIncidentTargetPolicy.cs'
+$chancePath = Join-Path $root '1.6/Source/IncidentChancePatches.cs'
 $patchPath = Join-Path $root '1.6/Source/IdentityLifecyclePatches.cs'
 
 [xml]$defsDocument = Get-Content -LiteralPath $defPath -Raw
@@ -34,6 +39,11 @@ $expected = @(
 )
 
 $source = Get-Content -LiteralPath $sourcePath -Raw
+$settings = Get-Content -LiteralPath $settingsPath -Raw
+$mod = Get-Content -LiteralPath $modPath -Raw
+$iris = Get-Content -LiteralPath $irisPath -Raw
+$targetPolicy = Get-Content -LiteralPath $targetPolicyPath -Raw
+$chance = Get-Content -LiteralPath $chancePath -Raw
 $patch = Get-Content -LiteralPath $patchPath -Raw
 if ($source -notmatch 'map\.mapTemperature\.OutdoorTemp' -or
     $source -notmatch 'MinimumGeneratedComfortTemperature' -or
@@ -41,6 +51,22 @@ if ($source -notmatch 'map\.mapTemperature\.OutdoorTemp' -or
     $patch -notmatch 'MouseDisasterTemperatureApparelSpawnPatch' -or
     $patch -notmatch 'ApplyTemperatureProtectionApparel\(pawn, map\)') {
     throw 'Temperature apparel is not connected to the spawned MouseDisaster pawn path.'
+}
+if ($settings -notmatch 'DefaultMouseDisasterMinimumEnvironmentTemperature = -35f' -or
+    $settings -notmatch 'DefaultMouseDisasterMaximumEnvironmentTemperature = 70f' -or
+    $settings -notmatch 'enableTemperatureProtectionApparel' -or
+    $settings -notmatch 'temperatureApparelInsulation' -or
+    $settings -notmatch 'disabledTemperatureApparelDefNames' -or
+    $settings -notmatch 'Scribe_Values\.Look\(ref mouseDisasterMinimumEnvironmentTemperature' -or
+    $settings -notmatch 'Scribe_Collections\.Look\(ref temperatureApparelInsulation') {
+    throw 'Temperature adaptation settings are not persisted with the expected defaults.'
+}
+if ($mod -notmatch 'SettingsPage\.Environment' -or
+    $mod -notmatch 'DrawEnvironmentSettings' -or
+    $iris -notmatch 'Environment' -or
+    $targetPolicy -notmatch 'ShouldBlockEnvironmentTemperature' -or
+    $chance -notmatch 'ShouldBlockEnvironmentTemperature') {
+    throw 'Temperature adaptation settings are not connected to the UI and map incident gate.'
 }
 
 foreach ($item in $expected) {
@@ -59,7 +85,8 @@ foreach ($item in $expected) {
     if ($def.ParentName -ne 'MouseDisasterTemperatureApparelBase') {
         throw "$($item.Name) does not use the shared temperature apparel base."
     }
-    $mapping = 'new TemperatureApparelOption("{0}", {1}f)' -f $item.Name, $item.Value
+    $isCold = $item.Stat -eq 'Insulation_Cold'
+    $mapping = 'new TemperatureApparelOption("{0}", {1}f, {2})' -f $item.Name, $item.Value, $isCold.ToString().ToLowerInvariant()
     if ($source -notmatch [regex]::Escape($mapping)) {
         throw "$($item.Name) is not mapped to the expected runtime insulation."
     }

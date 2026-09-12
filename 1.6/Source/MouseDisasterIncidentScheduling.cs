@@ -21,6 +21,7 @@ namespace MouseDisaster
             {
                 var def = DefDatabase<IncidentDef>.GetNamedSilentFail(entry.DefName);
                 if (def == null || !settings.IsIncidentEnabled(entry.DefName) || !def.TargetAllowed(target) ||
+                    MouseDisasterIncidentTargetPolicy.ShouldBlockEnvironmentTemperature(entry.DefName, target) ||
                     (positive.HasValue ? settings.IsPositiveIncident(def) != positive.Value : !settings.ReplacesRaid(entry.DefName))) continue;
                 // This protection lives in Storyteller, not IncidentWorker.CanFireNow.
                 if (def.category == IncidentCategoryDefOf.ThreatBig && ModsConfig.AnomalyActive &&

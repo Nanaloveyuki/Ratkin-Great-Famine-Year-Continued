@@ -47,6 +47,7 @@ namespace MouseDisaster
         {
             if (page == null || page == SettingsPage.Safety) DrawSafetySettings(listing);
             if (page == null || page == SettingsPage.General) DrawGeneralSettings(listing);
+            if (page == null || page == SettingsPage.Environment) DrawEnvironmentSettings(listing);
             if (page == null || page == SettingsPage.PawnBehavior) DrawPawnSettings(listing);
             if (page == null || page == SettingsPage.Predation) DrawPredationSettings(listing);
             if (page == null) DrawIncidentSection(listing);
@@ -157,6 +158,60 @@ namespace MouseDisaster
             DrawFamineSettings(listing);
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_DisplayDebug");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableFloatingText", ref Settings.enableFloatingText, "MouseDisaster_Settings_EnableFloatingText_Tooltip");
+        }
+
+        private static void DrawEnvironmentSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_Environment");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnableTemperatureProtectionApparel",
+                ref Settings.enableTemperatureProtectionApparel, "MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip");
+            DrawDecimalSlider(listing, "MouseDisaster_Settings_TemperatureMinimum",
+                ref Settings.mouseDisasterMinimumEnvironmentTemperature,
+                MouseDisasterSettings.MinMouseDisasterEnvironmentTemperature,
+                MouseDisasterSettings.MaxMouseDisasterEnvironmentTemperature, "0.0");
+            DrawDecimalSlider(listing, "MouseDisaster_Settings_TemperatureMaximum",
+                ref Settings.mouseDisasterMaximumEnvironmentTemperature,
+                MouseDisasterSettings.MinMouseDisasterEnvironmentTemperature,
+                MouseDisasterSettings.MaxMouseDisasterEnvironmentTemperature, "0.0");
+            listing.Label("MouseDisaster_Settings_TemperatureRangeHint".Translate());
+
+            if (!Settings.enableTemperatureProtectionApparel)
+            {
+                listing.Label("MouseDisaster_Settings_TemperatureProtectionDisabledHint".Translate());
+                return;
+            }
+
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_TemperatureApparel");
+            foreach (MouseDisasterUtility.TemperatureApparelOption option in MouseDisasterUtility.AllTemperatureApparelOptions)
+            {
+                string label = ResolveTemperatureApparelLabel(option);
+                bool enabled = Settings.IsTemperatureApparelEnabled(option.DefName);
+                listing.CheckboxLabeled(
+                    "MouseDisaster_Settings_TemperatureApparelEnabled".Translate(label).ToString(),
+                    ref enabled,
+                    "MouseDisaster_Settings_TemperatureApparelEnabled_Tooltip".Translate(label).ToString());
+                if (enabled != Settings.IsTemperatureApparelEnabled(option.DefName))
+                {
+                    Settings.SetTemperatureApparelEnabled(option.DefName, enabled);
+                }
+
+                float insulation = Settings.GetTemperatureApparelInsulation(option.DefName, option.Insulation);
+                string direction = (option.IsCold
+                    ? "MouseDisaster_Settings_TemperatureCold"
+                    : "MouseDisaster_Settings_TemperatureHeat").Translate().ToString();
+                listing.Label("MouseDisaster_Settings_TemperatureApparelInsulation".Translate(
+                    label, insulation.ToString("0.0"), direction).ToString());
+                insulation = listing.Slider(insulation, MouseDisasterSettings.MinTemperatureApparelInsulation,
+                    MouseDisasterSettings.MaxTemperatureApparelInsulation);
+                Settings.SetTemperatureApparelInsulation(option.DefName, insulation);
+                listing.Gap(2f);
+            }
+        }
+
+        private static string ResolveTemperatureApparelLabel(MouseDisasterUtility.TemperatureApparelOption option)
+        {
+            ThingDef def = DefDatabase<ThingDef>.GetNamedSilentFail(option.DefName);
+            return def?.LabelCap ?? option.DefName;
         }
 
         private static void DrawEndingSettings(Listing_Standard listing, bool hosted)
