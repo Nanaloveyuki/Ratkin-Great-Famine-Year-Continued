@@ -82,6 +82,7 @@ namespace MouseDisaster
 
         public override void LoadedGame()
         {
+            MouseDisasterUtility.ResetLoadedGameTransientState();
             MouseDisasterPhase2Utility.CleanupLoadedPendingState();
             MouseDisasterUtility.CleanupLoadedPendingState();
             MouseDisasterUtility.RestoreAbandonedDeliveryDuties();

@@ -5,7 +5,7 @@
   <MouseDisaster_BroadcastNoCandidates>希望广播：没有已启用的候选事件</MouseDisaster_BroadcastNoCandidates>
   <MouseDisaster_BroadcastError>希望广播事件执行异常，剩余请求已取消，广播冷却已解除。请查看日志中的错误详情。</MouseDisaster_BroadcastError>
   <MouseDisaster_RemovalSection>当前存档与卸载准备</MouseDisaster_RemovalSection>
-  <MouseDisaster_RemovalDisabled>此存档已停止生成新的鼠灾事件。全局 Mod 设置未改变。</MouseDisaster_RemovalDisabled>
+  <MouseDisaster_RemovalDisabled>此存档已停止生成新的鼠灾事件。请再保存一次以持久化该状态；全局 Mod 设置未改变。</MouseDisaster_RemovalDisabled>
   <MouseDisaster_RemovalDisable>仅对此存档停用新的鼠灾内容</MouseDisaster_RemovalDisable>
   <MouseDisaster_RemovalExport>备份并导出卸载用存档</MouseDisaster_RemovalExport>
   <MouseDisaster_RemovalConfirm>将暂停游戏，停用此存档的新鼠灾内容，并保存备份与清理副本，不覆盖原存档。

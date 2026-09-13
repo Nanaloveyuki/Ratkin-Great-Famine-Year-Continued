@@ -5,7 +5,7 @@
   <MouseDisaster_BroadcastNoCandidates>Broadcast hope: no enabled candidate incidents</MouseDisaster_BroadcastNoCandidates>
   <MouseDisaster_BroadcastError>A hope broadcast incident threw an error. Remaining requests were cancelled and the cooldown was cleared. See the log for details.</MouseDisaster_BroadcastError>
   <MouseDisaster_RemovalSection>Current save and removal preparation</MouseDisaster_RemovalSection>
-  <MouseDisaster_RemovalDisabled>New Ratkin crises are disabled for this save. Other saves are unchanged.</MouseDisaster_RemovalDisabled>
+  <MouseDisaster_RemovalDisabled>New Ratkin crises are disabled for this save. Save the game again to persist this status. Other saves are unchanged.</MouseDisaster_RemovalDisabled>
   <MouseDisaster_RemovalDisable>Stop new Ratkin crises in this save only</MouseDisaster_RemovalDisable>
   <MouseDisaster_RemovalExport>Back up and export a save for removal</MouseDisaster_RemovalExport>
   <MouseDisaster_RemovalConfirm>The game will pause, disable new content for this save, and create a backup and a cleaned copy without overwriting existing saves.

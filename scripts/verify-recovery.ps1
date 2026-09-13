@@ -9,13 +9,14 @@ public static class RecoveryHarness {
     private static void Check(bool value, string name) { if (!value) throw new System.Exception(name); checks++; }
     private static MouseDisasterCleanupPlan Plan() {
         var p = new MouseDisasterCleanupPlan { PackageId = "test.mod" };
+        p.LegacyPackageIds.Add("legacy.test.mod");
         p.OwnedDefs.UnionWith(new[] { "ModTrait", "ModGene", "ModKind", "ModStory", "ModItem", "ModIncident", "ModHediff", "ModDuty" });
         p.OwnedClasses.UnionWith(new[] { "Mod.Component", "Mod.Lord", "Mod.Driver", "Mod.Letter" });
         p.Replacements.Add("ModKind", "RaceKind"); p.Replacements.Add("ModStory", "CoreStory");
         p.ThingDefs.Add("ModItem"); return p;
     }
     public static int Run() {
-        var doc = System.Xml.Linq.XDocument.Parse(@"<savegame><meta><modIds><li>core</li><li>test.mod</li><li>race</li></modIds><modNames><li>Core</li><li>Mod</li><li>Race</li></modNames></meta><game>
+        var doc = System.Xml.Linq.XDocument.Parse(@"<savegame><meta><modIds><li>core</li><li>test.mod</li><li>legacy.test.mod</li><li>race</li></modIds><modNames><li>Core</li><li>Mod</li><li>Legacy Mod</li><li>Race</li></modNames></meta><game>
 <components><li Class='Mod.Component'><nested>ModDuty</nested></li><li Class='Other.Component'/></components>
 <world><pawns><pawn><kindDef>ModKind</kindDef><story><childhood>ModStory</childhood><traits><allTraits><li><def>ModTrait</def></li><li><def>Kind</def></li></allTraits></traits></story>
 <genes><xenogenes><li><def>ModGene</def><loadID>7</loadID></li></xenogenes></genes><sourceGene>Gene_7</sourceGene>
@@ -41,6 +42,7 @@ public static class RecoveryHarness {
         Check(game.Element("worldObjectRef").Value == "WorldObject_8", "letter ID confused with world object ID");
         Check(game.Element("stats").Element("keys").Elements().Count() == 1 && game.Element("stats").Element("values").Elements().Single().Value == "9", "parallel dictionary misaligned");
         Check(game.Element("target").Value == "null" && game.Element("otherTarget").Value == "Thing_Ratkin1", "thing references not scoped");
+        Check(game.Document.Root.Element("meta").Element("modIds").Elements().Count() == 2, "legacy mod metadata retained");
         Check(doc.Root.Element("meta").Element("modNames").Elements().Last().Value == "Race", "mod metadata misaligned");
         string once = doc.ToString(); new MouseDisasterSaveCleanup(Plan()).Clean(doc); Check(doc.ToString() == once, "cleanup not idempotent");
         bool rejected = false;
@@ -78,6 +80,7 @@ public static class RecoveryHarness {
     }
     public static string InspectSave(string path, string root) {
         var p = new MouseDisasterCleanupPlan { PackageId = "nanaloveyuki.mouse.disaster.famine.continued" };
+        p.LegacyPackageIds.UnionWith(new[] { "lezhizhong.mouse.disaster.famine", "local.mousedisaster.greatfamine" });
         foreach (string file in System.IO.Directory.GetFiles(System.IO.Path.Combine(root, "Defs"), "*.xml", System.IO.SearchOption.AllDirectories))
         foreach (var d in System.Xml.Linq.XDocument.Load(file).Root.Elements()) {
             string id = (string)d.Element("defName"); if (id == null) continue; p.OwnedDefs.Add(id);

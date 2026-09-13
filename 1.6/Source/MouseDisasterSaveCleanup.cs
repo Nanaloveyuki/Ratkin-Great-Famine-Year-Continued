@@ -9,6 +9,7 @@ namespace MouseDisaster
     {
         public readonly HashSet<string> OwnedDefs = new HashSet<string>(StringComparer.Ordinal);
         public readonly HashSet<string> OwnedClasses = new HashSet<string>(StringComparer.Ordinal);
+        public readonly HashSet<string> LegacyPackageIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public readonly Dictionary<string, string> Replacements = new Dictionary<string, string>(StringComparer.Ordinal);
         public readonly HashSet<string> ThingDefs = new HashSet<string>(StringComparer.Ordinal);
         public string PackageId;
@@ -98,13 +99,19 @@ namespace MouseDisaster
             {
                 var entries = ids.Elements().ToList();
                 for (int i = entries.Count - 1; i >= 0; i--)
-                    if (string.Equals(entries[i].Value, plan.PackageId, StringComparison.OrdinalIgnoreCase))
+                    if (IsOwnedPackageId(entries[i].Value))
                     {
                         foreach (string listName in new[] { "modNames", "modSteamIds" })
                             ids.Parent.Element(listName)?.Elements().ElementAtOrDefault(i)?.Remove();
                         entries[i].Remove();
                     }
             }
+        }
+
+        private bool IsOwnedPackageId(string packageId)
+        {
+            return string.Equals(packageId, plan.PackageId, StringComparison.OrdinalIgnoreCase) ||
+                   plan.LegacyPackageIds.Contains(packageId);
         }
 
         private bool IsOwnedClass(XElement node)

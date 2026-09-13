@@ -43,9 +43,24 @@ namespace MouseDisaster
                 // CreateNew never replaces a player save, including a previous export.
                 string cleanPath = GenFilePaths.FilePathForSavedGame(clean);
                 string temporaryPath = cleanPath + ".tmp";
-                using (var stream = new FileStream(temporaryPath, FileMode.CreateNew))
-                    document.Save(stream);
-                File.Move(temporaryPath, cleanPath);
+                try
+                {
+                    using (var stream = new FileStream(temporaryPath, FileMode.CreateNew))
+                        document.Save(stream);
+                    File.Move(temporaryPath, cleanPath);
+                }
+                finally
+                {
+                    try
+                    {
+                        if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+                    }
+                    catch (Exception cleanupException)
+                    {
+                        Log.Warning("[MouseDisaster] Could not remove temporary clean-save file " +
+                            temporaryPath + ": " + cleanupException.Message);
+                    }
+                }
                 Find.WindowStack.Add(new Dialog_MessageBox("MouseDisaster_RemovalDone".Translate(
                     clean, backup, cleanup.ReplacedDefs, cleanup.RemovedEntries)));
             }
@@ -60,6 +75,11 @@ namespace MouseDisaster
         {
             ModContentPack content = LoadedModManager.GetMod<MouseDisasterMod>().Content;
             var plan = new MouseDisasterCleanupPlan { PackageId = content.PackageId };
+            plan.LegacyPackageIds.UnionWith(new[]
+            {
+                "lezhizhong.mouse.disaster.famine",
+                "local.mousedisaster.greatfamine"
+            });
             foreach (Def def in content.AllDefs) plan.OwnedDefs.Add(def.defName);
             foreach (Type type in typeof(MouseDisasterMod).Assembly.GetTypes()) plan.OwnedClasses.Add(type.FullName);
             foreach (ThingDef def in content.AllDefs.OfType<ThingDef>()) plan.ThingDefs.Add(def.defName);

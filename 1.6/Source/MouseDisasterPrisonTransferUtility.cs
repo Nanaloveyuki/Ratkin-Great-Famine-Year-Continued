@@ -18,7 +18,15 @@ namespace MouseDisaster
         private static int cachedScanMapId = -1;
         private static int cachedScanTick = -1;
         private static List<IntVec3> cachedPrisonCells;
-        private static bool cachedScanResult;
+        private static bool cachedScanComplete;
+
+        internal static void ResetTransientState()
+        {
+            cachedScanMapId = -1;
+            cachedScanTick = -1;
+            cachedPrisonCells = null;
+            cachedScanComplete = false;
+        }
 
         public static bool IsPrisonIntegrationEnabled()
         {
@@ -39,13 +47,9 @@ namespace MouseDisaster
             }
 
             int nowTick = Find.TickManager?.TicksGame ?? 0;
-            if (cachedScanMapId == map.uniqueID && nowTick - cachedScanTick < PrisonScanCacheDurationTicks)
+            if (cachedScanMapId == map.uniqueID && nowTick >= cachedScanTick &&
+                nowTick - cachedScanTick < PrisonScanCacheDurationTicks)
             {
-                if (!cachedScanResult)
-                {
-                    return false;
-                }
-
                 for (int i = 0; i < cachedPrisonCells.Count && cells.Count < desiredCount; i++)
                 {
                     IntVec3 cell = cachedPrisonCells[i];
@@ -55,13 +59,16 @@ namespace MouseDisaster
                     }
                 }
 
-                return cells.Count >= desiredCount;
+                if (cells.Count >= desiredCount || cachedScanComplete)
+                {
+                    return cells.Count >= desiredCount;
+                }
             }
 
             cachedScanMapId = map.uniqueID;
             cachedScanTick = nowTick;
             cachedPrisonCells = new List<IntVec3>();
-            cachedScanResult = false;
+            cachedScanComplete = false;
 
             foreach (IntVec3 cell in map.AllCells)
             {
@@ -78,14 +85,13 @@ namespace MouseDisaster
                     cells.Add(cell);
                     if (cells.Count >= desiredCount)
                     {
-                        cachedScanResult = true;
                         return true;
                     }
                 }
             }
 
-            cachedScanResult = cells.Count >= desiredCount;
-            return cachedScanResult;
+            cachedScanComplete = true;
+            return cells.Count >= desiredCount;
         }
 
         private static bool TryResolveRimPrisonMethod(out MethodInfo method)

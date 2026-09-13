@@ -24,7 +24,7 @@ namespace MouseDisaster
                     ".." + settings.mouseDisasterMaximumEnvironmentTemperature.ToString("0.0"));
                 return null;
             }
-            var candidates = new List<FiringIncident>();
+            var candidates = new List<FiringIncident>(MouseDisasterIncidentCatalog.AllEntries.Count);
             foreach (var entry in MouseDisasterIncidentCatalog.AllEntries)
             {
                 var def = DefDatabase<IncidentDef>.GetNamedSilentFail(entry.DefName);

@@ -406,22 +406,14 @@ namespace MouseDisaster
             }
         }
 
-        internal static void ResetPendingState()
+        internal static void ResetLoadedGameTransientState()
         {
-            NextBegTickByPawnId.Clear();
+            // These values are runtime-only. They are keyed by map/Pawn IDs and must not
+            // survive loading a different save in the same process.
+            MouseDisasterPrisonTransferUtility.ResetTransientState();
             BegAttempts.Clear();
             BeggedColonists.Clear();
             BegSuccess.Clear();
-            SiegeBeggarPawnIds.Clear();
-            SiegeBeggarStoleFoodSuccess.Clear();
-            StrongSiegePawnIds.Clear();
-            AirDropStayUntilTickByPawnId.Clear();
-            WallGnawCounts.Clear();
-            ForcePrisonerOnPurchasePawnIds.Clear();
-            TradableChattelPawnIds.Clear();
-            ChildExchangeMoodPawnIds.Clear();
-            ActiveChildExchangeByTraderId.Clear();
-            ActiveAbandonedDeliveryByAdultId.Clear();
             MapPawnCaches.Clear();
             PrisonerScavengeDelayStateByPawnId.Clear();
             PrisonerScavengeBurstRemainingByPawnId.Clear();
@@ -432,6 +424,33 @@ namespace MouseDisaster
             TailBiteLastVictimTickByPawnId.Clear();
             TailBiteLastNotifyTickByPawnId.Clear();
             FloatingTextLastTickByKey.Clear();
+            ReusablePawnLookup.Clear();
+            ReusableIntList.Clear();
+            ReusablePawnList.Clear();
+
+            lastFactionRelationRepairTick = int.MinValue;
+            lastFactionRelationRepairFactionCount = -1;
+            hiddenFactionExplicitHostilityUntilTick = -1;
+            cachedHostilePawnExists = false;
+            cachedHostilePawnCheckTick = -1;
+            lastHiddenFactionRelationSyncFactionCount = -1;
+            suppressReliefAreaPostfix = false;
+        }
+
+        internal static void ResetPendingState()
+        {
+            ResetLoadedGameTransientState();
+            NextBegTickByPawnId.Clear();
+            SiegeBeggarPawnIds.Clear();
+            SiegeBeggarStoleFoodSuccess.Clear();
+            StrongSiegePawnIds.Clear();
+            AirDropStayUntilTickByPawnId.Clear();
+            WallGnawCounts.Clear();
+            ForcePrisonerOnPurchasePawnIds.Clear();
+            TradableChattelPawnIds.Clear();
+            ChildExchangeMoodPawnIds.Clear();
+            ActiveChildExchangeByTraderId.Clear();
+            ActiveAbandonedDeliveryByAdultId.Clear();
         }
 
         internal static List<int> CopyForcePrisonerOnPurchasePawnIds()

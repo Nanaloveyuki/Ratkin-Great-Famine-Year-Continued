@@ -19,7 +19,8 @@ public static class AccessTools {
  public HarmonyPatch(Type t,string n) {} public HarmonyPatch(Type t,string n,Type[] a) {}
 }}
 namespace Verse {
- public class Map : IIncidentTarget { public bool IsPlayerHome=true; public StoryState StoryState {get;}=new StoryState(); }
+ public class MapTemperature { public float OutdoorTemp=20; }
+ public class Map : IIncidentTarget { public bool IsPlayerHome=true; public MapTemperature mapTemperature=new MapTemperature(); public StoryState StoryState {get;}=new StoryState(); }
  public static class ModsConfig { public static bool AnomalyActive; }
  public class TickManager { public int TicksGame=900000; }
  public class Anomaly { public int metalHellClosedTick; }
@@ -50,8 +51,10 @@ namespace RimWorld {
 namespace MouseDisaster {
  public class Entry { public string DefName; }
  public static class MouseDisasterIncidentCatalog { public static List<Entry> AllEntries=new List<Entry>(); public static bool IsKnownIncident(string n)=>AllEntries.Any(e=>e.DefName==n); }
- public class Settings { public float positiveIncidentDays=3,negativeIncidentDays=7; public HashSet<string> disabled=new HashSet<string>(),replace=new HashSet<string>(); public bool IsIncidentEnabled(string n)=>!disabled.Contains(n); public bool IsPositiveIncident(IncidentDef d)=>d.positive; public bool ReplacesRaid(string n)=>replace.Contains(n); }
+ public class Settings { public float positiveIncidentDays=3,negativeIncidentDays=7,mouseDisasterMinimumEnvironmentTemperature=-100,mouseDisasterMaximumEnvironmentTemperature=100; public HashSet<string> disabled=new HashSet<string>(),replace=new HashSet<string>(); public bool IsIncidentEnabled(string n)=>!disabled.Contains(n); public bool IsPositiveIncident(IncidentDef d)=>d.positive; public bool ReplacesRaid(string n)=>replace.Contains(n); public bool IsMouseDisasterEnvironmentTemperatureAllowed(float t)=>true; }
  public static class MouseDisasterMod { public static Settings Settings=new Settings(); }
+ public static class MouseDisasterTrace { public static void Log(string message){} public static string DescribeMap(Map map)=>"map"; }
+ public static class MouseDisasterIncidentTargetPolicy { public static bool ShouldBlockEnvironmentTemperature(string name,IIncidentTarget target)=>false; }
  public static class MouseDisasterRuntime { public static bool AllowsNewContent=true; }
  public static class SchedulingHarness {
   static int checks; static void Check(bool b,string m){if(!b)throw new Exception(m);checks++;}

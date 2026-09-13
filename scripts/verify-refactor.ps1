@@ -42,12 +42,25 @@ $stub = @'
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
+using RimWorld.Planet;
 using Verse;
+namespace RimWorld {
+    public interface IIncidentTarget { }
+}
+namespace RimWorld.Planet {
+    public class Caravan : RimWorld.IIncidentTarget { public bool IsPlayerControlled; }
+}
 namespace Verse {
     public class Pawn { public int thingIDNumber; }
+    public class Map : RimWorld.IIncidentTarget { public bool IsPlayerHome; public MapTemperature mapTemperature = new MapTemperature(); }
+    public class MapTemperature { public float OutdoorTemp = 20f; }
     public static class Translator { public static string Translate(this string key) { return key; } }
+    public static class Extensions { public static bool NullOrEmpty(this string value) { return string.IsNullOrEmpty(value); } }
 }
 namespace MouseDisaster {
+public class MouseDisasterSettings { public bool IsMouseDisasterEnvironmentTemperatureAllowed(float value) { return true; } }
+public static class MouseDisasterMod { public static MouseDisasterSettings Settings = new MouseDisasterSettings(); }
 public static class RefactorHarness {
     static int checks;
     static void Check(bool value, string name) { if (!value) throw new Exception(name); checks++; }

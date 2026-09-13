@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
   <ThingDef Name="MouseDisasterTemperatureApparelBase" ParentName="ApparelBase" Abstract="True">
     <thingClass>Apparel</thingClass>
@@ -32,8 +32,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Heat_StaleWetCloth</defName>
-    <label>stale wet cloth</label>
-    <description>An absorbent cloth draped over the body. No one knows how long it has been used. It cools the wearer, and in this heat, staying alive matters more than health.</description>
+    <label>陈旧的湿布</label>
+    <description>搭在身上的吸水布，也不知道用了多久。虽然能降温呢，但都这么热了，活着最重要。</description>
     <statBases>
       <Insulation_Heat>8</Insulation_Heat>
     </statBases>
@@ -41,8 +41,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Heat_DryMudCoating</defName>
-    <label>dry hardened mud coating</label>
-    <description>Although it feels terrible against the skin, it at least helps the wearer endure heat.</description>
+    <label>干硬的厚泥巴涂层</label>
+    <description>贴在身上很难受，但最起码可以起到降温的作用。</description>
     <statBases>
       <Insulation_Heat>12</Insulation_Heat>
     </statBases>
@@ -50,8 +50,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Heat_ReedShadeWrap</defName>
-    <label>reed shade wrap</label>
-    <description>A loose wrap woven from dry reeds. It barely counts as clothing, but it keeps the sun off and lets hot air through.</description>
+    <label>芦苇遮阳裹布</label>
+    <description>用干芦苇编成的松散裹布。勉强算是衣服，却能挡住阳光，也能让热气透出去。</description>
     <statBases>
       <Insulation_Heat>20</Insulation_Heat>
     </statBases>
@@ -59,8 +59,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Heat_SoakedBarkWrap</defName>
-    <label>soaked bark shade wrap</label>
-    <description>Bark strips soaked in water and tied across the body. The smell is awful, but the first hours of heat are easier.</description>
+    <label>浸水的树皮遮热衣</label>
+    <description>浸过水的树皮条绑在身上，味道糟透了，但至少能让最初那段酷热好受一些。</description>
     <statBases>
       <Insulation_Heat>28</Insulation_Heat>
     </statBases>
@@ -68,8 +68,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Heat_MudReedMantle</defName>
-    <label>mud and reed cooling mantle</label>
-    <description>A heavy mat of mud and reeds. It is ugly, damp, and surprisingly useful under a merciless sun.</description>
+    <label>泥芦降温披</label>
+    <description>泥巴和芦苇压成的厚垫子。又丑、又湿，却意外地能在烈日下派上用场。</description>
     <statBases>
       <Insulation_Heat>36</Insulation_Heat>
     </statBases>
@@ -77,8 +77,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Heat_HeavyCoolingMud</defName>
-    <label>thick cooling mud shell</label>
-    <description>Several layers of dried mud cover the body. It cracks with every movement, but it keeps unbearable heat away.</description>
+    <label>厚重的降温泥壳</label>
+    <description>身上糊了好几层晒干的泥巴。每次活动都会裂开，但能挡住难以忍受的高温。</description>
     <statBases>
       <Insulation_Heat>44</Insulation_Heat>
     </statBases>
@@ -86,8 +86,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Cold_ThinHempLayer</defName>
-    <label>single hemp warming layer</label>
-    <description>A thin piece of rough hemp cloth. It is not much, but it is better than bare skin.</description>
+    <label>单层麻布保暖层</label>
+    <description>一小片粗糙的麻布，虽然不顶什么用，但总比光着身子好。</description>
     <statBases>
       <Insulation_Cold>8</Insulation_Cold>
     </statBases>
@@ -95,8 +95,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Cold_LayeredHempClothes</defName>
-    <label>layered hemp warming clothes</label>
-    <description>The most primitive hemp cloth, woven layer upon layer. It is ugly, but warm enough.</description>
+    <label>层层麻布织成的保暖衣物</label>
+    <description>最原始的办法做出来的麻布，尽管不好看，但足够保暖了。</description>
     <statBases>
       <Insulation_Cold>12</Insulation_Cold>
     </statBases>
@@ -104,8 +104,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Cold_StrawBarkQuilt</defName>
-    <label>straw and bark quilt</label>
-    <description>Dry straw and bark stitched between old cloth. It crackles when the wearer moves, yet holds a little precious warmth.</description>
+    <label>草梗树皮絮衣</label>
+    <description>干草梗和树皮缝在旧布中间，走动时嘎吱作响，却能留住一点宝贵的热气。</description>
     <statBases>
       <Insulation_Cold>20</Insulation_Cold>
     </statBases>
@@ -113,8 +113,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Cold_PatchedFurCloak</defName>
-    <label>patched fur scrap cloak</label>
-    <description>Scraps of fur sewn into a short cloak. The seams are open and the smell is worse, but wind cannot pass through easily.</description>
+    <label>拼接毛皮短披</label>
+    <description>用毛皮碎片拼成的短披风，接缝处都开了，味道也不好，但风不容易直接灌进来。</description>
     <statBases>
       <Insulation_Cold>28</Insulation_Cold>
     </statBases>
@@ -122,8 +122,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Cold_SmokeStiffenedBlanket</defName>
-    <label>smoke stiffened blanket</label>
-    <description>A blanket hardened by smoke and grease. It is coarse and dirty, but it keeps the cold away.</description>
+    <label>烟熏油硬的旧毯</label>
+    <description>被烟和油脂熏硬的旧毯子，粗糙又脏，却能把寒气挡在外面。</description>
     <statBases>
       <Insulation_Cold>40</Insulation_Cold>
     </statBases>
@@ -131,8 +131,8 @@
 
   <ThingDef ParentName="MouseDisasterTemperatureApparelBase">
     <defName>MouseDisaster_Cold_ThickHideHempWrap</defName>
-    <label>thick hide and hemp wrap</label>
-    <description>Several layers of hide and hemp tied around the body. It restricts no vital movement and holds warmth better than it looks.</description>
+    <label>厚皮麻布裹衣</label>
+    <description>几层兽皮和麻布绑在身上，不会妨碍关键活动，保暖效果却比看起来好得多。</description>
     <statBases>
       <Insulation_Cold>56</Insulation_Cold>
     </statBases>
