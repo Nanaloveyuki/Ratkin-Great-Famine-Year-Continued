@@ -39,6 +39,8 @@ namespace MouseDisaster
         public MouseDisasterEventExecution previous;
         public int groupId;
         public HashSet<Pawn> before;
+        public string incidentDefName;
+        public Map map;
     }
 
     public sealed class GameComponent_MouseDisasterEventBehavior : GameComponent

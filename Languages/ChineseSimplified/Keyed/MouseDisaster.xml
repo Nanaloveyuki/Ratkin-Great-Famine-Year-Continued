@@ -137,6 +137,12 @@
   <MouseDisaster_Settings_RatEggTraitBridge_Tooltip>幼年灾鼠可能获得额外特质，来自原版及支持的特质模组。</MouseDisaster_Settings_RatEggTraitBridge_Tooltip>
   <MouseDisaster_Settings_RatEggTraitChance>兼容特性生成概率：{0}%</MouseDisaster_Settings_RatEggTraitChance>
   <MouseDisaster_Settings_CompatDisabledHint>已关闭来自联动模组的额外特质。</MouseDisaster_Settings_CompatDisabledHint>
+  <MouseDisaster_Settings_Section_PawnHistory>人物经历</MouseDisaster_Settings_Section_PawnHistory>
+  <MouseDisaster_Settings_EnablePawnHistories>为事件生成的鼠族启用人物经历</MouseDisaster_Settings_EnablePawnHistories>
+  <MouseDisaster_Settings_EnablePawnHistories_Tooltip>开启后，符合条件的事件生成鼠族会从已勾选的 pawn_history.md.cache 经历中获得一项人物经历。默认关闭。</MouseDisaster_Settings_EnablePawnHistories_Tooltip>
+  <MouseDisaster_Settings_PawnHistory_EnableAll>启用全部经历</MouseDisaster_Settings_PawnHistory_EnableAll>
+  <MouseDisaster_Settings_PawnHistory_DisableAll>停用全部经历</MouseDisaster_Settings_PawnHistory_DisableAll>
+  <MouseDisaster_Settings_PawnHistory_SelectionHint>选择可能被分配的经历；上方总开关也必须开启。</MouseDisaster_Settings_PawnHistory_SelectionHint>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>
   <MouseDisaster_Settings_ImplNote>按你的喜好调整鼠族的到访、行为与殖民地故事。</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>窝趴趴舔灰灰，肚肚咕咕叫，脏脏也系饭饭。</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>

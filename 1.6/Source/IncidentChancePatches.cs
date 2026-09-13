@@ -103,7 +103,9 @@ namespace MouseDisaster
                 {
                     previous = MouseDisasterEventExecution.Current,
                     groupId = GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(__instance.def) ?? 0,
-                    before = parms?.target is Map map ? new HashSet<Pawn>(map.mapPawns.AllPawns) : null
+                    before = parms?.target is Map map ? new HashSet<Pawn>(map.mapPawns.AllPawns) : null,
+                    incidentDefName = defName,
+                    map = parms?.target as Map
                 };
                 MouseDisasterEventExecution.Current = __state;
                 return true;

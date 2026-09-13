@@ -134,6 +134,12 @@
   <MouseDisaster_Settings_RatEggTraitBridge_Tooltip>Young famine Ratkin may receive additional traits from the base game and supported trait mods.</MouseDisaster_Settings_RatEggTraitBridge_Tooltip>
   <MouseDisaster_Settings_RatEggTraitChance>Additional trait chance: {0}%</MouseDisaster_Settings_RatEggTraitChance>
   <MouseDisaster_Settings_CompatDisabledHint>Additional traits from supported mods are disabled.</MouseDisaster_Settings_CompatDisabledHint>
+  <MouseDisaster_Settings_Section_PawnHistory>Character histories</MouseDisaster_Settings_Section_PawnHistory>
+  <MouseDisaster_Settings_EnablePawnHistories>Enable character histories for event-generated Ratkin</MouseDisaster_Settings_EnablePawnHistories>
+  <MouseDisaster_Settings_EnablePawnHistories_Tooltip>When enabled, eligible event-generated Ratkin may receive one of the selected histories from pawn_history.md.cache. Disabled by default.</MouseDisaster_Settings_EnablePawnHistories_Tooltip>
+  <MouseDisaster_Settings_PawnHistory_EnableAll>Enable all histories</MouseDisaster_Settings_PawnHistory_EnableAll>
+  <MouseDisaster_Settings_PawnHistory_DisableAll>Disable all histories</MouseDisaster_Settings_PawnHistory_DisableAll>
+  <MouseDisaster_Settings_PawnHistory_SelectionHint>Select the histories that may be assigned. The master switch above must also be enabled.</MouseDisaster_Settings_PawnHistory_SelectionHint>
   <MouseDisaster_Settings_ResetDefaults>Reset to defaults</MouseDisaster_Settings_ResetDefaults>
   <MouseDisaster_Settings_ImplNote>Choose how Ratkin arrive, behave and become part of your colony's story.</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>Tummy's rumbling... even dusty crumbs count.</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>

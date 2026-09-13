@@ -56,7 +56,7 @@ namespace MouseDisaster
                     continue;
                 }
 
-                MouseDisasterUtility.SetBiologicalAgeYears(child, Rand.Range(1f, 2.9f));
+                MouseDisasterUtility.SetBiologicalAgeYears(child, MouseDisasterUtility.RandomRatEggAgeYears());
                 GenSpawn.Spawn(child, CellFinder.RandomClosewalkCellNear(cell, map, 5), map);
                 MouseDisasterUtility.PrepareTradablePrisoner(child, faction);
                 MouseDisasterUtility.StripRatEggInventory(child);

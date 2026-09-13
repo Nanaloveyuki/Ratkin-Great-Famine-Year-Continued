@@ -60,7 +60,7 @@ namespace MouseDisaster
                     continue;
                 }
 
-                MouseDisasterUtility.SetBiologicalAgeYears(baby, Rand.Range(1f, 2.9f));
+                MouseDisasterUtility.SetBiologicalAgeYears(baby, MouseDisasterUtility.RandomRatEggAgeYears());
                 GenSpawn.Spawn(baby, CellFinder.RandomClosewalkCellNear(cell, map, 4), map);
                 MouseDisasterUtility.StripRatEggInventory(baby);
                 MouseDisasterUtility.PrepareNonCaravanBabyPawn(baby, gatherCell);

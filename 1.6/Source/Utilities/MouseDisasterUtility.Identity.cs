@@ -37,8 +37,11 @@ namespace MouseDisaster
                 return false;
             }
 
-            bool hasChildhood = pawn.story.Childhood == MouseDisasterDefOf.MouseDisaster_Newborn;
-            bool hasAdulthood = pawn.story.Adulthood == null || pawn.story.Adulthood == MouseDisasterDefOf.MouseDisaster_Refugee;
+            bool hasChildhood = pawn.story.Childhood == MouseDisasterDefOf.MouseDisaster_Newborn ||
+                                MouseDisasterPawnHistoryCatalog.IsMouseDisasterHistory(pawn.story.Childhood);
+            bool hasAdulthood = pawn.story.Adulthood == null ||
+                                pawn.story.Adulthood == MouseDisasterDefOf.MouseDisaster_Refugee ||
+                                MouseDisasterPawnHistoryCatalog.IsMouseDisasterHistory(pawn.story.Adulthood);
             return hasChildhood && hasAdulthood;
         }
 

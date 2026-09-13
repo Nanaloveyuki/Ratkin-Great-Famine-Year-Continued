@@ -72,7 +72,9 @@ namespace MouseDisaster
                 return null;
             }
 
-            MouseDisasterUtility.SetBiologicalAgeYears(pawn, babyStage ? Rand.Range(1.05f, 2.8f) : Rand.Range(3.1f, 6.8f));
+            MouseDisasterUtility.SetBiologicalAgeYears(pawn, babyStage
+                ? MouseDisasterUtility.RandomRatEggAgeYears(2.8f)
+                : Rand.Range(3.1f, 6.8f));
             MouseDisasterUtility.StripRatEggInventory(pawn);
             if (pureNegative)
             {

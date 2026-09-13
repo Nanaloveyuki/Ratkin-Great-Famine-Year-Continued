@@ -49,6 +49,7 @@ namespace MouseDisaster
             if (page == null || page == SettingsPage.General) DrawGeneralSettings(listing);
             if (page == null || page == SettingsPage.Environment) DrawEnvironmentSettings(listing);
             if (page == null || page == SettingsPage.PawnBehavior) DrawPawnSettings(listing);
+            if (page == null || page == SettingsPage.PawnHistory) DrawPawnHistorySettings(listing);
             if (page == null || page == SettingsPage.Predation) DrawPredationSettings(listing);
             if (page == null) DrawIncidentSection(listing);
             else if (page == SettingsPage.OriginalEvents || page == SettingsPage.ContinuedEvents)
@@ -70,6 +71,30 @@ namespace MouseDisaster
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
             DrawBiologySettings(listing);
+        }
+
+        private static void DrawPawnHistorySettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_PawnHistory");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnablePawnHistories",
+                ref Settings.enablePawnHistories, "MouseDisaster_Settings_EnablePawnHistories_Tooltip");
+
+            if (listing.ButtonText("MouseDisaster_Settings_PawnHistory_EnableAll".Translate()))
+                Settings.SetAllPawnHistoriesEnabled(true);
+            if (listing.ButtonText("MouseDisaster_Settings_PawnHistory_DisableAll".Translate()))
+                Settings.SetAllPawnHistoriesEnabled(false);
+
+            listing.Label("MouseDisaster_Settings_PawnHistory_SelectionHint".Translate());
+            listing.Gap(2f);
+            foreach (MouseDisasterPawnHistoryDefinition history in MouseDisasterPawnHistoryCatalog.All)
+            {
+                bool selected = Settings.IsPawnHistorySelected(history.Id);
+                bool changed = selected;
+                listing.CheckboxLabeled(history.DisplayLabel, ref changed, history.Tooltip);
+                if (changed != selected)
+                    Settings.SetPawnHistoryEnabled(history.Id, changed);
+                listing.Gap(1f);
+            }
         }
 
         private static void DrawRatkinYoungTradeSettings(Listing_Standard listing)

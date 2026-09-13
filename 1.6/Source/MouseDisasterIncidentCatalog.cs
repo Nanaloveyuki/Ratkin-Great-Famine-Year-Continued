@@ -138,6 +138,17 @@ namespace MouseDisaster
             return Entries.Any(entry => entry.DefName.Equals(defName, StringComparison.OrdinalIgnoreCase));
         }
 
+        public static string GetDisplayId(string defName)
+        {
+            if (defName.NullOrEmpty())
+            {
+                return null;
+            }
+
+            return Entries.FirstOrDefault(entry =>
+                entry.DefName.Equals(defName, StringComparison.OrdinalIgnoreCase))?.DisplayId;
+        }
+
         public static bool IsIncidentEnabled(string defName, IEnumerable<string> disabledIncidentDefNames)
         {
             if (string.IsNullOrWhiteSpace(defName))

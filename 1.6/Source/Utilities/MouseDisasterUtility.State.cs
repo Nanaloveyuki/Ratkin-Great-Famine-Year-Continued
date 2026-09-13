@@ -41,7 +41,7 @@ namespace MouseDisaster
         private const string ClothStuffDefName = "Cloth";
         private const string HumanleatherStuffDefName = "Humanleather";
         private const string RatTailPartDefName = "RK_RatTail";
-        private const float RatEggMinAgeYears = 1f;
+        private static readonly float RatEggMinAgeYears = 1f / GenDate.DaysPerYear;
         private const float RatEggMaxAgeYears = 2.9f;
         private const float RatkinYoungChildMinAgeYears = 3f;
         private const float RatkinYoungChildMaxAgeYears = 6.9f;

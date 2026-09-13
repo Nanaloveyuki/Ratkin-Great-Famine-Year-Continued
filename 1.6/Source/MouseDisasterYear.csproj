@@ -134,6 +134,8 @@
     <Compile Include="MouseDisasterRuntime.cs" />
     <Compile Include="MouseDisasterGeneRestorePolicy.cs" />
     <Compile Include="MouseDisasterIncidentCatalog.cs" />
+    <Compile Include="MouseDisasterPawnHistory.cs" />
+    <Compile Include="MouseDisasterPawnHistoryData.cs" />
     <Compile Include="MouseDisasterIncidentTargetPolicy.cs" />
     <Compile Include="MouseDisasterGeneRemovalScope.cs" />
     <Compile Include="MouseDisasterPrisonTransferUtility.cs" />

@@ -12,6 +12,7 @@ namespace MouseDisaster
             General,
             Environment,
             PawnBehavior,
+            PawnHistory,
             Predation,
             OriginalEvents,
             ContinuedEvents,

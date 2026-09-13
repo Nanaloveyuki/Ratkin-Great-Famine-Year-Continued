@@ -34,7 +34,7 @@
     <fixedChildBackstories>
       <li>MouseDisaster_Newborn</li>
     </fixedChildBackstories>
-    <minGenerationAge>0</minGenerationAge>
+    <minGenerationAge>0.0166667</minGenerationAge>
     <maxGenerationAge>2.9</maxGenerationAge>
   </PawnKindDef>
 
@@ -67,7 +67,7 @@
     <fixedChildBackstories>
       <li>MouseDisaster_Newborn</li>
     </fixedChildBackstories>
-    <minGenerationAge>0</minGenerationAge>
+    <minGenerationAge>0.0166667</minGenerationAge>
     <maxGenerationAge>2.9</maxGenerationAge>
   </PawnKindDef>
 
@@ -100,7 +100,7 @@
     <fixedChildBackstories>
       <li>MouseDisaster_Newborn</li>
     </fixedChildBackstories>
-    <minGenerationAge>0</minGenerationAge>
+    <minGenerationAge>0.0166667</minGenerationAge>
     <maxGenerationAge>2.9</maxGenerationAge>
   </PawnKindDef>
 

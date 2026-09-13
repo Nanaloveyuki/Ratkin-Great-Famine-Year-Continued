@@ -139,6 +139,8 @@ namespace MouseDisaster
         public float famineYearDisasterBonusPercent = 20f;
         public bool enableRatEggTraitsBridge = true;
         public float ratEggTraitGenerationChance = 0.5f;
+        public bool enablePawnHistories = true;
+        public List<string> enabledPawnHistoryIds = CreateDefaultPawnHistoryIds();
         public List<string> disabledIncidentDefNames = new List<string>();
         public int maxRatkinAge = 50;
         public float ageDiseaseMultiplier = 1f;
@@ -206,6 +208,8 @@ namespace MouseDisaster
             famineYearDisasterBonusPercent = 20f;
             enableRatEggTraitsBridge = true;
             ratEggTraitGenerationChance = 0.5f;
+            enablePawnHistories = true;
+            enabledPawnHistoryIds = CreateDefaultPawnHistoryIds();
             disabledIncidentDefNames = new List<string>();
             maxRatkinAge = 50;
             ageDiseaseMultiplier = 1f;
@@ -276,6 +280,7 @@ namespace MouseDisaster
                 mouseDisasterMaximumEnvironmentTemperature = temperature;
             }
             NormalizeTemperatureApparelSettings();
+            NormalizePawnHistorySettings();
             if (!System.Enum.IsDefined(typeof(PrisonerScavengePoisonMode), prisonerScavengePoisonMode))
             {
                 prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
@@ -328,6 +333,36 @@ namespace MouseDisaster
                 string.Equals(entry, defName, System.StringComparison.OrdinalIgnoreCase));
             if (!enabled) disabledTemperatureApparelDefNames.Add(defName);
             NormalizeTemperatureApparelSettings();
+        }
+
+        public bool IsPawnHistorySelected(string id)
+        {
+            return !string.IsNullOrWhiteSpace(id) &&
+                   (enabledPawnHistoryIds ?? new List<string>())
+                       .Any(entry => string.Equals(entry, id, System.StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool IsPawnHistoryEnabled(string id)
+        {
+            return enablePawnHistories && IsPawnHistorySelected(id);
+        }
+
+        public void SetPawnHistoryEnabled(string id, bool enabled)
+        {
+            if (!MouseDisasterPawnHistoryCatalog.IsKnown(id)) return;
+            enabledPawnHistoryIds ??= new List<string>();
+            enabledPawnHistoryIds.RemoveAll(entry =>
+                string.Equals(entry, id, System.StringComparison.OrdinalIgnoreCase));
+            if (enabled) enabledPawnHistoryIds.Add(id);
+            NormalizePawnHistorySettings();
+        }
+
+        public void SetAllPawnHistoriesEnabled(bool enabled)
+        {
+            enabledPawnHistoryIds = enabled
+                ? MouseDisasterPawnHistoryCatalog.All.Select(history => history.Id).ToList()
+                : new List<string>();
+            NormalizePawnHistorySettings();
         }
 
         public float GetTemperatureApparelInsulation(string defName, float fallback)
@@ -456,6 +491,8 @@ namespace MouseDisaster
             Scribe_Values.Look(ref famineYearDisasterBonusPercent, "famineYearDisasterBonusPercent", 20f);
             Scribe_Values.Look(ref enableRatEggTraitsBridge, "enableRatEggTraitsBridge", true);
             Scribe_Values.Look(ref ratEggTraitGenerationChance, "ratEggTraitGenerationChance", 0.5f);
+            Scribe_Values.Look(ref enablePawnHistories, "enablePawnHistories", true);
+            Scribe_Collections.Look(ref enabledPawnHistoryIds, "enabledPawnHistoryIds", LookMode.Value);
             Scribe_Collections.Look(ref disabledIncidentDefNames, "disabledIncidentDefNames", LookMode.Value);
             Scribe_Values.Look(ref maxRatkinAge, "maxRatkinAge", 50);
             Scribe_Values.Look(ref ageDiseaseMultiplier, "ageDiseaseMultiplier", 1f);
@@ -480,6 +517,7 @@ namespace MouseDisaster
             }
 
             NormalizeIncidentToggleState();
+            NormalizePawnHistorySettings();
             ClampValues();
         }
 
@@ -492,6 +530,24 @@ namespace MouseDisaster
                 .Distinct(System.StringComparer.OrdinalIgnoreCase)
                 .Where(MouseDisasterIncidentCatalog.IsKnownIncident)
                 .OrderBy(defName => defName)
+                .ToList();
+        }
+
+        private void NormalizePawnHistorySettings()
+        {
+            enabledPawnHistoryIds = (enabledPawnHistoryIds ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Distinct(System.StringComparer.OrdinalIgnoreCase)
+                .Where(MouseDisasterPawnHistoryCatalog.IsKnown)
+                .OrderBy(id => id)
+                .ToList();
+        }
+
+        private static List<string> CreateDefaultPawnHistoryIds()
+        {
+            return MouseDisasterPawnHistoryCatalog.All
+                .Select(history => history.Id)
                 .ToList();
         }
 

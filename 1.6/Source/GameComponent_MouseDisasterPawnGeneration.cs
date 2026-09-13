@@ -381,19 +381,22 @@ namespace MouseDisaster
             Rand.PushState(Gen.HashCombineInt(batch.randomSeed, slot));
             try
             {
-                switch (batch.kind)
+                using (MouseDisasterPawnHistoryCatalog.PushContext(batch.incidentDef?.defName, batch.map))
                 {
-                    case MouseDisasterPawnBatchKind.LargeRefugeeWave:
-                        GenerateLargeRefugee(batch);
-                        break;
-                    case MouseDisasterPawnBatchKind.GreatFamine:
-                        GenerateGreatFaminePawn(batch);
-                        break;
-                    case MouseDisasterPawnBatchKind.TraderCaravan:
-                        GenerateTraderCaravanPawn(batch, slot);
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unknown pawn batch kind: " + batch.kind);
+                    switch (batch.kind)
+                    {
+                        case MouseDisasterPawnBatchKind.LargeRefugeeWave:
+                            GenerateLargeRefugee(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.GreatFamine:
+                            GenerateGreatFaminePawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.TraderCaravan:
+                            GenerateTraderCaravanPawn(batch, slot);
+                            break;
+                        default:
+                            throw new InvalidOperationException("Unknown pawn batch kind: " + batch.kind);
+                    }
                 }
             }
             finally
@@ -477,7 +480,7 @@ namespace MouseDisaster
                 pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinChild, batch.faction, DevelopmentalStage.Baby, 0.5f);
                 if (pawn != null)
                 {
-                    MouseDisasterUtility.SetBiologicalAgeYears(pawn, Rand.Range(1f, 2.9f));
+                    MouseDisasterUtility.SetBiologicalAgeYears(pawn, MouseDisasterUtility.RandomRatEggAgeYears());
                 }
             }
 

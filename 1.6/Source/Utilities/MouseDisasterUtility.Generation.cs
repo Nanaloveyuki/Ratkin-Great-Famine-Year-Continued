@@ -70,6 +70,7 @@ namespace MouseDisaster
                 SetBiologicalAgeYears(pawn, Rand.Range(RatkinYoungChildMinAgeYears, RatkinYoungChildMaxAgeYears));
             }
 
+            MouseDisasterPawnHistoryCatalog.TryApply(pawn, stage);
             RefreshRatkinDevelopmentalPresentation(pawn);
 
             return pawn;
@@ -132,7 +133,7 @@ namespace MouseDisaster
             {
                 if (ageYears < RatEggMinAgeYears || ageYears >= 3f)
                 {
-                    SetBiologicalAgeYears(pawn, Rand.Range(RatEggMinAgeYears, RatEggMaxAgeYears));
+                    SetBiologicalAgeYears(pawn, RandomRatEggAgeYears());
                 }
                 return;
             }
@@ -343,6 +344,16 @@ namespace MouseDisaster
             pawn.ageTracker.AgeBiologicalTicks = ticks;
             pawn.ageTracker.AgeChronologicalTicks = ticks;
             RefreshRatkinDevelopmentalPresentation(pawn);
+        }
+
+        public static float RandomRatEggAgeYears()
+        {
+            return RandomRatEggAgeYears(RatEggMaxAgeYears);
+        }
+
+        public static float RandomRatEggAgeYears(float maximumAgeYears)
+        {
+            return Rand.Range(RatEggMinAgeYears, Mathf.Max(RatEggMinAgeYears, maximumAgeYears));
         }
 
         public static int CalculateGroupCount(float points)
@@ -643,7 +654,7 @@ namespace MouseDisaster
 
             if (pawn.ageTracker.AgeBiologicalYearsFloat < RatEggMinAgeYears)
             {
-                SetBiologicalAgeYears(pawn, Rand.Range(RatEggMinAgeYears, RatEggMaxAgeYears));
+                SetBiologicalAgeYears(pawn, RandomRatEggAgeYears());
             }
         }
     }
