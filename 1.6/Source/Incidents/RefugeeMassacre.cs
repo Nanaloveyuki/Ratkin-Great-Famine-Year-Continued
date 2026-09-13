@@ -137,13 +137,12 @@ namespace MouseDisaster
             for (int i = 0; i < adults + children; i++)
             {
                 bool adult = i < adults;
-                float age = adult ? Rand.Range(18f, 50f) : Rand.Range(0f, 8f);
+                float age = adult ? Rand.Range(18f, 50f) : Rand.Range(1f / GenDate.DaysPerYear, 8f);
                 var stage = adult ? DevelopmentalStage.Adult : age < 3f ? DevelopmentalStage.Baby : DevelopmentalStage.Child;
                 Pawn pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(adult ?
                     MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult : MouseDisasterDefOf.MouseDisaster_BeggarRatkinChild,
-                    site.Faction, stage, 0.8f, true);
+                    site.Faction, stage, 0.8f, true, fixedAgeYears: age);
                 if (pawn == null) throw new InvalidOperationException("MouseDisaster: refugee camp pawn generation failed.");
-                MouseDisasterUtility.SetBiologicalAgeYears(pawn, age);
                 foreach (Trait trait in pawn.story.traits.allTraits.ToList()) pawn.story.traits.RemoveTrait(trait);
                 if (age >= 3f) MouseDisasterUtility.MakeRatEggPureNegative(pawn, adult ? 3 : 2);
                 GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(center, map, 8), map);

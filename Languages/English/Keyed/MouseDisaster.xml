@@ -136,10 +136,21 @@
   <MouseDisaster_Settings_CompatDisabledHint>Additional traits from supported mods are disabled.</MouseDisaster_Settings_CompatDisabledHint>
   <MouseDisaster_Settings_Section_PawnHistory>Character histories</MouseDisaster_Settings_Section_PawnHistory>
   <MouseDisaster_Settings_EnablePawnHistories>Enable character histories for event-generated Ratkin</MouseDisaster_Settings_EnablePawnHistories>
-  <MouseDisaster_Settings_EnablePawnHistories_Tooltip>When enabled, eligible event-generated Ratkin may receive one of the selected histories from pawn_history.md.cache. Disabled by default.</MouseDisaster_Settings_EnablePawnHistories_Tooltip>
+  <MouseDisaster_Settings_EnablePawnHistories_Tooltip>When enabled, eligible event-generated Ratkin may receive one of the selected histories. Enabled by default.</MouseDisaster_Settings_EnablePawnHistories_Tooltip>
   <MouseDisaster_Settings_PawnHistory_EnableAll>Enable all histories</MouseDisaster_Settings_PawnHistory_EnableAll>
   <MouseDisaster_Settings_PawnHistory_DisableAll>Disable all histories</MouseDisaster_Settings_PawnHistory_DisableAll>
   <MouseDisaster_Settings_PawnHistory_SelectionHint>Select the histories that may be assigned. The master switch above must also be enabled.</MouseDisaster_Settings_PawnHistory_SelectionHint>
+  <MouseDisaster_Settings_PawnHistory_Age>Age: {0}</MouseDisaster_Settings_PawnHistory_Age>
+  <MouseDisaster_Settings_PawnHistory_Event>Event: {0}</MouseDisaster_Settings_PawnHistory_Event>
+  <MouseDisaster_Settings_PawnHistory_Skills>Skills: {0}</MouseDisaster_Settings_PawnHistory_Skills>
+  <MouseDisaster_Settings_PawnHistory_Passions>Passions: {0}</MouseDisaster_Settings_PawnHistory_Passions>
+  <MouseDisaster_Settings_PawnHistory_Major>major {0}</MouseDisaster_Settings_PawnHistory_Major>
+  <MouseDisaster_Settings_PawnHistory_AnyPassion>at least one passion ({0})</MouseDisaster_Settings_PawnHistory_AnyPassion>
+  <MouseDisaster_Settings_PawnHistory_NoWeapons>No weapons</MouseDisaster_Settings_PawnHistory_NoWeapons>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Plague>plague</MouseDisaster_Settings_PawnHistory_EventCategory_Plague>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Theft>theft</MouseDisaster_Settings_PawnHistory_EventCategory_Theft>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>conflict</MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Siege>siege</MouseDisaster_Settings_PawnHistory_EventCategory_Siege>
   <MouseDisaster_Settings_ResetDefaults>Reset to defaults</MouseDisaster_Settings_ResetDefaults>
   <MouseDisaster_Settings_ImplNote>Choose how Ratkin arrive, behave and become part of your colony's story.</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>Tummy's rumbling... even dusty crumbs count.</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>

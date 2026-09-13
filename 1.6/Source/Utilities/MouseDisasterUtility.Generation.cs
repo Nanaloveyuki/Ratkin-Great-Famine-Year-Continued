@@ -14,7 +14,13 @@ namespace MouseDisaster
     public static partial class MouseDisasterUtility
     {
 
-        private static Pawn GenerateRatkinPawn(PawnKindDef kindDef, Faction formerFaction, DevelopmentalStage stage, bool allowViolenceDisabledTraits = false, Gender? fixedGender = null)
+        private static Pawn GenerateRatkinPawn(
+            PawnKindDef kindDef,
+            Faction formerFaction,
+            DevelopmentalStage stage,
+            bool allowViolenceDisabledTraits = false,
+            Gender? fixedGender = null,
+            float? fixedAgeYears = null)
         {
             if (kindDef == null)
             {
@@ -50,7 +56,17 @@ namespace MouseDisaster
 
             EnsureRatkinIdentity(pawn, generationKindDef, stage);
             EnsureMouseDisasterBackstories(pawn, stage);
-            NormalizeMouseEggAge(pawn, stage);
+            bool hasFixedAge = fixedAgeYears.HasValue &&
+                               !float.IsNaN(fixedAgeYears.Value) &&
+                               !float.IsInfinity(fixedAgeYears.Value);
+            if (hasFixedAge)
+            {
+                SetBiologicalAgeYears(pawn, fixedAgeYears.Value);
+            }
+            else
+            {
+                NormalizeMouseEggAge(pawn, stage);
+            }
             EnsureRatEggMobility(pawn);
             EnsureStageInventoryClear(pawn, stage);
             StripRatEggEquipmentIfNeeded(pawn, stage);
@@ -60,12 +76,12 @@ namespace MouseDisaster
             NormalizeGeneratedTraits(pawn, stage);
             AssignDisasterApparel(pawn, stage);
 
-            if (stage.Adult() && (pawn.ageTracker.AgeBiologicalYearsFloat < RatkinAdultMinAgeYears || pawn.ageTracker.AgeBiologicalYearsFloat > RatkinAdultMaxAgeYears))
+            if (!hasFixedAge && stage.Adult() && (pawn.ageTracker.AgeBiologicalYearsFloat < RatkinAdultMinAgeYears || pawn.ageTracker.AgeBiologicalYearsFloat > RatkinAdultMaxAgeYears))
             {
                 SetBiologicalAgeYears(pawn, Rand.Range(RatkinAdultMinAgeYears, RatkinAdultMaxAgeYears));
             }
 
-            if (stage == DevelopmentalStage.Child && (pawn.ageTracker.AgeBiologicalYearsFloat < RatkinYoungChildMinAgeYears || pawn.ageTracker.AgeBiologicalYearsFloat > RatkinYoungChildMaxAgeYears))
+            if (!hasFixedAge && stage == DevelopmentalStage.Child && (pawn.ageTracker.AgeBiologicalYearsFloat < RatkinYoungChildMinAgeYears || pawn.ageTracker.AgeBiologicalYearsFloat > RatkinYoungChildMaxAgeYears))
             {
                 SetBiologicalAgeYears(pawn, Rand.Range(RatkinYoungChildMinAgeYears, RatkinYoungChildMaxAgeYears));
             }
@@ -249,12 +265,19 @@ namespace MouseDisaster
 
         public static Pawn GenerateFactionRatkinPawn(PawnKindDef kindDef, Faction faction, DevelopmentalStage stage, float foodPercentage = 0.35f, bool allowViolenceDisabledTraits = false)
         {
-            return GenerateFactionRatkinPawn(kindDef, faction, stage, foodPercentage, allowViolenceDisabledTraits, null);
+            return GenerateFactionRatkinPawn(kindDef, faction, stage, foodPercentage, allowViolenceDisabledTraits, null, null);
         }
 
-        public static Pawn GenerateFactionRatkinPawn(PawnKindDef kindDef, Faction faction, DevelopmentalStage stage, float foodPercentage, bool allowViolenceDisabledTraits, Gender? fixedGender)
+        public static Pawn GenerateFactionRatkinPawn(
+            PawnKindDef kindDef,
+            Faction faction,
+            DevelopmentalStage stage,
+            float foodPercentage,
+            bool allowViolenceDisabledTraits,
+            Gender? fixedGender = null,
+            float? fixedAgeYears = null)
         {
-            Pawn pawn = GenerateRatkinPawn(kindDef, faction, stage, allowViolenceDisabledTraits, fixedGender);
+            Pawn pawn = GenerateRatkinPawn(kindDef, faction, stage, allowViolenceDisabledTraits, fixedGender, fixedAgeYears);
             if (pawn == null)
             {
                 return null;

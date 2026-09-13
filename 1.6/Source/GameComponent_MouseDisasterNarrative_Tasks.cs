@@ -108,8 +108,12 @@ namespace MouseDisaster
         {
             if (!MouseDisasterUtility.TryFindFormerFaction(out Faction faction) || faction.HostileTo(Faction.OfPlayer) ||
                 !MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 cell)) return;
-            Pawn pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
-                faction, DevelopmentalStage.Adult, 0.7f);
+            Pawn pawn;
+            using (MouseDisasterPawnHistoryCatalog.PushContext(null, map))
+            {
+                pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,
+                    faction, DevelopmentalStage.Adult, 0.7f);
+            }
             if (pawn == null) return;
             GenSpawn.Spawn(pawn, cell, map);
             envoy = pawn;

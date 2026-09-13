@@ -83,16 +83,49 @@ namespace MouseDisaster
         public IReadOnlyList<string[]> PassionGroups { get; }
         public MouseDisasterPawnHistoryRestriction Restrictions { get; }
 
-        public string DisplayLabel => Id + " " + Title;
+        public string DisplayLabel
+        {
+            get
+            {
+                BackstoryDef backstory = DefDatabase<BackstoryDef>.GetNamedSilentFail(BackstoryDefName);
+                string title = backstory?.TitleFor(Gender.None);
+                return Id + " " + (title.NullOrEmpty() ? Title : title);
+            }
+        }
 
         public string Tooltip
         {
             get
             {
                 List<string> lines = new List<string>();
-                if (!string.IsNullOrWhiteSpace(AgeText)) lines.Add("age: " + AgeText);
-                if (!string.IsNullOrWhiteSpace(EventText)) lines.Add("event: " + EventText);
-                if (!string.IsNullOrWhiteSpace(SpecialText)) lines.Add(SpecialText);
+                if (!string.IsNullOrWhiteSpace(AgeText))
+                {
+                    lines.Add("MouseDisaster_Settings_PawnHistory_Age".Translate(AgeText).ToString());
+                }
+
+                string eventConstraint = FormatEventConstraint();
+                if (!eventConstraint.NullOrEmpty())
+                {
+                    lines.Add("MouseDisaster_Settings_PawnHistory_Event".Translate(eventConstraint).ToString());
+                }
+
+                if (SkillRanges.Count > 0)
+                {
+                    lines.Add("MouseDisaster_Settings_PawnHistory_Skills".Translate(
+                        string.Join(", ", SkillRanges.Select(FormatSkillRange).ToArray())).ToString());
+                }
+
+                string passionConstraint = FormatPassionConstraint();
+                if (!passionConstraint.NullOrEmpty())
+                {
+                    lines.Add("MouseDisaster_Settings_PawnHistory_Passions".Translate(passionConstraint).ToString());
+                }
+
+                if ((Restrictions & MouseDisasterPawnHistoryRestriction.NoWeapons) != 0)
+                {
+                    lines.Add("MouseDisaster_Settings_PawnHistory_NoWeapons".Translate().ToString());
+                }
+
                 return string.Join("\n", lines);
             }
         }
@@ -192,6 +225,72 @@ namespace MouseDisaster
                 string.Equals(link, title, StringComparison.OrdinalIgnoreCase));
         }
 
+        private string FormatEventConstraint()
+        {
+            List<string> constraints = new List<string>();
+            if (EventIds.Count > 0)
+            {
+                constraints.Add(string.Join(", ", EventIds));
+            }
+
+            if (EventCategory != MouseDisasterPawnHistoryEventCategory.None)
+            {
+                constraints.Add(("MouseDisaster_Settings_PawnHistory_EventCategory_" + EventCategory)
+                    .Translate().ToString());
+            }
+
+            return string.Join("; ", constraints);
+        }
+
+        private static string FormatSkillRange(MouseDisasterPawnHistorySkillRange range)
+        {
+            SkillDef skillDef = DefDatabase<SkillDef>.GetNamedSilentFail(range.SkillDefName);
+            string label = skillDef?.skillLabel;
+            if (label.NullOrEmpty())
+            {
+                label = range.SkillDefName;
+            }
+
+            return label + " " + range.Minimum + "-" + range.Maximum;
+        }
+
+        private string FormatPassionConstraint()
+        {
+            List<string> constraints = new List<string>();
+            foreach (MouseDisasterPawnHistoryPassionRule rule in PassionRules)
+            {
+                string label = ResolveSkillLabel(rule.SkillDefName);
+                string activation = FormatChance(rule.ActivationChance);
+                string major = rule.MajorChance > 0f
+                    ? " (" + "MouseDisaster_Settings_PawnHistory_Major".Translate(FormatChance(rule.MajorChance)).ToString() + ")"
+                    : string.Empty;
+                constraints.Add(label + " " + activation + major);
+            }
+
+            foreach (string[] group in PassionGroups)
+            {
+                string labels = string.Join(" / ", (group ?? new string[0]).Select(ResolveSkillLabel).ToArray());
+                if (!labels.NullOrEmpty())
+                {
+                    constraints.Add("MouseDisaster_Settings_PawnHistory_AnyPassion".Translate(labels).ToString());
+                }
+            }
+
+            return string.Join("; ", constraints);
+        }
+
+        private static string ResolveSkillLabel(string skillDefName)
+        {
+            SkillDef skillDef = DefDatabase<SkillDef>.GetNamedSilentFail(skillDefName);
+            string label = skillDef == null ? null : skillDef.skillLabel;
+            return label.NullOrEmpty() ? skillDefName : label;
+        }
+
+        private static string FormatChance(float chance)
+        {
+            return Mathf.RoundToInt(Mathf.Clamp01(chance) * 100f) + "%";
+        }
+
         private bool MatchesEventContext(string eventId)
         {
             bool hasEventConstraint = EventIds.Count > 0 || EventCategory != MouseDisasterPawnHistoryEventCategory.None;
@@ -281,8 +380,13 @@ namespace MouseDisaster
 
         public static IDisposable PushContext(string incidentDefName, Map map)
         {
+            return PushContext(incidentDefName, map, null);
+        }
+
+        public static IDisposable PushContext(string incidentDefName, Map map, float? temperature)
+        {
             HistoryGenerationContext previous = currentContext;
-            currentContext = new HistoryGenerationContext(incidentDefName, map);
+            currentContext = new HistoryGenerationContext(incidentDefName, map, temperature);
             return new HistoryContextScope(previous);
         }
 
@@ -406,12 +510,43 @@ namespace MouseDisaster
         }
 
         private static Map CurrentMap =>
-            currentContext?.Map ?? MouseDisasterEventExecution.Current?.map ?? Find.CurrentMap;
+            currentContext?.Map ?? MouseDisasterEventExecution.Current?.map;
 
         private static float? ResolveTemperature()
         {
-            float temperature = CurrentMap?.mapTemperature?.OutdoorTemp ?? float.NaN;
-            return float.IsNaN(temperature) || float.IsInfinity(temperature) ? (float?)null : temperature;
+            if (currentContext?.Temperature.HasValue == true)
+            {
+                return NormalizeTemperature(currentContext.Temperature);
+            }
+
+            float? mapTemperature = ResolveMapTemperature(currentContext?.Map);
+            if (mapTemperature.HasValue)
+            {
+                return mapTemperature;
+            }
+
+            MouseDisasterEventExecution execution = MouseDisasterEventExecution.Current;
+            if (execution?.temperature.HasValue == true)
+            {
+                return NormalizeTemperature(execution.temperature);
+            }
+
+            return ResolveMapTemperature(execution?.map);
+        }
+
+        private static float? ResolveMapTemperature(Map map)
+        {
+            return NormalizeTemperature(map?.mapTemperature?.OutdoorTemp);
+        }
+
+        private static float? NormalizeTemperature(float? temperature)
+        {
+            if (!temperature.HasValue || float.IsNaN(temperature.Value) || float.IsInfinity(temperature.Value))
+            {
+                return null;
+            }
+
+            return temperature.Value;
         }
 
         private static void ApplySkillRanges(Pawn pawn, MouseDisasterPawnHistoryDefinition history)
@@ -446,25 +581,26 @@ namespace MouseDisaster
 
             foreach (MouseDisasterPawnHistoryPassionRule rule in history.PassionRules)
             {
-                if (!Rand.Chance(rule.ActivationChance))
-                {
-                    continue;
-                }
-
                 SkillRecord record = ResolveSkillRecord(pawn, rule.SkillDefName);
                 if (record == null || record.TotallyDisabled)
                 {
                     continue;
                 }
 
-                if (record.passion < Passion.Minor)
+                Passion passion = Passion.None;
+                if (Rand.Chance(rule.ActivationChance))
                 {
-                    record.passion = Passion.Minor;
+                    passion = Passion.Minor;
+                    if (rule.MajorChance > 0f && Rand.Chance(rule.MajorChance))
+                    {
+                        passion = Passion.Major;
+                    }
                 }
 
-                if (rule.MajorChance > 0f && Rand.Chance(rule.MajorChance))
+                if (record.passion != passion)
                 {
-                    record.passion = Passion.Major;
+                    record.passion = passion;
+                    record.Notify_SkillDisablesChanged();
                 }
             }
 
@@ -479,7 +615,9 @@ namespace MouseDisaster
                     continue;
                 }
 
-                records.RandomElement().passion = Passion.Minor;
+                SkillRecord selected = records.RandomElement();
+                selected.passion = Passion.Minor;
+                selected.Notify_SkillDisablesChanged();
             }
         }
 
@@ -501,11 +639,13 @@ namespace MouseDisaster
         {
             public readonly string IncidentDefName;
             public readonly Map Map;
+            public readonly float? Temperature;
 
-            public HistoryGenerationContext(string incidentDefName, Map map)
+            public HistoryGenerationContext(string incidentDefName, Map map, float? temperature)
             {
                 IncidentDefName = incidentDefName;
                 Map = map;
+                Temperature = temperature;
             }
         }
 

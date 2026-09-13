@@ -105,7 +105,8 @@ namespace MouseDisaster
                     groupId = GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(__instance.def) ?? 0,
                     before = parms?.target is Map map ? new HashSet<Pawn>(map.mapPawns.AllPawns) : null,
                     incidentDefName = defName,
-                    map = parms?.target as Map
+                    map = parms?.target as Map,
+                    temperature = ResolveTargetTemperature(parms?.target)
                 };
                 MouseDisasterEventExecution.Current = __state;
                 return true;
@@ -113,6 +114,31 @@ namespace MouseDisaster
 
             __result = false;
             return false;
+        }
+
+        private static float? ResolveTargetTemperature(IIncidentTarget target)
+        {
+            if (target is Map map)
+            {
+                return NormalizeTemperature(map.mapTemperature?.OutdoorTemp);
+            }
+
+            if (target is Caravan caravan && caravan.Tile.Valid)
+            {
+                return NormalizeTemperature(GenTemperature.GetTemperatureAtTile(caravan.Tile));
+            }
+
+            return null;
+        }
+
+        private static float? NormalizeTemperature(float? temperature)
+        {
+            if (!temperature.HasValue || float.IsNaN(temperature.Value) || float.IsInfinity(temperature.Value))
+            {
+                return null;
+            }
+
+            return temperature.Value;
         }
 
         public static void Postfix(IncidentWorker __instance, IncidentParms parms, bool __result, MouseDisasterEventExecution __state)

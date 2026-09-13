@@ -535,7 +535,16 @@ namespace MouseDisaster
 
         private void NormalizePawnHistorySettings()
         {
-            enabledPawnHistoryIds = (enabledPawnHistoryIds ?? new List<string>())
+            // A missing list means this save predates pawn histories. Keep the
+            // feature's default-on behavior, while preserving an explicitly
+            // saved empty list from "Disable all histories".
+            if (enabledPawnHistoryIds == null)
+            {
+                enabledPawnHistoryIds = CreateDefaultPawnHistoryIds();
+                return;
+            }
+
+            enabledPawnHistoryIds = enabledPawnHistoryIds
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Select(id => id.Trim())
                 .Distinct(System.StringComparer.OrdinalIgnoreCase)

@@ -139,10 +139,21 @@
   <MouseDisaster_Settings_CompatDisabledHint>已关闭来自联动模组的额外特质。</MouseDisaster_Settings_CompatDisabledHint>
   <MouseDisaster_Settings_Section_PawnHistory>人物经历</MouseDisaster_Settings_Section_PawnHistory>
   <MouseDisaster_Settings_EnablePawnHistories>为事件生成的鼠族启用人物经历</MouseDisaster_Settings_EnablePawnHistories>
-  <MouseDisaster_Settings_EnablePawnHistories_Tooltip>开启后，符合条件的事件生成鼠族会从已勾选的 pawn_history.md.cache 经历中获得一项人物经历。默认关闭。</MouseDisaster_Settings_EnablePawnHistories_Tooltip>
+  <MouseDisaster_Settings_EnablePawnHistories_Tooltip>开启后，符合条件的事件生成鼠族会从已勾选的经历中获得一项人物经历。默认开启。</MouseDisaster_Settings_EnablePawnHistories_Tooltip>
   <MouseDisaster_Settings_PawnHistory_EnableAll>启用全部经历</MouseDisaster_Settings_PawnHistory_EnableAll>
   <MouseDisaster_Settings_PawnHistory_DisableAll>停用全部经历</MouseDisaster_Settings_PawnHistory_DisableAll>
   <MouseDisaster_Settings_PawnHistory_SelectionHint>选择可能被分配的经历；上方总开关也必须开启。</MouseDisaster_Settings_PawnHistory_SelectionHint>
+  <MouseDisaster_Settings_PawnHistory_Age>年龄：{0}</MouseDisaster_Settings_PawnHistory_Age>
+  <MouseDisaster_Settings_PawnHistory_Event>事件：{0}</MouseDisaster_Settings_PawnHistory_Event>
+  <MouseDisaster_Settings_PawnHistory_Skills>技能：{0}</MouseDisaster_Settings_PawnHistory_Skills>
+  <MouseDisaster_Settings_PawnHistory_Passions>兴趣：{0}</MouseDisaster_Settings_PawnHistory_Passions>
+  <MouseDisaster_Settings_PawnHistory_Major>双火 {0}</MouseDisaster_Settings_PawnHistory_Major>
+  <MouseDisaster_Settings_PawnHistory_AnyPassion>至少一种兴趣（{0}）</MouseDisaster_Settings_PawnHistory_AnyPassion>
+  <MouseDisaster_Settings_PawnHistory_NoWeapons>不生成武器</MouseDisaster_Settings_PawnHistory_NoWeapons>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Plague>鼠疫</MouseDisaster_Settings_PawnHistory_EventCategory_Plague>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Theft>偷窃</MouseDisaster_Settings_PawnHistory_EventCategory_Theft>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>冲突</MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>
+  <MouseDisaster_Settings_PawnHistory_EventCategory_Siege>围攻</MouseDisaster_Settings_PawnHistory_EventCategory_Siege>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>
   <MouseDisaster_Settings_ImplNote>按你的喜好调整鼠族的到访、行为与殖民地故事。</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>窝趴趴舔灰灰，肚肚咕咕叫，脏脏也系饭饭。</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>

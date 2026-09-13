@@ -41,6 +41,7 @@ namespace MouseDisaster
         public HashSet<Pawn> before;
         public string incidentDefName;
         public Map map;
+        public float? temperature;
     }
 
     public sealed class GameComponent_MouseDisasterEventBehavior : GameComponent
