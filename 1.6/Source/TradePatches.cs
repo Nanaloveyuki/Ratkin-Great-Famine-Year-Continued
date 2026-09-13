@@ -13,19 +13,20 @@ namespace MouseDisaster
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.PreTraded))]
     public static class TradePatches
     {
-        public static void Prefix(Pawn __instance, TradeAction action)
+        public static void Prefix(Pawn __instance, TradeAction action, ref bool __state)
         {
-            if (action == TradeAction.PlayerBuys && MouseDisasterUtility.IsMouseDisasterTradePawn(__instance))
+            __state = action == TradeAction.PlayerBuys && MouseDisasterUtility.IsMouseDisasterTradePawn(__instance);
+            if (__state)
             {
                 MouseDisasterUtility.PreparePurchasedTradePawnJoinStatus(__instance);
             }
         }
 
-        public static void Postfix(Pawn __instance, TradeAction action)
+        public static void Postfix(Pawn __instance, TradeAction action, bool __state)
         {
             bool markedChattel = MouseDisasterUtility.IsMarkedTradableChattel(__instance);
             bool forcePrisoner = MouseDisasterUtility.IsForcedPrisonerOnPurchase(__instance);
-            if (action != TradeAction.PlayerBuys || (!markedChattel && !forcePrisoner) || __instance == null)
+            if (action != TradeAction.PlayerBuys || (!__state && !markedChattel && !forcePrisoner) || __instance == null)
             {
                 return;
             }
@@ -84,7 +85,7 @@ namespace MouseDisaster
     {
         public static void Postfix(Pawn p, ref TraderCaravanRole __result)
         {
-            if (MouseDisasterUtility.IsMarkedTradableChattel(p))
+            if (MouseDisasterUtility.IsMouseDisasterTradePawn(p))
             {
                 __result = TraderCaravanRole.Chattel;
             }
@@ -177,6 +178,78 @@ namespace MouseDisaster
             {
                 __result = true;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn_TraderTracker), nameof(Pawn_TraderTracker.CanTradeNow), MethodType.Getter)]
+    public static class MouseDisasterTraderCanTradeNowPatch
+    {
+        private static readonly AccessTools.FieldRef<Pawn_TraderTracker, Pawn> PawnField =
+            AccessTools.FieldRefAccess<Pawn_TraderTracker, Pawn>("pawn");
+
+        public static void Postfix(Pawn_TraderTracker __instance, ref bool __result)
+        {
+            if (__result || __instance == null || !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(__instance.traderKind?.defName))
+            {
+                return;
+            }
+
+            Pawn pawn = PawnField(__instance);
+            if (pawn == null || pawn.Dead || !pawn.Spawned || pawn.mindState == null || !pawn.mindState.wantsToTradeWithColony ||
+                !pawn.CanCasuallyInteractNow(false, false, false, false) || pawn.Downed || pawn.IsPrisoner ||
+                pawn.Faction == Faction.OfPlayer || (pawn.Faction != null && pawn.Faction.HostileTo(Faction.OfPlayer)))
+            {
+                return;
+            }
+
+            __result = __instance.Goods.Any(thing => thing is Pawn tradePawn && MouseDisasterUtility.IsMouseDisasterTradePawn(tradePawn));
+        }
+    }
+
+    [HarmonyPatch(typeof(Tradeable), nameof(Tradeable.TraderWillTrade), MethodType.Getter)]
+    public static class MouseDisasterTradeablePawnWillTradePatch
+    {
+        public static void Postfix(Tradeable __instance, ref bool __result)
+        {
+            if (__result || __instance == null || !__instance.HasAnyThing || !(TradeSession.trader?.TraderKind is TraderKindDef traderKind) ||
+                !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(traderKind.defName) ||
+                !(__instance.AnyThing is Pawn pawn) || !MouseDisasterUtility.IsMouseDisasterTradePawn(pawn))
+            {
+                return;
+            }
+
+            __result = true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Transition), nameof(Transition.CheckSignal))]
+    internal static class MouseDisasterTraderIdleDeparturePatch
+    {
+        public static bool Prefix(Transition __instance, Lord lord)
+        {
+            if (MouseDisasterMod.Settings?.allowMouseDisasterFactionToLeaveWhenIdle == true ||
+                !IsMouseDisasterTraderIdleDeparture(__instance, lord))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsMouseDisasterTraderIdleDeparture(Transition transition, Lord lord)
+        {
+            if (transition == null || lord?.LordJob is not LordJob_TradeWithColony ||
+                !(transition.target is LordToil_ExitMapAndEscortCarriers) || transition.sources == null ||
+                transition.sources.Count != 1 || transition.sources[0]?.GetType().Name != "LordToil_DefendTraderCaravan" ||
+                transition.triggers == null || transition.triggers.Count != 1 ||
+                !(transition.triggers[0] is Trigger_TicksPassed))
+            {
+                return false;
+            }
+
+            Pawn trader = TraderCaravanUtility.FindTrader(lord);
+            return trader != null && MouseDisasterUtility.IsMouseDisasterTraderAdult(trader) &&
+                   MouseDisasterUtility.IsMouseDisasterNeutralFaction(trader.Faction);
         }
     }
 

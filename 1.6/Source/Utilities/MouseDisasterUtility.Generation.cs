@@ -98,7 +98,7 @@ namespace MouseDisaster
                 kindDef,
                 faction,
                 forceGenerateNewPawn: true,
-                canGeneratePawnRelations: false,
+                canGeneratePawnRelations: MouseDisasterPawnGenerationPolicy.AllowRelationsForDirectMouseDisasterGeneration(),
                 prohibitedTraits: MouseDisasterGenerationPolicy.ProhibitedTraits,
                 allowDowned: stage == DevelopmentalStage.Baby,
                 mustBeCapableOfViolence: !allowViolenceDisabledTraits && stage != DevelopmentalStage.Baby,

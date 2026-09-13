@@ -58,7 +58,7 @@ public static class Scribe_Collections { public static void Look<T>(ref List<T> 
 public static class MouseDisasterDefOf { public static object MouseDisaster_FamilyExit = new object(); }
 public static class MouseDisasterUtility {
     public static bool IsPlayerAffiliatedRatkin(Pawn p) { return p.Faction == Faction.OfPlayer || p.IsPrisonerOfColony || p.IsSlaveOfColony; }
-    public static Job ExitMapJob(Pawn p) { return new Job { def="Exit" }; }
+    public static Job ExitMapJob(Pawn p, bool force = false) { return new Job { def="Exit" }; }
 }
 public class Harness : JobGiver_MouseDisasterFamilyExit {
     static int checks;

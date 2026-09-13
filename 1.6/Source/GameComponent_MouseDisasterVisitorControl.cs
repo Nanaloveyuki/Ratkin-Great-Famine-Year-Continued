@@ -649,7 +649,7 @@ namespace MouseDisaster
                     return;
                 }
 
-                Job exitJob = MouseDisasterUtility.ExitMapJob(pawn);
+                Job exitJob = MouseDisasterUtility.ExitMapJob(pawn, force: true);
                 if (exitJob != null)
                 {
                     pawn.jobs?.TryTakeOrderedJob(exitJob, JobTag.Misc);

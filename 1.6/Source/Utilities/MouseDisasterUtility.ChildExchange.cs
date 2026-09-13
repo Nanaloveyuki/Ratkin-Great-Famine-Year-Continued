@@ -61,7 +61,20 @@ namespace MouseDisaster
 
         public static bool IsMouseDisasterTradePawn(Pawn pawn)
         {
-            return pawn != null && (IsMarkedTradableChattel(pawn) || IsForcedPrisonerOnPurchase(pawn));
+            return pawn != null && (IsMarkedTradableChattel(pawn) || IsForcedPrisonerOnPurchase(pawn) || IsPersistedMouseDisasterTradePawn(pawn));
+        }
+
+        private static bool IsPersistedMouseDisasterTradePawn(Pawn pawn)
+        {
+            if (pawn.kindDef == null || pawn.kindDef != MouseDisasterDefOf.MouseDisaster_BeggarRatkinChild ||
+                pawn.Faction == null || pawn.guest == null || !pawn.guest.IsPrisoner || pawn.guest.HostFaction != pawn.Faction)
+            {
+                return false;
+            }
+
+            Lord lord = pawn.GetLord();
+            return lord?.LordJob is LordJob_TradeWithColony &&
+                   lord.ownedPawns != null && lord.ownedPawns.Any(IsMouseDisasterTraderAdult);
         }
 
         public static MouseDisasterTradePawnJoinMode GetRatkinYoungTradeJoinMode()

@@ -288,7 +288,7 @@ namespace MouseDisaster
 
             if (pawn.Map != null && pawn.Spawned)
             {
-                Job exitJob = ExitMapJob(pawn);
+                Job exitJob = ExitMapJob(pawn, force: true);
                 if (exitJob != null)
                 {
                     pawn.jobs?.TryTakeOrderedJob(exitJob);

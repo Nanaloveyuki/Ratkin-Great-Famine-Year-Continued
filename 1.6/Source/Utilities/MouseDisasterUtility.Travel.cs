@@ -19,8 +19,13 @@ namespace MouseDisaster
             return CellFinder.TryFindRandomEdgeCellWith(c => map.reachability.CanReachColony(c), map, CellFinder.EdgeRoadChance_Ignore, out cell);
         }
 
-        public static Job ExitMapJob(Pawn pawn)
+        public static Job ExitMapJob(Pawn pawn, bool force = false)
         {
+            if (!force && ShouldBlockIdleDeparture(pawn))
+            {
+                return null;
+            }
+
             if (IsPendingAbandonedChild(pawn)) return null;
             if (pawn?.Map == null || pawn.Dead || pawn.Downed || !pawn.Spawned)
             {
@@ -44,6 +49,14 @@ namespace MouseDisaster
             job.exitMapOnArrival = true;
             job.locomotionUrgency = LocomotionUrgency.Jog;
             return job;
+        }
+
+        public static bool ShouldBlockIdleDeparture(Pawn pawn)
+        {
+            return pawn != null &&
+                   !IsPlayerAffiliatedRatkin(pawn) &&
+                   IsMouseDisasterNeutralFaction(pawn.Faction) &&
+                   MouseDisasterMod.Settings?.allowMouseDisasterFactionToLeaveWhenIdle != true;
         }
 
         public static Job TryCreatePathRecoveryJob(Pawn pawn)

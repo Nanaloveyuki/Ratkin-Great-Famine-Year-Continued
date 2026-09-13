@@ -50,6 +50,7 @@ public static partial class MouseDisasterUtility {
  public static List<Pawn> leaving = new List<Pawn>();
  public static bool IsPlayerAffiliatedRatkin(Pawn p) { return p.Faction==Faction.OfPlayer || p.prisoner || p.slave; }
  public static bool IsPendingAbandonedChild(Pawn p) { return false; }
+ public static bool ShouldBlockIdleDeparture(Pawn p) { return false; }
  public static bool ShouldUsePassiveAutoOrderMode(Pawn p) { return false; }
  public static Job CreateGotoJob(IntVec3 c) { return JobMaker.MakeJob(JobDefOf.Goto,c); }
  public static bool TryFindFarEdgeCell(Map m, IntVec3 p, out IntVec3 c) { c=new IntVec3(); return true; }

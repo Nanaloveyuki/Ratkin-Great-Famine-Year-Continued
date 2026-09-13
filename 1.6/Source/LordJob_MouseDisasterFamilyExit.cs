@@ -54,13 +54,13 @@ namespace MouseDisaster
             if (family.carrier == null || pawn.DevelopmentalStage != DevelopmentalStage.Adult)
                 return JobMaker.MakeJob(JobDefOf.Wait, 120);
             if (pawn != family.carrier)
-                return family.carrier.Spawned ? JobMaker.MakeJob(JobDefOf.Wait, 120) : MouseDisasterUtility.ExitMapJob(pawn);
+                return family.carrier.Spawned ? JobMaker.MakeJob(JobDefOf.Wait, 120) : MouseDisasterUtility.ExitMapJob(pawn, force: true);
 
             // Collect actual children at their positions; native inventory ownership survives saving.
             var waiting = family.children.Where(p => p != null && !p.Dead && p.MapHeld == pawn.Map &&
                 !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p) && p.ParentHolder != pawn.inventory &&
                 !(p.ParentHolder is Pawn_InventoryTracker held && MouseDisasterUtility.IsPlayerAffiliatedRatkin(held.pawn))).ToList();
-            if (waiting.Count == 0) return MouseDisasterUtility.ExitMapJob(pawn);
+            if (waiting.Count == 0) return MouseDisasterUtility.ExitMapJob(pawn, force: true);
             foreach (Pawn heldChild in waiting.Where(p => p.ParentHolder is Pawn_InventoryTracker))
             {
                 var inventory = (Pawn_InventoryTracker)heldChild.ParentHolder;

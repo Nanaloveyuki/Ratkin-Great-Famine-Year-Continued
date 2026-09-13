@@ -65,6 +65,10 @@ namespace MouseDisaster
         {
             DrawSectionTitle(listing, "MouseDisaster_IrisMenus_PawnBehavior");
             listing.CheckboxLabeled("MouseDisaster_Settings_LeaveAfterFed".Translate(), ref Settings.leaveAfterFed);
+            DrawCheckbox(listing, "MouseDisaster_Settings_AllowMouseDisasterFactionToLeaveWhenIdle", ref Settings.allowMouseDisasterFactionToLeaveWhenIdle,
+                "MouseDisaster_Settings_AllowMouseDisasterFactionToLeaveWhenIdle_Tooltip");
+            DrawCheckbox(listing, "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations", ref Settings.preventUnnecessaryNeutralPawnRelations,
+                "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs", ref Settings.allowColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip");
             DrawRatkinYoungTradeSettings(listing);

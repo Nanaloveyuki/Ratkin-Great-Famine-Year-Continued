@@ -57,6 +57,8 @@ namespace MouseDisaster
         public bool wildPredatorsHuntHomeAreaRatkin = false;
         public int wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
         public bool leaveAfterFed = true;
+        public bool allowMouseDisasterFactionToLeaveWhenIdle = false;
+        public bool preventUnnecessaryNeutralPawnRelations = true;
         public bool countWithoutSuin = true;
         public bool endingsWithoutSuin = true;
         public float positiveIncidentDays = 3f;
@@ -155,6 +157,8 @@ namespace MouseDisaster
             wildPredatorsHuntHomeAreaRatkin = false;
             wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
             leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
+            allowMouseDisasterFactionToLeaveWhenIdle = false;
+            preventUnnecessaryNeutralPawnRelations = true;
             positiveIncidentDays = negativeIncidentDays = 3f;
             positiveIncidents.Clear();
             raidReplacementIncidents.Clear();
@@ -424,6 +428,8 @@ namespace MouseDisaster
             Scribe_Values.Look(ref wildPredatorsHuntHomeAreaRatkin, "wildPredatorsHuntHomeAreaRatkin", false);
             Scribe_Values.Look(ref wildPredatorSearchIntervalTicks, "wildPredatorSearchIntervalTicks", DefaultWildPredatorSearchIntervalTicks);
             Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
+            Scribe_Values.Look(ref allowMouseDisasterFactionToLeaveWhenIdle, "allowMouseDisasterFactionToLeaveWhenIdle", false);
+            Scribe_Values.Look(ref preventUnnecessaryNeutralPawnRelations, "preventUnnecessaryNeutralPawnRelations", true);
             Scribe_Values.Look(ref countWithoutSuin, "countWithoutSuin", true);
             Scribe_Values.Look(ref endingsWithoutSuin, "endingsWithoutSuin", true);
             Scribe_Values.Look(ref positiveIncidentDays, "positiveIncidentDays", 3f);

@@ -434,6 +434,14 @@ namespace MouseDisaster
                 faction.def == MouseDisasterDefOf.MouseDisaster_HostileVisitors || faction.def == MouseDisasterDefOf.MouseDisaster_FriendlyVisitors);
         }
 
+        public static bool IsMouseDisasterNeutralFaction(Faction faction)
+        {
+            return faction != null &&
+                   (IsMouseDisasterHiddenFaction(faction) ||
+                    (MouseDisasterDefOf.MouseDisaster_NeutralVisitors != null &&
+                     faction.def == MouseDisasterDefOf.MouseDisaster_NeutralVisitors));
+        }
+
         private static void NormalizeHiddenFactionDisplayName(Faction faction)
         {
             if (faction == null || MouseDisasterDefOf.MouseDisaster_HiddenFaction == null || faction.def != MouseDisasterDefOf.MouseDisaster_HiddenFaction)
