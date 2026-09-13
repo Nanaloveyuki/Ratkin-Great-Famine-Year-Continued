@@ -19,7 +19,7 @@
       <bodyPartGroups>
         <li>Waist</li>
       </bodyPartGroups>
-      <wornGraphicPath>Things/Pawn/Humanlike/Apparel/TribalA/TribalA</wornGraphicPath>
+      <!-- 这是只提供保温数值的应急层，不参与 PawnRenderTree，避免依赖身体阶段/种族的服饰贴图。 -->
       <layers>
         <li>OnSkin</li>
       </layers>

@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -7,17 +8,38 @@ namespace MouseDisaster
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.SpawnSetup))]
     public static class MouseDisasterSpawnSetupPatch
     {
-        public static void Postfix(Pawn __instance, bool respawningAfterLoad)
+        public static void Prefix(Pawn __instance, Map map, bool respawningAfterLoad)
         {
-            // SpawnSetup 会和并行渲染交错发生，这里只标记缓存失效，
-            // 避免在生成期做基因/身份/兼容状态重写，把 Verse 的共享缓存打坏。
-            MouseDisasterUtility.MarkMapPawnCacheDirty(__instance);
-            if (!respawningAfterLoad && __instance != null && __instance.Spawned &&
-                MouseDisasterUtility.IsMouseDisasterPawn(__instance))
+            // Pawn.SpawnSetup 的 Prefix 仍在 Thing.SpawnSetup 注册 DynamicDrawManager 之前，
+            // 先完成温度服饰装备，避免在 Pawn 已进入动态绘制后修改其服饰/渲染树。
+            if (respawningAfterLoad || __instance == null || __instance.Spawned || map == null)
             {
-                MouseDisasterUtility.ApplyTemperatureProtectionApparel(
-                    __instance, __instance.Map, __instance.Position);
+                return;
             }
+
+            try
+            {
+                if (!MouseDisasterUtility.IsMouseDisasterPawn(__instance))
+                {
+                    return;
+                }
+
+                MouseDisasterUtility.ApplyTemperatureProtectionApparel(
+                    __instance, map, __instance.Position);
+            }
+            catch (Exception exception)
+            {
+                // 温度服饰只是附加保护；即使第三方 Def 或地图温度异常，也不能阻断原版 SpawnSetup。
+                Log.Warning("[MouseDisaster] Pre-spawn temperature apparel hook failed for " +
+                    MouseDisasterTrace.DescribePawn(__instance) + "; " +
+                    MouseDisasterTrace.DescribeMap(map) + ": " + exception);
+            }
+        }
+
+        public static void Postfix(Pawn __instance)
+        {
+            // SpawnSetup 的 Postfix 只处理地图缓存和事件通知，不再修改服饰或渲染状态。
+            MouseDisasterUtility.MarkMapPawnCacheDirty(__instance);
             GameComponent_MouseDisasterEventBehavior.Component?.NotifySpawned(__instance);
         }
     }

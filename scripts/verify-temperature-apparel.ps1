@@ -18,12 +18,12 @@ if ($defs.Count -ne 12) {
 $baseDef = @($defsDocument.Defs.ThingDef | Where-Object { $_.Name -eq 'MouseDisasterTemperatureApparelBase' })[0]
 if ($null -eq $baseDef -or
     $baseDef.graphicData.texPath -ne 'Things/Pawn/Humanlike/Apparel/TribalA/TribalA' -or
-    $baseDef.apparel.wornGraphicPath -ne 'Things/Pawn/Humanlike/Apparel/TribalA/TribalA' -or
+    -not [string]::IsNullOrWhiteSpace([string]$baseDef.apparel.wornGraphicPath) -or
     @($baseDef.apparel.bodyPartGroups.li) -notcontains 'Waist' -or
     [string]$baseDef.apparel.developmentalStageFilter -notmatch '\bBaby\b' -or
     [string]$baseDef.apparel.developmentalStageFilter -notmatch '\bChild\b' -or
     [string]$baseDef.apparel.developmentalStageFilter -notmatch '\bAdult\b') {
-    throw 'Temperature apparel does not use the expected graphics, Waist slot, and developmental stages.'
+    throw 'Temperature apparel does not use the expected non-rendering protection layer, Waist slot, and developmental stages.'
 }
 
 $expected = @(
@@ -52,10 +52,13 @@ if ($source -notmatch 'GenTemperature\.TryGetTemperatureForCell' -or
     $source -notmatch 'MinimumGeneratedComfortTemperature' -or
     $source -notmatch 'MaximumGeneratedComfortTemperature' -or
     $source -notmatch 'HasTemperatureProtectionApparel' -or
+    $patch -notmatch 'Prefix\(\s*Pawn __instance, Map map, bool respawningAfterLoad\)' -or
     $patch -notmatch 'bool respawningAfterLoad' -or
-    $patch -notmatch '!respawningAfterLoad' -or
-    $patch -notmatch 'ApplyTemperatureProtectionApparel\(\s*__instance, __instance\.Map, __instance\.Position\)' -or
-    $patch -match 'MouseDisasterTemperatureApparelSpawnPatch') {
+    $patch -notmatch 'respawningAfterLoad\s*\|\|' -or
+    $patch -notmatch '__instance\.Spawned' -or
+    $patch -notmatch 'Pre-spawn temperature apparel hook failed' -or
+    $patch -notmatch 'ApplyTemperatureProtectionApparel\(\s*__instance, map, __instance\.Position\)' -or
+    $patch -match 'ApplyTemperatureProtectionApparel\(\s*__instance, __instance\.Map, __instance\.Position\)') {
     throw 'Temperature apparel is not connected to the spawned MouseDisaster pawn path.'
 }
 if ($settings -notmatch 'DefaultMouseDisasterMinimumEnvironmentTemperature = -35f' -or
@@ -109,4 +112,4 @@ if ($coldForMinus35 -gt 56.0 -or $heatFor70 -gt 44.0) {
     throw 'Temperature apparel does not cover the requested -35C to 70C boundary for the current Ratkin baseline.'
 }
 
-"PASS: 12 temperature apparel defs, developmental-stage support, cell-temperature spawn hookup, lifecycle preservation, and -35C/70C boundary coverage verified."
+"PASS: 12 non-rendering temperature apparel defs, developmental-stage support, guarded pre-spawn hookup, lifecycle preservation, and -35C/70C boundary coverage verified."

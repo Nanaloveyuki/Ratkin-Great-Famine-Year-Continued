@@ -55,7 +55,9 @@ namespace MouseDisaster
 
         internal static void ApplyTemperatureProtectionApparel(Pawn pawn, Map map, IntVec3 cell)
         {
-            if (pawn == null || map?.mapTemperature == null || pawn.Dead || pawn.apparel == null)
+            // 该辅助服饰只允许在 Pawn.SpawnSetup 的 Prefix 中加入。
+            // 已入图 Pawn 的 Wear 会使 PawnRenderer 缓存失效，可能与 DynamicDrawManager 的绘制迭代交错。
+            if (pawn == null || pawn.Spawned || map?.mapTemperature == null || pawn.Dead || pawn.apparel == null)
             {
                 return;
             }
@@ -218,6 +220,11 @@ namespace MouseDisaster
             }
             catch (Exception exception)
             {
+                // Wear 可能在加入 wornApparel 后、通知链完成前抛错；先清掉半成品，避免留下无效穿戴项。
+                if (apparel != null && pawn.apparel.WornApparel.Contains(apparel))
+                {
+                    pawn.apparel.Remove(apparel);
+                }
                 apparel?.Destroy();
                 Log.Warning("[MouseDisaster] Could not equip temperature protection apparel on " + pawn + ": " + exception);
                 return false;
