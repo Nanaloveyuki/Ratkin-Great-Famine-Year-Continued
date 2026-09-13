@@ -73,6 +73,7 @@ namespace MouseDisaster
         public float positiveIncidentDays = 3f;
         public float negativeIncidentDays = 3f;
         public bool allowColonistChildcareForMouseDisasterEggs = false;
+        public bool allowNonColonistChildcareForMouseDisasterEggs = false;
         public Dictionary<string, bool> positiveIncidents = new Dictionary<string, bool>();
         public Dictionary<string, bool> raidReplacementIncidents = new Dictionary<string, bool>();
 
@@ -178,6 +179,7 @@ namespace MouseDisaster
             allowColonistAutoGiveFood = false;
             ratkinYoungTradeJoinMode = MouseDisasterTradePawnJoinMode.Slave;
             allowColonistChildcareForMouseDisasterEggs = false;
+            allowNonColonistChildcareForMouseDisasterEggs = false;
             enableAgeCapAdjustment = true;
             enableWildRatkinIncidents = true;
             enableThiefIncidents = true;
@@ -490,6 +492,7 @@ namespace MouseDisaster
                 ? (MouseDisasterTradePawnJoinMode)ratkinYoungTradeJoinModeRaw
                 : MouseDisasterTradePawnJoinMode.Slave;
             Scribe_Values.Look(ref allowColonistChildcareForMouseDisasterEggs, "allowColonistChildcareForMouseDisasterEggs", false);
+            Scribe_Values.Look(ref allowNonColonistChildcareForMouseDisasterEggs, "allowNonColonistChildcareForMouseDisasterEggs", false);
             Scribe_Values.Look(ref enableAgeCapAdjustment, "enableAgeCapAdjustment", true);
             Scribe_Values.Look(ref enableWildRatkinIncidents, "enableWildRatkinIncidents", true);
             Scribe_Values.Look(ref enableThiefIncidents, "enableThiefIncidents", true);

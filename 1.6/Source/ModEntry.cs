@@ -72,6 +72,7 @@ namespace MouseDisaster
                 "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs", ref Settings.allowColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip");
+            DrawCheckbox(listing, "MouseDisaster_Settings_AllowNonColonistChildcareForMouseDisasterEggs", ref Settings.allowNonColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowNonColonistChildcareForMouseDisasterEggs_Tooltip");
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_VisitorEmployment");
             DrawEmploymentDurationSlider(listing, "MouseDisaster_Settings_TemporaryRecruitDuration",
                 ref Settings.temporaryRecruitDurationDays,

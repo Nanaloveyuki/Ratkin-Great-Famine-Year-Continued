@@ -25,15 +25,33 @@ namespace MouseDisaster
                    MouseDisasterUtility.IsMouseDisasterIncidentVisitor(baby);
         }
 
-        internal static bool IsColonistCarer(Pawn pawn)
+        internal static bool IsAllowedCarer(Pawn pawn)
         {
-            return pawn != null &&
-                   pawn.IsColonist &&
-                   pawn.Faction == Faction.OfPlayer &&
-                   MouseDisasterMod.Settings?.allowColonistChildcareForMouseDisasterEggs == true;
+            if (pawn == null || pawn.Faction != Faction.OfPlayer)
+            {
+                return false;
+            }
+
+            return pawn.IsColonist
+                ? MouseDisasterMod.Settings?.allowColonistChildcareForMouseDisasterEggs == true
+                : MouseDisasterMod.Settings?.allowNonColonistChildcareForMouseDisasterEggs == true;
         }
 
-        internal static IEnumerable<Pawn> AllowedBabies(Map map, bool includeUnspawned)
+        internal static bool AllowsCare(Pawn carer, Pawn baby)
+        {
+            return IsAllowedCarer(carer) && IsMouseDisasterBabyTarget(baby);
+        }
+
+        internal static bool IsMouseDisasterBabyTarget(Pawn baby)
+        {
+            return baby != null &&
+                   IsMouseDisasterNeutralFaction(baby.Faction) &&
+                   MouseDisasterUtility.IsMouseEggBaby(baby) &&
+                   (MouseDisasterUtility.IsMouseDisasterPawn(baby) ||
+                    MouseDisasterUtility.IsMouseDisasterIncidentVisitor(baby));
+        }
+
+        internal static IEnumerable<Pawn> AllowedBabies(Map map, Pawn carer, bool includeUnspawned)
         {
             if (map?.mapPawns == null)
             {
@@ -44,26 +62,42 @@ namespace MouseDisaster
             for (int i = 0; i < pawns.Count; i++)
             {
                 Pawn baby = pawns[i];
-                if (baby != null && !baby.Dead && AllowsColonistCare(Faction.OfPlayer, baby))
+                if (baby != null && !baby.Dead && AllowsCare(carer, baby))
                 {
                     yield return baby;
                 }
             }
         }
 
-        internal static IEnumerable<Thing> AppendAllowedBabies(IEnumerable<Thing> original, Map map)
+        internal static IEnumerable<Thing> FilterAndAppendAllowedBabies(IEnumerable<Thing> original, Pawn carer)
         {
+            HashSet<Pawn> seen = new HashSet<Pawn>();
             if (original != null)
             {
                 foreach (Thing thing in original)
                 {
+                    Pawn baby = thing as Pawn;
+                    if (baby != null &&
+                        IsMouseDisasterBabyTarget(baby) &&
+                        !AllowsCare(carer, baby))
+                    {
+                        continue;
+                    }
+
+                    if (baby != null)
+                    {
+                        seen.Add(baby);
+                    }
                     yield return thing;
                 }
             }
 
-            foreach (Pawn baby in AllowedBabies(map, includeUnspawned: false))
+            foreach (Pawn baby in AllowedBabies(carer?.Map, carer, includeUnspawned: false))
             {
-                yield return baby;
+                if (seen.Add(baby))
+                {
+                    yield return baby;
+                }
             }
         }
 
@@ -89,14 +123,38 @@ namespace MouseDisaster
         }
     }
 
+    [HarmonyPatch(typeof(ChildcareUtility), nameof(ChildcareUtility.HasBreastfeedCompatibleFactions), new[] { typeof(Pawn), typeof(Pawn) })]
+    internal static class MouseDisasterChildcarePawnFactionPatch
+    {
+        public static void Postfix(Pawn mom, Pawn baby, ref bool __result)
+        {
+            if (MouseDisasterChildcarePolicy.IsMouseDisasterBabyTarget(baby))
+            {
+                __result = MouseDisasterChildcarePolicy.AllowsCare(mom, baby);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(WorkGiver_PlayWithBaby), nameof(WorkGiver_PlayWithBaby.PotentialWorkThingsGlobal))]
     internal static class MouseDisasterPlayWithBabyTargetsPatch
     {
         public static void Postfix(Pawn pawn, ref IEnumerable<Thing> __result)
         {
-            if (MouseDisasterChildcarePolicy.IsColonistCarer(pawn))
+            __result = MouseDisasterChildcarePolicy.FilterAndAppendAllowedBabies(__result, pawn);
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkGiver_PlayWithBaby), nameof(WorkGiver_PlayWithBaby.HasJobOnThing))]
+    internal static class MouseDisasterPlayWithBabyJobPatch
+    {
+        public static void Postfix(Pawn pawn, Thing t, ref bool __result)
+        {
+            Pawn baby = t as Pawn;
+            if (__result &&
+                MouseDisasterChildcarePolicy.IsMouseDisasterBabyTarget(baby) &&
+                !MouseDisasterChildcarePolicy.AllowsCare(pawn, baby))
             {
-                __result = MouseDisasterChildcarePolicy.AppendAllowedBabies(__result, pawn.Map);
+                __result = false;
             }
         }
     }
@@ -106,9 +164,18 @@ namespace MouseDisaster
     {
         public static void Postfix(Pawn mom, AutofeedMode priorityLevel, ref Thing food, ref Pawn __result)
         {
+            if (__result != null &&
+                MouseDisasterChildcarePolicy.IsMouseDisasterBabyTarget(__result) &&
+                !MouseDisasterChildcarePolicy.AllowsCare(mom, __result))
+            {
+                food = null;
+                __result = null;
+                return;
+            }
+
             if (__result != null ||
                 priorityLevel == AutofeedMode.Never ||
-                !MouseDisasterChildcarePolicy.IsColonistCarer(mom) ||
+                !MouseDisasterChildcarePolicy.IsAllowedCarer(mom) ||
                 mom.MapHeld == null)
             {
                 return;
@@ -116,7 +183,7 @@ namespace MouseDisaster
 
             ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
             bool canBreastfeed = ChildcareUtility.CanBreastfeedNow(mom, out breastfeedFailReason);
-            foreach (Pawn baby in MouseDisasterChildcarePolicy.AllowedBabies(mom.MapHeld, includeUnspawned: true))
+            foreach (Pawn baby in MouseDisasterChildcarePolicy.AllowedBabies(mom.MapHeld, mom, includeUnspawned: true))
             {
                 if (baby.mindState == null ||
                     baby.Suspended ||
@@ -146,16 +213,24 @@ namespace MouseDisaster
     {
         public static void Postfix(Pawn mom, AutofeedMode priorityLevel, ref Pawn __result)
         {
+            if (__result != null &&
+                MouseDisasterChildcarePolicy.IsMouseDisasterBabyTarget(__result) &&
+                !MouseDisasterChildcarePolicy.AllowsCare(mom, __result))
+            {
+                __result = null;
+                return;
+            }
+
             if (__result != null ||
                 priorityLevel == AutofeedMode.Never ||
-                !MouseDisasterChildcarePolicy.IsColonistCarer(mom) ||
+                !MouseDisasterChildcarePolicy.IsAllowedCarer(mom) ||
                 mom.MapHeld == null)
             {
                 return;
             }
 
             ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
-            foreach (Pawn baby in MouseDisasterChildcarePolicy.AllowedBabies(mom.MapHeld, includeUnspawned: false))
+            foreach (Pawn baby in MouseDisasterChildcarePolicy.AllowedBabies(mom.MapHeld, mom, includeUnspawned: false))
             {
                 if (baby.mindState == null ||
                     baby.mindState.AutofeedSetting(mom) != priorityLevel ||
