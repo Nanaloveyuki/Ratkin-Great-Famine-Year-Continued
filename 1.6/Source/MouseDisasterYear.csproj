@@ -112,6 +112,7 @@
     <Compile Include="GameComponent_MouseDisasterNarrative_Alerts.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_Debug.cs" />
     <Compile Include="GameComponent_MouseDisasterNarrative_Tasks.cs" />
+    <Compile Include="GameComponent_MouseDisasterPawnCleanup.cs" />
     <Compile Include="MouseDisasterNarrativePolicy.cs" />
     <Compile Include="MouseDisasterGenerationExtension.cs" />
     <Compile Include="MouseDisasterPawnGenerationPatches.cs" />

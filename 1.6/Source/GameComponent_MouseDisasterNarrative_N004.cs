@@ -151,6 +151,7 @@ namespace MouseDisaster
 
         public override void GameComponentTick()
         {
+            TryRunDailyMouseDisasterPawnCleanup();
             if (Find.TickManager != null && Find.TickManager.TicksGame % MouseDisasterNarrativePolicy.CheckTicks == 0)
                 ProcessNarrativeJournal();
             if (Find.TickManager == null || Find.TickManager.TicksGame % N004CheckIntervalTicks != 0)

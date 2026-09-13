@@ -586,6 +586,90 @@ namespace MouseDisaster
             }
         }
 
+        internal static void CleanupExpiredPendingState()
+        {
+            CleanupLoadedPendingState();
+
+            HashSet<int> activeMapIds = new HashSet<int>(
+                Find.Maps?.Where(map => map != null && !map.Disposed).Select(map => map.uniqueID) ??
+                Enumerable.Empty<int>());
+
+            if (ActiveChildExchangeByTraderId != null)
+            {
+                List<int> staleChildExchangeIds = ActiveChildExchangeByTraderId
+                    .Where(pair => pair.Value == null || !activeMapIds.Contains(pair.Value.mapId))
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < staleChildExchangeIds.Count; i++)
+                {
+                    if (ActiveChildExchangeByTraderId.TryGetValue(staleChildExchangeIds[i], out ChildExchangeState state))
+                    {
+                        state.trader = null;
+                        state.escortPawns?.Clear();
+                        state.childPawns?.Clear();
+                        state.escortPawnIds?.Clear();
+                        state.childPawnIds?.Clear();
+                    }
+
+                    ActiveChildExchangeByTraderId.Remove(staleChildExchangeIds[i]);
+                }
+            }
+
+            if (ActiveAbandonedDeliveryByAdultId != null)
+            {
+                List<int> staleAbandonedDeliveryIds = ActiveAbandonedDeliveryByAdultId
+                    .Where(pair => pair.Value == null || !activeMapIds.Contains(pair.Value.mapId))
+                    .Select(pair => pair.Key)
+                    .ToList();
+                for (int i = 0; i < staleAbandonedDeliveryIds.Count; i++)
+                {
+                    if (ActiveAbandonedDeliveryByAdultId.TryGetValue(staleAbandonedDeliveryIds[i], out AbandonedDeliveryState state))
+                    {
+                        state.adult = null;
+                        state.childPawns?.Clear();
+                        state.childPawnIds?.Clear();
+                        state.deliveredChildIds?.Clear();
+                    }
+
+                    ActiveAbandonedDeliveryByAdultId.Remove(staleAbandonedDeliveryIds[i]);
+                }
+            }
+
+            List<int> staleCacheIds = MapPawnCaches
+                .Where(pair => !activeMapIds.Contains(pair.Key))
+                .Select(pair => pair.Key)
+                .ToList();
+            for (int i = 0; i < staleCacheIds.Count; i++)
+            {
+                if (MapPawnCaches.TryGetValue(staleCacheIds[i], out MapPawnClassificationCache cache))
+                {
+                    cache.ratkinPawns.Clear();
+                    cache.mouseDisasterPawns.Clear();
+                    cache.incidentMoodChildren.Clear();
+                    cache.doorStuckCandidates.Clear();
+                    cache.spawnedPawnById.Clear();
+                }
+
+                MapPawnCaches.Remove(staleCacheIds[i]);
+            }
+        }
+
+        internal static bool HasActivePendingPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                return false;
+            }
+
+            int pawnId = pawn.thingIDNumber;
+            return (ActiveChildExchangeByTraderId?.Values.Any(state => state != null &&
+                        (state.trader == pawn || state.trader?.thingIDNumber == pawnId ||
+                         state.escortPawnIds?.Contains(pawnId) == true || state.childPawnIds?.Contains(pawnId) == true)) == true) ||
+                   (ActiveAbandonedDeliveryByAdultId?.Values.Any(state => state != null &&
+                        (state.adult == pawn || state.adult?.thingIDNumber == pawnId ||
+                         state.childPawnIds?.Contains(pawnId) == true)) == true);
+        }
+
         internal static void RestoreAbandonedDeliveryDuties()
         {
             foreach (AbandonedDeliveryState state in ActiveAbandonedDeliveryByAdultId.Values)

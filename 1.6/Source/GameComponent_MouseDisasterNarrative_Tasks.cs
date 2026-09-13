@@ -358,6 +358,10 @@ namespace MouseDisaster
             if (returnPhase == 2 && recoveredVisitor != null && !recoveredVisitor.Dead && recoveredVisitor.Spawned)
                 StartN007Release(recoveredVisitor.Map, new[] { recoveredVisitor });
             if (recoveredVisitor != null) Find.WorldPawns.ForcefullyKeptPawns.Remove(recoveredVisitor);
+            recoveredVisitor = null;
+            returnMapId = -1;
+            returnDueTick = 0;
+            returnDeadline = 0;
             returnPhase = 3;
         }
 

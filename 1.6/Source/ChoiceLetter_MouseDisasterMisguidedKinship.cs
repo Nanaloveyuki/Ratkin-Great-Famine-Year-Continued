@@ -16,6 +16,15 @@ namespace MouseDisaster
 
         public override bool CanDismissWithRightClick => false;
 
+        public override bool CanShowInLetterStack
+        {
+            get
+            {
+                return base.CanShowInLetterStack &&
+                       (babies?.Any(pawn => pawn != null && !pawn.Dead && !pawn.Destroyed && pawn.Spawned) == true);
+            }
+        }
+
         public override IEnumerable<DiaOption> Choices
         {
             get
@@ -71,6 +80,17 @@ namespace MouseDisaster
             base.ExposeData();
             Scribe_Collections.Look(ref babies, "babies", LookMode.Reference);
             Scribe_References.Look(ref map, "map");
+        }
+
+        public override void OpenLetter()
+        {
+            if (!ArchivedOnly && !(babies?.Any(pawn => pawn != null && !pawn.Dead && !pawn.Destroyed && pawn.Spawned) == true))
+            {
+                Find.LetterStack.RemoveLetter(this);
+                return;
+            }
+
+            base.OpenLetter();
         }
     }
 }

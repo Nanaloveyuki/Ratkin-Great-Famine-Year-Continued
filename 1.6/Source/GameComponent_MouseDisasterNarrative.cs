@@ -44,7 +44,8 @@ namespace MouseDisaster
                 observedIncidentDefNames ??= new List<string>();
                 observedIncidentDefNames.RemoveAll(string.IsNullOrWhiteSpace);
                 n004Records ??= new List<MouseDisasterN004Record>();
-                n004Records.RemoveAll(record => record == null || record.mother == null);
+                n004Records.RemoveAll(record => record == null ||
+                    (record.mother == null && record.outcome != MouseDisasterN004Outcome.FamilySeparated));
                 for (int i = 0; i < n004Records.Count; i++)
                 {
                     MouseDisasterN004Record record = n004Records[i];

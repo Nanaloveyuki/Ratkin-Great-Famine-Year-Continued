@@ -97,6 +97,43 @@ namespace MouseDisaster
             }
         }
 
+        internal static void CleanupExpiredPendingState()
+        {
+            CleanupLoadedPendingState();
+            ActiveAidRequestsByTargetPawnId ??= new Dictionary<int, AidRequestState>();
+
+            HashSet<int> activeMapIds = new HashSet<int>(
+                Find.Maps?.Where(map => map != null && !map.Disposed).Select(map => map.uniqueID) ??
+                Enumerable.Empty<int>());
+            List<int> staleTargetIds = ActiveAidRequestsByTargetPawnId
+                .Where(pair => pair.Value == null || !activeMapIds.Contains(pair.Value.mapId))
+                .Select(pair => pair.Key)
+                .ToList();
+            for (int i = 0; i < staleTargetIds.Count; i++)
+            {
+                if (ActiveAidRequestsByTargetPawnId.TryGetValue(staleTargetIds[i], out AidRequestState state))
+                {
+                    state.targetPawn = null;
+                    state.trackedPawns?.Clear();
+                    state.pawnIds?.Clear();
+                }
+
+                ActiveAidRequestsByTargetPawnId.Remove(staleTargetIds[i]);
+            }
+        }
+
+        internal static bool HasActivePendingPawn(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                return false;
+            }
+
+            int pawnId = pawn.thingIDNumber;
+            return ActiveAidRequestsByTargetPawnId?.Values.Any(state => state != null &&
+                (state.targetPawn == pawn || state.targetPawnId == pawnId || state.pawnIds?.Contains(pawnId) == true)) == true;
+        }
+
         public static bool SupportsVisitorDelivery(MouseDisasterRequestKind kind)
         {
             return ResolveRequestedThingDef(kind) != null;

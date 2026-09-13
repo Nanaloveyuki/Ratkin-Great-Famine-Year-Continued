@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -144,6 +145,13 @@ namespace MouseDisaster
             return pawn != null && !pawn.Dead && !pawn.Destroyed && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) && byPawn.TryGetValue(pawn, out group);
         }
 
+        internal bool HasPawnReference(Pawn pawn)
+        {
+            return pawn != null &&
+                   (pawn.Spawned || pawn.MapHeld != null || pawn.IsCaravanMember()) &&
+                   (byPawn.ContainsKey(pawn) || pendingSpawn.Contains(pawn));
+        }
+
         public static MouseDisasterPawnBehavior Profile(Pawn pawn)
         {
             var component = Component;
@@ -283,7 +291,9 @@ namespace MouseDisaster
                 for (int j = group.pawns.Count - 1; j >= 0; j--)
                 {
                     Pawn pawn = group.pawns[j];
-                    if (pawn != null && !pawn.Destroyed && !pawn.Dead && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn)) continue;
+                    if (pawn != null && !pawn.Destroyed && !pawn.Dead &&
+                        !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) &&
+                        (pawn.Spawned || pawn.MapHeld != null || pawn.IsCaravanMember())) continue;
                     if (pawn != null) { byPawn.Remove(pawn); profiles.Remove(pawn); }
                     group.pawns.RemoveAt(j);
                 }

@@ -64,6 +64,13 @@ namespace MouseDisaster
             }
         }
 
+        public override void MapRemoved()
+        {
+            MouseDisasterUtility.CleanupExpiredPendingState();
+            MouseDisasterPhase2Utility.CleanupExpiredPendingState();
+            base.MapRemoved();
+        }
+
         private bool ShouldRun(int intervalTicks)
         {
             if (intervalTicks <= 1 || Find.TickManager == null)

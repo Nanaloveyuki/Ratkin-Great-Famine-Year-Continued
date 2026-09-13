@@ -53,6 +53,11 @@ namespace MouseDisaster
             manualRemovalPawns.Remove(pawn);
         }
 
+        internal void CleanupExpiredMarkers()
+        {
+            manualRemovalPawns?.RemoveAll(pawn => pawn == null || pawn.Dead || pawn.Destroyed);
+        }
+
         public void BeginInternalGeneRemoval(Pawn pawn)
         {
             if (pawn == null)
