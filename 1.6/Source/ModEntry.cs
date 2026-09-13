@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -71,6 +72,17 @@ namespace MouseDisaster
                 "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs", ref Settings.allowColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip");
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_VisitorEmployment");
+            DrawEmploymentDurationSlider(listing, "MouseDisaster_Settings_TemporaryRecruitDuration",
+                ref Settings.temporaryRecruitDurationDays,
+                MouseDisasterSettings.MinTemporaryRecruitDurationDays,
+                MouseDisasterSettings.MaxTemporaryRecruitDurationDays,
+                "MouseDisaster_Settings_TemporaryRecruitDuration_Tooltip");
+            DrawEmploymentDurationSlider(listing, "MouseDisaster_Settings_HiredWorkerDuration",
+                ref Settings.hiredWorkerDurationDays,
+                MouseDisasterSettings.MinHiredWorkerDurationDays,
+                MouseDisasterSettings.MaxHiredWorkerDurationDays,
+                "MouseDisaster_Settings_HiredWorkerDuration_Tooltip");
             DrawRatkinYoungTradeSettings(listing);
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
@@ -487,6 +499,14 @@ namespace MouseDisaster
         private static void DrawDaysSlider(Listing_Standard listing, string labelKey, ref int daysValue, int min, int max)
         {
             listing.Label(labelKey.Translate(daysValue.ToString()));
+            daysValue = Mathf.RoundToInt(listing.Slider(daysValue, min, max));
+        }
+
+        private static void DrawEmploymentDurationSlider(Listing_Standard listing, string labelKey, ref int daysValue,
+            int min, int max, string tooltipKey)
+        {
+            string duration = MouseDisasterVisitorUtility.FormatDurationLabel(GenDate.DaysToTicks(daysValue));
+            listing.Label(labelKey.Translate(duration), -1f, new TipSignal(tooltipKey.Translate()));
             daysValue = Mathf.RoundToInt(listing.Slider(daysValue, min, max));
         }
 

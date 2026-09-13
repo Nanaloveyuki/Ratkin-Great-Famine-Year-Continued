@@ -21,6 +21,7 @@ namespace MouseDisaster
         public PawnKindDef originalKindDef;
         public MouseDisasterVisitorStatus status;
         public int temporaryUntilTick = -1;
+        public bool employmentTimerPaused;
         internal int slot = -1;
 
         public void ExposeData()
@@ -30,6 +31,7 @@ namespace MouseDisaster
             Scribe_Defs.Look(ref originalKindDef, "originalKindDef");
             Scribe_Values.Look(ref status, "status", MouseDisasterVisitorStatus.Visitor);
             Scribe_Values.Look(ref temporaryUntilTick, "temporaryUntilTick", -1);
+            Scribe_Values.Look(ref employmentTimerPaused, "employmentTimerPaused", false);
         }
     }
 
@@ -51,6 +53,7 @@ namespace MouseDisaster
             {
                 visitorRecords ??= new List<MouseDisasterVisitorRecord>();
                 RebuildRecordIndex();
+                NormalizeLoadedRecords();
             }
         }
 
@@ -95,6 +98,27 @@ namespace MouseDisaster
         public bool IsManagedVisitor(Pawn pawn)
         {
             return GetRecord(pawn) != null;
+        }
+
+        public void NotifyPawnIdentityChanged(Pawn pawn)
+        {
+            MouseDisasterVisitorRecord record = GetRecord(pawn);
+            if (record == null ||
+                (record.status != MouseDisasterVisitorStatus.TemporaryRecruit &&
+                 record.status != MouseDisasterVisitorStatus.HiredWorker) ||
+                !IsIdentityChangedEmployment(pawn))
+            {
+                return;
+            }
+
+            if (!record.employmentTimerPaused)
+            {
+                record.employmentTimerPaused = true;
+                record.temporaryUntilTick = -1;
+                PauseEmploymentMarkerTimer(pawn);
+            }
+
+            Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeVisitorIdentityChanged(pawn);
         }
 
         public void RemoveVisitorRecord(Pawn pawn)
@@ -187,7 +211,8 @@ namespace MouseDisaster
                 BringPawnUnderPlayerProtection(record.pawn);
                 record.status = MouseDisasterVisitorStatus.TemporaryRecruit;
                 record.temporaryUntilTick = untilTick;
-                SyncEmploymentMarkers(record.pawn, record.status);
+                record.employmentTimerPaused = false;
+                SyncEmploymentMarkers(record.pawn, record.status, GetRemainingTimerTicks(record), false);
                 recruitedCount++;
             }
 
@@ -204,8 +229,10 @@ namespace MouseDisaster
 
             BringPawnUnderPlayerProtection(pawn);
             record.status = MouseDisasterVisitorStatus.HiredWorker;
-            record.temporaryUntilTick = -1;
-            SyncEmploymentMarkers(pawn, record.status);
+            record.temporaryUntilTick = (Find.TickManager?.TicksGame ?? 0) +
+                System.Math.Max(600, MouseDisasterVisitorUtility.HiredWorkerDurationTicks);
+            record.employmentTimerPaused = false;
+            SyncEmploymentMarkers(pawn, record.status, GetRemainingTimerTicks(record), false);
             return true;
         }
 
@@ -448,11 +475,24 @@ namespace MouseDisaster
 
                 if (processTemporaryExpiry &&
                     record.status == MouseDisasterVisitorStatus.TemporaryRecruit &&
+                    !record.employmentTimerPaused &&
                     record.temporaryUntilTick > 0 &&
                     nowTick >= record.temporaryUntilTick)
                 {
                     RestoreOriginalIdentityAndForceLeave(record);
-                    Messages.Message("MouseDisaster_VisitorControl_TemporaryExpired".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent, historical: false);
+                    Messages.Message("MouseDisaster_VisitorControl_EmploymentExpired".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent, historical: false);
+                    RemoveRecordAt(i);
+                    continue;
+                }
+
+                if (processTemporaryExpiry &&
+                    record.status == MouseDisasterVisitorStatus.HiredWorker &&
+                    !record.employmentTimerPaused &&
+                    record.temporaryUntilTick > 0 &&
+                    nowTick >= record.temporaryUntilTick)
+                {
+                    RestoreOriginalIdentityAndForceLeave(record);
+                    Messages.Message("MouseDisaster_VisitorControl_EmploymentExpired".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent, historical: false);
                     RemoveRecordAt(i);
                     continue;
                 }
@@ -495,6 +535,45 @@ namespace MouseDisaster
                 if (record == null) continue;
                 record.slot = i;
                 if (record.pawn != null) recordsByPawn[record.pawn] = record;
+            }
+        }
+
+        private void NormalizeLoadedRecords()
+        {
+            int nowTick = Find.TickManager?.TicksGame ?? 0;
+            for (int i = visitorRecords.Count - 1; i >= 0; i--)
+            {
+                MouseDisasterVisitorRecord record = visitorRecords[i];
+                if (record?.pawn == null || record.pawn.Dead)
+                {
+                    RemoveRecordAt(i);
+                    continue;
+                }
+
+                if (record.status != MouseDisasterVisitorStatus.TemporaryRecruit &&
+                    record.status != MouseDisasterVisitorStatus.HiredWorker)
+                {
+                    record.temporaryUntilTick = -1;
+                    record.employmentTimerPaused = false;
+                    SyncEmploymentMarkers(record.pawn, MouseDisasterVisitorStatus.Visitor);
+                    continue;
+                }
+
+                if (record.employmentTimerPaused || IsIdentityChangedEmployment(record.pawn))
+                {
+                    record.employmentTimerPaused = true;
+                    record.temporaryUntilTick = -1;
+                    SyncEmploymentMarkers(record.pawn, record.status, GenDate.TicksPerDay, true);
+                    Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeVisitorIdentityChanged(record.pawn);
+                    continue;
+                }
+
+                if (record.temporaryUntilTick <= 0)
+                {
+                    record.temporaryUntilTick = nowTick + System.Math.Max(600, DurationTicksForStatus(record.status));
+                }
+
+                SyncEmploymentMarkers(record.pawn, record.status, GetRemainingTimerTicks(record), false);
             }
         }
 
@@ -657,7 +736,8 @@ namespace MouseDisaster
             }
         }
 
-        private static void SyncEmploymentMarkers(Pawn pawn, MouseDisasterVisitorStatus status)
+        private static void SyncEmploymentMarkers(Pawn pawn, MouseDisasterVisitorStatus status,
+            int remainingTimerTicks = -1, bool timerPaused = false)
         {
             if (pawn == null)
             {
@@ -675,6 +755,75 @@ namespace MouseDisaster
             {
                 MouseDisasterUtility.AddOrRefreshHediff(pawn, MouseDisasterDefOf.MouseDisaster_HiredWorkerMark, 1f);
             }
+
+            if (status == MouseDisasterVisitorStatus.TemporaryRecruit ||
+                status == MouseDisasterVisitorStatus.HiredWorker)
+            {
+                HediffDef markerDef = status == MouseDisasterVisitorStatus.TemporaryRecruit
+                    ? MouseDisasterDefOf.MouseDisaster_TemporaryShelterMark
+                    : MouseDisasterDefOf.MouseDisaster_HiredWorkerMark;
+                Hediff marker = pawn.health?.hediffSet?.GetFirstHediffOfDef(markerDef);
+                HediffComp_MouseDisasterEmploymentTimer timer =
+                    marker?.TryGetComp<HediffComp_MouseDisasterEmploymentTimer>();
+                if (timer != null)
+                {
+                    timer.SetDuration(System.Math.Max(1, remainingTimerTicks > 0
+                        ? remainingTimerTicks
+                        : GenDate.TicksPerDay));
+                    timer.disabled = timerPaused;
+                }
+            }
+        }
+
+        private static void PauseEmploymentMarkerTimer(Pawn pawn)
+        {
+            if (pawn?.health?.hediffSet == null)
+            {
+                return;
+            }
+
+            HediffComp_MouseDisasterEmploymentTimer timer = pawn.health.hediffSet
+                .GetFirstHediffOfDef(MouseDisasterDefOf.MouseDisaster_TemporaryShelterMark)?
+                .TryGetComp<HediffComp_MouseDisasterEmploymentTimer>();
+            timer ??= pawn.health.hediffSet
+                .GetFirstHediffOfDef(MouseDisasterDefOf.MouseDisaster_HiredWorkerMark)?
+                .TryGetComp<HediffComp_MouseDisasterEmploymentTimer>();
+            if (timer == null)
+            {
+                return;
+            }
+
+            if (timer.ticksToDisappear <= 0)
+            {
+                timer.SetDuration(1);
+            }
+
+            timer.disabled = true;
+        }
+
+        private static int GetRemainingTimerTicks(MouseDisasterVisitorRecord record)
+        {
+            if (record == null || record.employmentTimerPaused)
+            {
+                return GenDate.TicksPerDay;
+            }
+
+            int nowTick = Find.TickManager?.TicksGame ?? 0;
+            return record.temporaryUntilTick > 0
+                ? System.Math.Max(1, record.temporaryUntilTick - nowTick)
+                : System.Math.Max(600, DurationTicksForStatus(record.status));
+        }
+
+        private static int DurationTicksForStatus(MouseDisasterVisitorStatus status)
+        {
+            return status == MouseDisasterVisitorStatus.HiredWorker
+                ? MouseDisasterVisitorUtility.HiredWorkerDurationTicks
+                : MouseDisasterVisitorUtility.TemporaryRecruitDurationTicks;
+        }
+
+        private static bool IsIdentityChangedEmployment(Pawn pawn)
+        {
+            return pawn != null && (pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony);
         }
 
         private static bool CanLeaveMapUnderOwnPower(Pawn pawn)
@@ -697,8 +846,50 @@ namespace MouseDisaster
 
     public static class MouseDisasterVisitorUtility
     {
-        public const int TemporaryRecruitDurationDays = 5;
-        public const int TemporaryRecruitDurationTicks = GenDate.TicksPerDay * TemporaryRecruitDurationDays;
+        public static int TemporaryRecruitDurationDays => MouseDisasterMod.Settings?.GetTemporaryRecruitDurationDays() ??
+            MouseDisasterSettings.DefaultTemporaryRecruitDurationDays;
+        public static int TemporaryRecruitDurationTicks => GenDate.DaysToTicks(TemporaryRecruitDurationDays);
+        public static int HiredWorkerDurationDays => MouseDisasterMod.Settings?.GetHiredWorkerDurationDays() ??
+            MouseDisasterSettings.DefaultHiredWorkerDurationDays;
+        public static int HiredWorkerDurationTicks => GenDate.DaysToTicks(HiredWorkerDurationDays);
+        public static string TemporaryRecruitDurationLabel =>
+            FormatDurationLabel(TemporaryRecruitDurationTicks);
+        public static string HiredWorkerDurationLabel =>
+            FormatDurationLabel(HiredWorkerDurationTicks);
+
+        public static string FormatDurationLabel(int ticks)
+        {
+            int years;
+            int quadrums;
+            int days;
+            float hours;
+            System.Math.Max(0, ticks).TicksToPeriod(out years, out quadrums, out days, out hours);
+            int totalDays = days + quadrums * GenDate.DaysPerQuadrum;
+            List<string> parts = new List<string>(2);
+            if (years > 0)
+            {
+                parts.Add(years == 1
+                    ? "Period1Year".Translate().ToString()
+                    : "PeriodYears".Translate(years).ToString());
+            }
+            if (totalDays > 0)
+            {
+                parts.Add(totalDays == 1
+                    ? "Period1Day".Translate().ToString()
+                    : "PeriodDays".Translate(totalDays).ToString());
+            }
+            if (parts.Count > 0)
+            {
+                return string.Join(", ", parts);
+            }
+
+            if (System.Math.Round(hours, 1) == 1.0)
+            {
+                return "Period1Hour".Translate().ToString();
+            }
+
+            return "PeriodHours".Translate(hours.ToString("0.#")).ToString();
+        }
 
         private static GameComponent_MouseDisasterVisitorControl Component => Current.Game?.GetComponent<GameComponent_MouseDisasterVisitorControl>();
 
@@ -710,6 +901,11 @@ namespace MouseDisaster
         public static bool IsManagedVisitor(Pawn pawn)
         {
             return Component?.IsManagedVisitor(pawn) ?? false;
+        }
+
+        public static void NotifyPawnIdentityChanged(Pawn pawn)
+        {
+            Component?.NotifyPawnIdentityChanged(pawn);
         }
 
         public static void RemoveVisitorRecord(Pawn pawn)

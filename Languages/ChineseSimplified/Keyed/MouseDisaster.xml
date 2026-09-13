@@ -3,6 +3,11 @@
   <MouseDisaster_ModName>鼠灾-大荒年</MouseDisaster_ModName>
   <MouseDisaster_Settings_Section_General>基础开关</MouseDisaster_Settings_Section_General>
   <MouseDisaster_Settings_Section_Environment>环境自适应</MouseDisaster_Settings_Section_Environment>
+  <MouseDisaster_Settings_Section_VisitorEmployment>来客雇佣</MouseDisaster_Settings_Section_VisitorEmployment>
+  <MouseDisaster_Settings_TemporaryRecruitDuration>短期工停留时间：{0}</MouseDisaster_Settings_TemporaryRecruitDuration>
+  <MouseDisaster_Settings_TemporaryRecruitDuration_Tooltip>短期工在期限结束前留在殖民地。最短 5 天，最长 1 年。</MouseDisaster_Settings_TemporaryRecruitDuration_Tooltip>
+  <MouseDisaster_Settings_HiredWorkerDuration>长期工停留时间：{0}</MouseDisaster_Settings_HiredWorkerDuration>
+  <MouseDisaster_Settings_HiredWorkerDuration_Tooltip>长期工在期限结束前留在殖民地。最短 5 天，最长 10 年。</MouseDisaster_Settings_HiredWorkerDuration_Tooltip>
   <MouseDisaster_Settings_EnableTemperatureProtectionApparel>为新生成的鼠灾鼠装备温度适应装备</MouseDisaster_Settings_EnableTemperatureProtectionApparel>
   <MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip>开启后，如果地图气温超出鼠灾鼠自身舒适范围，新生成的鼠灾鼠会获得一件只提供抗寒或抗热属性的自制装备。</MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip>
   <MouseDisaster_Settings_TemperatureMinimum>新鼠灾事件最低地图气温：{0} C</MouseDisaster_Settings_TemperatureMinimum>
@@ -201,25 +206,26 @@
   <MouseDisaster_FamineYear_JudgementInactive>今年未进入大荒年。大型自然灾害保持常规概率。</MouseDisaster_FamineYear_JudgementInactive>
   <MouseDisaster_FamineYear_JudgementCatchup>提示：你是在年初之后加载或启用系统，本次为补判定。</MouseDisaster_FamineYear_JudgementCatchup>
   <MouseDisaster_FamineYear_MajorDisasterTriggered>大荒年加剧了天灾：{0}</MouseDisaster_FamineYear_MajorDisasterTriggered>
-  <MouseDisaster_VisitorControl_TemporaryRecruit>临时招募整批（{0}天）</MouseDisaster_VisitorControl_TemporaryRecruit>
-  <MouseDisaster_VisitorControl_HireAll>雇佣整批为长工</MouseDisaster_VisitorControl_HireAll>
+  <MouseDisaster_VisitorControl_TemporaryRecruit>临时招募整批（{0}）</MouseDisaster_VisitorControl_TemporaryRecruit>
+  <MouseDisaster_VisitorControl_HireAll>雇佣整批为长工（{0}）</MouseDisaster_VisitorControl_HireAll>
   <MouseDisaster_VisitorControl_JoinAll>同意整批加入殖民地</MouseDisaster_VisitorControl_JoinAll>
   <MouseDisaster_VisitorControl_AttackAll>驱赶攻击整批</MouseDisaster_VisitorControl_AttackAll>
   <MouseDisaster_VisitorControl_SendToPrison>监狱需要你</MouseDisaster_VisitorControl_SendToPrison>
-  <MouseDisaster_VisitorControl_Hire>雇佣长工</MouseDisaster_VisitorControl_Hire>
+  <MouseDisaster_VisitorControl_Hire>雇佣长工（{0}）</MouseDisaster_VisitorControl_Hire>
   <MouseDisaster_VisitorControl_EndHire>终止雇佣</MouseDisaster_VisitorControl_EndHire>
   <MouseDisaster_VisitorControl_Join>同意加入殖民地</MouseDisaster_VisitorControl_Join>
   <MouseDisaster_VisitorControl_NoValidTarget>当前没有可操作的鼠灾访客。</MouseDisaster_VisitorControl_NoValidTarget>
-  <MouseDisaster_VisitorControl_TemporaryRecruit_Success>已临时招募 {0} 名鼠灾访客，期限 {1} 天。</MouseDisaster_VisitorControl_TemporaryRecruit_Success>
-  <MouseDisaster_VisitorControl_HireAll_Success>已雇佣 {0} 名鼠灾访客为长工。</MouseDisaster_VisitorControl_HireAll_Success>
+  <MouseDisaster_VisitorControl_TemporaryRecruit_Success>已临时招募 {0} 名鼠灾访客，期限 {1}。</MouseDisaster_VisitorControl_TemporaryRecruit_Success>
+  <MouseDisaster_VisitorControl_HireAll_Success>已雇佣 {0} 名鼠灾访客为长工，期限 {1}。</MouseDisaster_VisitorControl_HireAll_Success>
   <MouseDisaster_VisitorControl_JoinAll_Success>已同意 {0} 名鼠灾访客加入殖民地。</MouseDisaster_VisitorControl_JoinAll_Success>
   <MouseDisaster_VisitorControl_AttackAll_Success>这批鼠灾访客已被驱赶为敌对，共 {0} 名。</MouseDisaster_VisitorControl_AttackAll_Success>
   <MouseDisaster_VisitorControl_SendToPrison_Success>已将 {0} 名鼠灾访客丢进监狱区域。</MouseDisaster_VisitorControl_SendToPrison_Success>
   <MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>当前地图没有可用的边缘监狱区域。</MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>
-  <MouseDisaster_VisitorControl_Hire_Success>已雇佣 {PAWN_nameDef} 为长工。</MouseDisaster_VisitorControl_Hire_Success>
+  <MouseDisaster_VisitorControl_Hire_Success>已雇佣 {PAWN_nameDef} 为长工，期限 {1}。</MouseDisaster_VisitorControl_Hire_Success>
   <MouseDisaster_VisitorControl_EndHire_Success>已终止对 {PAWN_nameDef} 的雇佣，对方正在离开。</MouseDisaster_VisitorControl_EndHire_Success>
   <MouseDisaster_VisitorControl_Join_Success>已同意 {PAWN_nameDef} 加入殖民地。</MouseDisaster_VisitorControl_Join_Success>
   <MouseDisaster_VisitorControl_TemporaryExpired>{PAWN_nameDef} 的临时收留到期了，对方正在离开。</MouseDisaster_VisitorControl_TemporaryExpired>
+  <MouseDisaster_VisitorControl_EmploymentExpired>{PAWN_nameDef} 的雇佣期限到了，对方正在离开。</MouseDisaster_VisitorControl_EmploymentExpired>
   <MouseDisaster_VisitorControl_NotImportant>无关紧要</MouseDisaster_VisitorControl_NotImportant>
   <MouseDisaster_FoodGive>食物给予</MouseDisaster_FoodGive>
   <MouseDisaster_FoodGive_Success>已下达 {PAWN_nameDef} 向 {TARGET_nameDef} 送去 {2} 的工作。</MouseDisaster_FoodGive_Success>

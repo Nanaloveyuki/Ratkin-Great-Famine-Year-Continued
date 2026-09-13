@@ -2,6 +2,7 @@ using Verse;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 
 namespace MouseDisaster
 {
@@ -41,6 +42,12 @@ namespace MouseDisaster
         public const int MinWildPredatorSearchIntervalTicks = 60;
         public const int MaxWildPredatorSearchIntervalTicks = 1200;
         public const int DefaultWildPredatorSearchIntervalTicks = 250;
+        public const int MinTemporaryRecruitDurationDays = 5;
+        public const int DefaultTemporaryRecruitDurationDays = 5;
+        public const int MaxTemporaryRecruitDurationDays = GenDate.DaysPerYear;
+        public const int MinHiredWorkerDurationDays = 5;
+        public const int DefaultHiredWorkerDurationDays = GenDate.DaysPerYear;
+        public const int MaxHiredWorkerDurationDays = GenDate.DaysPerYear * 10;
         public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
         public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
         public const float MinMouseDisasterEnvironmentTemperature = -35f;
@@ -59,6 +66,8 @@ namespace MouseDisaster
         public bool leaveAfterFed = true;
         public bool allowMouseDisasterFactionToLeaveWhenIdle = false;
         public bool preventUnnecessaryNeutralPawnRelations = true;
+        public int temporaryRecruitDurationDays = DefaultTemporaryRecruitDurationDays;
+        public int hiredWorkerDurationDays = DefaultHiredWorkerDurationDays;
         public bool countWithoutSuin = true;
         public bool endingsWithoutSuin = true;
         public float positiveIncidentDays = 3f;
@@ -159,6 +168,8 @@ namespace MouseDisaster
             leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
             allowMouseDisasterFactionToLeaveWhenIdle = false;
             preventUnnecessaryNeutralPawnRelations = true;
+            temporaryRecruitDurationDays = DefaultTemporaryRecruitDurationDays;
+            hiredWorkerDurationDays = DefaultHiredWorkerDurationDays;
             positiveIncidentDays = negativeIncidentDays = 3f;
             positiveIncidents.Clear();
             raidReplacementIncidents.Clear();
@@ -263,6 +274,10 @@ namespace MouseDisaster
             narrativeBroadcastGoal = Mathf.Clamp(narrativeBroadcastGoal, 1, 99);
             narrativeDriveLimit = Mathf.Clamp(narrativeDriveLimit, 0, 99);
             narrativeAdultGoal = Mathf.Clamp(narrativeAdultGoal, 1, 500);
+            temporaryRecruitDurationDays = Mathf.Clamp(temporaryRecruitDurationDays,
+                MinTemporaryRecruitDurationDays, MaxTemporaryRecruitDurationDays);
+            hiredWorkerDurationDays = Mathf.Clamp(hiredWorkerDurationDays,
+                MinHiredWorkerDurationDays, MaxHiredWorkerDurationDays);
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
             ageDiseaseMultiplier = Mathf.Clamp(ageDiseaseMultiplier, MinAgeDiseaseMultiplier, MaxAgeDiseaseMultiplier);
             chaosPregnancyChancePercent = Mathf.Clamp(chaosPregnancyChancePercent, MinChaosPregnancyChancePercent, MaxChaosPregnancyChancePercent);
@@ -293,6 +308,18 @@ namespace MouseDisaster
             {
                 ratkinYoungTradeJoinMode = MouseDisasterTradePawnJoinMode.Slave;
             }
+        }
+
+        public int GetTemporaryRecruitDurationDays()
+        {
+            return Mathf.Clamp(temporaryRecruitDurationDays,
+                MinTemporaryRecruitDurationDays, MaxTemporaryRecruitDurationDays);
+        }
+
+        public int GetHiredWorkerDurationDays()
+        {
+            return Mathf.Clamp(hiredWorkerDurationDays,
+                MinHiredWorkerDurationDays, MaxHiredWorkerDurationDays);
         }
 
         public MouseDisasterTradePawnJoinMode GetRatkinYoungTradeJoinMode()
@@ -430,6 +457,8 @@ namespace MouseDisaster
             Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
             Scribe_Values.Look(ref allowMouseDisasterFactionToLeaveWhenIdle, "allowMouseDisasterFactionToLeaveWhenIdle", false);
             Scribe_Values.Look(ref preventUnnecessaryNeutralPawnRelations, "preventUnnecessaryNeutralPawnRelations", true);
+            Scribe_Values.Look(ref temporaryRecruitDurationDays, "temporaryRecruitDurationDays", DefaultTemporaryRecruitDurationDays);
+            Scribe_Values.Look(ref hiredWorkerDurationDays, "hiredWorkerDurationDays", DefaultHiredWorkerDurationDays);
             Scribe_Values.Look(ref countWithoutSuin, "countWithoutSuin", true);
             Scribe_Values.Look(ref endingsWithoutSuin, "endingsWithoutSuin", true);
             Scribe_Values.Look(ref positiveIncidentDays, "positiveIncidentDays", 3f);

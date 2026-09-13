@@ -8,7 +8,8 @@
     <initialSeverity>0.33</initialSeverity>
     <minSeverity>0.001</minSeverity>
     <maxSeverity>1</maxSeverity>
-    <tendable>true</tendable>
+    <tendable>false</tendable>
+    <everCurableByItem>false</everCurableByItem>
     <isBad>true</isBad>
     <stages>
       <li>

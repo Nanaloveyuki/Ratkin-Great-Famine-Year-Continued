@@ -94,6 +94,7 @@ namespace MouseDisaster
 
         public static void NotifyMouseDisasterPawnIdentityOrLifeStageChanged(Pawn pawn)
         {
+            MouseDisasterVisitorUtility.NotifyPawnIdentityChanged(pawn);
             NormalizeMouseDisasterPawnIdentityOrLifeStageChanged(pawn, markMapCacheDirty: true);
         }
 

@@ -3,6 +3,11 @@
   <MouseDisaster_ModName>Ratkin: Great Famine Year</MouseDisaster_ModName>
   <MouseDisaster_Settings_Section_General>Event frequency</MouseDisaster_Settings_Section_General>
   <MouseDisaster_Settings_Section_Environment>Environment adaptation</MouseDisaster_Settings_Section_Environment>
+  <MouseDisaster_Settings_Section_VisitorEmployment>Visitor employment</MouseDisaster_Settings_Section_VisitorEmployment>
+  <MouseDisaster_Settings_TemporaryRecruitDuration>Short-term stay: {0}</MouseDisaster_Settings_TemporaryRecruitDuration>
+  <MouseDisaster_Settings_TemporaryRecruitDuration_Tooltip>How long a short-term Ratkin worker remains before leaving. Minimum 5 days; maximum 1 year.</MouseDisaster_Settings_TemporaryRecruitDuration_Tooltip>
+  <MouseDisaster_Settings_HiredWorkerDuration>Long-term stay: {0}</MouseDisaster_Settings_HiredWorkerDuration>
+  <MouseDisaster_Settings_HiredWorkerDuration_Tooltip>How long a long-term Ratkin worker remains before leaving. Minimum 5 days; maximum 10 years.</MouseDisaster_Settings_HiredWorkerDuration_Tooltip>
   <MouseDisaster_Settings_EnableTemperatureProtectionApparel>Equip adaptive temperature apparel for new Ratkin</MouseDisaster_Settings_EnableTemperatureProtectionApparel>
   <MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip>When enabled, new Mouse Disaster Ratkin receive one custom apparel item when the map temperature is outside their comfortable range. The apparel only adds heat or cold insulation.</MouseDisaster_Settings_EnableTemperatureProtectionApparel_Tooltip>
   <MouseDisaster_Settings_TemperatureMinimum>Minimum map temperature for new incidents: {0} C</MouseDisaster_Settings_TemperatureMinimum>
@@ -198,25 +203,26 @@
   <MouseDisaster_FamineYear_JudgementInactive>This is not a Great Famine Year. Major natural disasters retain their usual chances.</MouseDisaster_FamineYear_JudgementInactive>
   <MouseDisaster_FamineYear_JudgementCatchup>This year's result was determined late because the game was loaded or the setting enabled after the start of the year.</MouseDisaster_FamineYear_JudgementCatchup>
   <MouseDisaster_FamineYear_MajorDisasterTriggered>The Great Famine Year brought a disaster: {0}</MouseDisaster_FamineYear_MajorDisasterTriggered>
-  <MouseDisaster_VisitorControl_TemporaryRecruit>Take in the whole group temporarily ({0} days)</MouseDisaster_VisitorControl_TemporaryRecruit>
-  <MouseDisaster_VisitorControl_HireAll>Hire the whole group</MouseDisaster_VisitorControl_HireAll>
+  <MouseDisaster_VisitorControl_TemporaryRecruit>Take in the whole group temporarily ({0})</MouseDisaster_VisitorControl_TemporaryRecruit>
+  <MouseDisaster_VisitorControl_HireAll>Hire the whole group ({0})</MouseDisaster_VisitorControl_HireAll>
   <MouseDisaster_VisitorControl_JoinAll>Let the whole group join the colony</MouseDisaster_VisitorControl_JoinAll>
   <MouseDisaster_VisitorControl_AttackAll>Drive away the whole group by force</MouseDisaster_VisitorControl_AttackAll>
   <MouseDisaster_VisitorControl_SendToPrison>Send to prison</MouseDisaster_VisitorControl_SendToPrison>
-  <MouseDisaster_VisitorControl_Hire>Hire as a worker</MouseDisaster_VisitorControl_Hire>
+  <MouseDisaster_VisitorControl_Hire>Hire as a worker ({0})</MouseDisaster_VisitorControl_Hire>
   <MouseDisaster_VisitorControl_EndHire>End employment</MouseDisaster_VisitorControl_EndHire>
   <MouseDisaster_VisitorControl_Join>Allow to join the colony</MouseDisaster_VisitorControl_Join>
   <MouseDisaster_VisitorControl_NoValidTarget>There are no eligible Ratkin visitors.</MouseDisaster_VisitorControl_NoValidTarget>
-  <MouseDisaster_VisitorControl_TemporaryRecruit_Success>Temporarily took in {0} Ratkin visitors for {1} days.</MouseDisaster_VisitorControl_TemporaryRecruit_Success>
-  <MouseDisaster_VisitorControl_HireAll_Success>Hired {0} Ratkin visitors.</MouseDisaster_VisitorControl_HireAll_Success>
+  <MouseDisaster_VisitorControl_TemporaryRecruit_Success>Temporarily took in {0} Ratkin visitors for {1}.</MouseDisaster_VisitorControl_TemporaryRecruit_Success>
+  <MouseDisaster_VisitorControl_HireAll_Success>Hired {0} Ratkin visitors for {1}.</MouseDisaster_VisitorControl_HireAll_Success>
   <MouseDisaster_VisitorControl_JoinAll_Success>Allowed {0} Ratkin visitors to join the colony.</MouseDisaster_VisitorControl_JoinAll_Success>
   <MouseDisaster_VisitorControl_AttackAll_Success>Drove {0} Ratkin visitors into hostility.</MouseDisaster_VisitorControl_AttackAll_Success>
   <MouseDisaster_VisitorControl_SendToPrison_Success>Sent {0} Ratkin visitors to the prison area.</MouseDisaster_VisitorControl_SendToPrison_Success>
   <MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>There is no available prison area on this map.</MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>
-  <MouseDisaster_VisitorControl_Hire_Success>Hired {PAWN_nameDef}.</MouseDisaster_VisitorControl_Hire_Success>
+  <MouseDisaster_VisitorControl_Hire_Success>Hired {PAWN_nameDef} for {1}.</MouseDisaster_VisitorControl_Hire_Success>
   <MouseDisaster_VisitorControl_EndHire_Success>Ended {PAWN_nameDef}'s employment. They are leaving.</MouseDisaster_VisitorControl_EndHire_Success>
   <MouseDisaster_VisitorControl_Join_Success>Allowed {PAWN_nameDef} to join the colony.</MouseDisaster_VisitorControl_Join_Success>
   <MouseDisaster_VisitorControl_TemporaryExpired>{PAWN_nameDef}'s temporary stay has ended. They are leaving.</MouseDisaster_VisitorControl_TemporaryExpired>
+  <MouseDisaster_VisitorControl_EmploymentExpired>{PAWN_nameDef}'s employment term has ended. They are leaving.</MouseDisaster_VisitorControl_EmploymentExpired>
   <MouseDisaster_VisitorControl_NotImportant>Not important</MouseDisaster_VisitorControl_NotImportant>
   <MouseDisaster_FoodGive>Give food</MouseDisaster_FoodGive>
   <MouseDisaster_FoodGive_Success>Assigned {PAWN_nameDef} to bring {2} to {TARGET_nameDef}.</MouseDisaster_FoodGive_Success>

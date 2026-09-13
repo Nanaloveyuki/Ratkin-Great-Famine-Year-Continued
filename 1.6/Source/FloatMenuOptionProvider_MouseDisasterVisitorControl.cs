@@ -24,11 +24,11 @@ namespace MouseDisaster
 
             if (MouseDisasterVisitorUtility.CanHire(clickedPawn))
             {
-                yield return new FloatMenuOption("MouseDisaster_VisitorControl_Hire".Translate(), delegate
+                yield return new FloatMenuOption("MouseDisaster_VisitorControl_Hire".Translate(MouseDisasterVisitorUtility.HiredWorkerDurationLabel), delegate
                 {
                     if (MouseDisasterVisitorUtility.TryHire(clickedPawn))
                     {
-                        Messages.Message("MouseDisaster_VisitorControl_Hire_Success".Translate(clickedPawn.Named("PAWN")), clickedPawn, MessageTypeDefOf.PositiveEvent, historical: false);
+                        Messages.Message("MouseDisaster_VisitorControl_Hire_Success".Translate(clickedPawn.Named("PAWN"), MouseDisasterVisitorUtility.HiredWorkerDurationLabel), clickedPawn, MessageTypeDefOf.PositiveEvent, historical: false);
                     }
                     else
                     {

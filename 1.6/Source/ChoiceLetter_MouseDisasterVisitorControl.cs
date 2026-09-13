@@ -38,7 +38,7 @@ namespace MouseDisaster
                 }
 
                 List<Pawn> recruitableVisitors = MouseDisasterVisitorUtility.GetRecruitableVisitors(validVisitors);
-                DiaOption temporaryRecruit = new DiaOption("MouseDisaster_VisitorControl_TemporaryRecruit".Translate(MouseDisasterVisitorUtility.TemporaryRecruitDurationDays.ToString()));
+                DiaOption temporaryRecruit = new DiaOption("MouseDisaster_VisitorControl_TemporaryRecruit".Translate(MouseDisasterVisitorUtility.TemporaryRecruitDurationLabel));
                 if (recruitableVisitors.Count == 0)
                 {
                     temporaryRecruit.Disable(null);
@@ -49,7 +49,7 @@ namespace MouseDisaster
                     {
                         if (MouseDisasterVisitorUtility.TryTemporaryRecruitAll(recruitableVisitors, out int recruitedCount))
                         {
-                            Messages.Message("MouseDisaster_VisitorControl_TemporaryRecruit_Success".Translate(recruitedCount, MouseDisasterVisitorUtility.TemporaryRecruitDurationDays), recruitableVisitors, MessageTypeDefOf.PositiveEvent, historical: false);
+                            Messages.Message("MouseDisaster_VisitorControl_TemporaryRecruit_Success".Translate(recruitedCount, MouseDisasterVisitorUtility.TemporaryRecruitDurationLabel), recruitableVisitors, MessageTypeDefOf.PositiveEvent, historical: false);
                         }
                         else
                         {
@@ -61,7 +61,7 @@ namespace MouseDisaster
                     temporaryRecruit.resolveTree = true;
                 }
 
-                DiaOption hireAll = new DiaOption("MouseDisaster_VisitorControl_HireAll".Translate());
+                DiaOption hireAll = new DiaOption("MouseDisaster_VisitorControl_HireAll".Translate(MouseDisasterVisitorUtility.HiredWorkerDurationLabel));
                 if (!MouseDisasterVisitorChoicePolicy.ShouldOfferBatchHire(incidentDefName, recruitableVisitors.Count))
                 {
                     hireAll.Disable(null);
@@ -72,7 +72,7 @@ namespace MouseDisaster
                     {
                         if (MouseDisasterVisitorUtility.TryHireAll(recruitableVisitors, out int hiredCount))
                         {
-                            Messages.Message("MouseDisaster_VisitorControl_HireAll_Success".Translate(hiredCount), recruitableVisitors, MessageTypeDefOf.PositiveEvent, historical: false);
+                            Messages.Message("MouseDisaster_VisitorControl_HireAll_Success".Translate(hiredCount, MouseDisasterVisitorUtility.HiredWorkerDurationLabel), recruitableVisitors, MessageTypeDefOf.PositiveEvent, historical: false);
                         }
                         else
                         {

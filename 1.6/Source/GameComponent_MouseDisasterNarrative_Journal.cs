@@ -14,12 +14,14 @@ namespace MouseDisaster
         public int careTicks;
         public int missingSince = -1;
         public NarrativePawnEnd end;
+        public bool identityChanged;
         public void ExposeData()
         {
             Scribe_References.Look(ref pawn, "pawn");
             Scribe_Values.Look(ref careTicks, "careTicks");
             Scribe_Values.Look(ref missingSince, "missingSince", -1);
             Scribe_Values.Look(ref end, "end");
+            Scribe_Values.Look(ref identityChanged, "identityChanged", false);
         }
     }
 
@@ -67,7 +69,7 @@ namespace MouseDisaster
         public int completed = -1;
         public bool delivered, driven, counted;
         public int deliveredTick = -1, drivenTick = -1;
-        public int left, settled, dead, detained, missing;
+        public int left, settled, dead, detained, missing, identityChanged;
 
         public static NarrativeVisitSummary FromVisit(NarrativeVisit visit, int completedTick)
         {
@@ -87,6 +89,7 @@ namespace MouseDisaster
                     case NarrativePawnEnd.Detained: summary.detained++; break;
                     default: summary.missing++; break;
                 }
+                if (person.identityChanged) summary.identityChanged++;
             }
             return summary;
         }
@@ -107,6 +110,7 @@ namespace MouseDisaster
             Scribe_Values.Look(ref dead, "dead");
             Scribe_Values.Look(ref detained, "detained");
             Scribe_Values.Look(ref missing, "missing");
+            Scribe_Values.Look(ref identityChanged, "identityChanged");
         }
     }
 
@@ -214,6 +218,22 @@ namespace MouseDisaster
             }
         }
 
+        public void NotifyNarrativeVisitorIdentityChanged(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                return;
+            }
+
+            foreach (var visit in narrativeVisits.Where(v => !v.resolved))
+            {
+                foreach (var person in visit.people.Where(p => p.pawn == pawn))
+                {
+                    person.identityChanged = true;
+                }
+            }
+        }
+
         public void RecordCaravanNarrative(bool paid)
         {
             string key = paid ? "S12Paid" : "S12Fight";
@@ -316,7 +336,9 @@ namespace MouseDisaster
                 var summary = NarrativeVisitSummary.FromVisit(visit, CurrentNarrativeTick);
                 int left = summary.left, settled = summary.settled, dead = summary.dead,
                     detained = summary.detained, missing = summary.missing;
-                if (CountsNarrativeState && MouseDisasterNarrativePolicy.IsAidComplete(visit.delivered && visit.scene != "S07", visit.driven, visit.people.Count, left, settled))
+                if (CountsNarrativeState && MouseDisasterNarrativePolicy.IsAidComplete(
+                    visit.delivered && visit.scene != "S07", visit.driven, visit.people.Count, left, settled,
+                    summary.identityChanged))
                 {
                     visit.counted = true;
                     summary.counted = true;

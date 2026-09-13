@@ -74,6 +74,7 @@ public class Pawn:Thing {
     public bool WillEat(Thing food,Pawn getter,bool careIfNotAcceptableForTitle,bool allowVenerated)=>willEat;
     public bool CanReserve(Thing food,int maxPawns,int count)=>canReserve;
     public bool CanReach(Thing food,PathEndMode mode,Danger danger)=>canReach;
+    public bool IsCaravanMember()=>false;
     public void PostApplyDamage(DamageInfo info,float total) {}
 }
 public class Faction { public static Faction OfPlayer=new Faction(); }

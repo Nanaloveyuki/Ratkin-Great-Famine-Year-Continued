@@ -125,6 +125,7 @@
     <Compile Include="Building_MouseDisasterNarrative.cs" />
     <Compile Include="GameComponent_MouseDisasterPendingState.cs" />
     <Compile Include="MouseDisasterGuanyinTu.cs" />
+    <Compile Include="HediffComp_MouseDisasterEmploymentTimer.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />
     <Compile Include="GameComponent_MouseDisasterPawnGeneration.cs" />
     <Compile Include="GameComponent_MouseDisasterVisitorControl.cs" />

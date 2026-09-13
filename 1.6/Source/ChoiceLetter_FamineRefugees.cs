@@ -56,7 +56,7 @@ namespace MouseDisaster
                 accept.resolveTree = true;
 
                 List<Pawn> recruitableRefugees = MouseDisasterVisitorUtility.GetRecruitableVisitors(validRefugees);
-                DiaOption temporaryRecruit = new DiaOption("MouseDisaster_VisitorControl_TemporaryRecruit".Translate(MouseDisasterVisitorUtility.TemporaryRecruitDurationDays.ToString()));
+                DiaOption temporaryRecruit = new DiaOption("MouseDisaster_VisitorControl_TemporaryRecruit".Translate(MouseDisasterVisitorUtility.TemporaryRecruitDurationLabel));
                 if (recruitableRefugees.Count == 0)
                 {
                     temporaryRecruit.Disable(null);
@@ -67,7 +67,7 @@ namespace MouseDisaster
                     {
                         if (MouseDisasterVisitorUtility.TryTemporaryRecruitAll(recruitableRefugees, out int recruitedCount))
                         {
-                            Messages.Message("MouseDisaster_VisitorControl_TemporaryRecruit_Success".Translate(recruitedCount, MouseDisasterVisitorUtility.TemporaryRecruitDurationDays), recruitableRefugees, MessageTypeDefOf.PositiveEvent, historical: false);
+                            Messages.Message("MouseDisaster_VisitorControl_TemporaryRecruit_Success".Translate(recruitedCount, MouseDisasterVisitorUtility.TemporaryRecruitDurationLabel), recruitableRefugees, MessageTypeDefOf.PositiveEvent, historical: false);
                         }
                         else
                         {

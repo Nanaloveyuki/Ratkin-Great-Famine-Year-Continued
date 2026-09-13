@@ -59,7 +59,23 @@ namespace MouseDisaster
 
         public static bool IsAidComplete(bool delivered, bool driven, int count, int left, int settled)
         {
-            return count > 0 && !driven && left + settled == count && (delivered || settled == count);
+            return IsAidComplete(delivered, driven, count, left, settled, 0);
+        }
+
+        public static bool IsAidComplete(bool delivered, bool driven, int count, int left, int settled,
+            int identityChanged)
+        {
+            int normalizedIdentityChanged = Math.Max(0, Math.Min(count, identityChanged));
+            int completedWithoutIdentityChange = left + settled;
+            return count > 0 && !driven &&
+                !IsIdentityChangeFailure(count, normalizedIdentityChanged) &&
+                completedWithoutIdentityChange + normalizedIdentityChanged == count &&
+                (delivered || settled + normalizedIdentityChanged == count);
+        }
+
+        public static bool IsIdentityChangeFailure(int totalPawnCount, int identityChangedCount)
+        {
+            return totalPawnCount > 0 && identityChangedCount >= totalPawnCount;
         }
 
         public static string Ending(int trust, bool narrator, int aid, int broadcasts, int driven,
