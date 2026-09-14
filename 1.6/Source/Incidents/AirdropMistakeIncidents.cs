@@ -23,29 +23,14 @@ namespace MouseDisaster
         protected override bool TryExecuteWorker(IncidentParms parms)
         {
             Map map = (Map)parms.target;
-            Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
-            List<Thing> payload = new List<Thing>();
-            int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 4, 14, 80f);
-            for (int i = 0; i < count; i++)
-            {
-                Pawn pawn = MouseDisasterPhase3Utility.CreateRatEggPawn(faction, babyStage: true, thiefLike: false, pureNegative: false, infect: InfectsWithPlague, foodLevel: 0.14f);
-                if (pawn == null)
-                {
-                    continue;
-                }
-
-                MouseDisasterPhase3Utility.PrepareStrandedAirdroppedEgg(pawn);
-                payload.Add(pawn);
-            }
-
-            if (payload.Count == 0)
+            if (!MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 entryCell))
             {
                 return false;
             }
 
-            DropPodUtility.DropThingsNear(DropCellFinder.TradeDropSpot(map), map, payload, 110, canInstaDropDuringInit: false, leaveSlag: false, canRoofPunch: true, forbid: true, allowFogged: true, faction);
-            SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, payload);
-            return true;
+            Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
+            int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 4, 14, 80f);
+            return GameComponent_MouseDisasterPawnGeneration.TryStartAirdropMistake(def, parms, map, entryCell, faction, count, InfectsWithPlague);
         }
     }
 

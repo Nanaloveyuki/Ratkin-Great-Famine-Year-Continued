@@ -19,9 +19,7 @@ namespace MouseDisaster
         protected override bool TryExecuteWorker(IncidentParms parms)
         {
             Map map = (Map)parms.target;
-            MouseDisasterPhase3Utility.SpawnPlagueRevengeWave(map, 16);
-            SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, new TargetInfo(map.Center, map));
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartPlagueRevengeWave(def, parms, map, 16);
         }
     }
 }

@@ -26,6 +26,13 @@
   <MouseDisaster_Settings_Section_FamineYear>Great Famine Year</MouseDisaster_Settings_Section_FamineYear>
   <MouseDisaster_Settings_Section_Age>Age and disease</MouseDisaster_Settings_Section_Age>
   <MouseDisaster_Settings_Section_Genes>Reproduction</MouseDisaster_Settings_Section_Genes>
+  <MouseDisaster_Settings_Section_AdaptiveRatkinXenotypes>Adaptive Ratkin xenotypes</MouseDisaster_Settings_Section_AdaptiveRatkinXenotypes>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_Hint>Adjust the generation weight of each Ratkin xenotype used by Mouse Disaster arrivals. A weight of 0 disables that xenotype. New external Ratkin xenotypes are detected automatically.</MouseDisaster_Settings_AdaptiveRatkinXenotypes_Hint>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_Disabled>Biotech is not active, so xenotype generation controls are unavailable.</MouseDisaster_Settings_AdaptiveRatkinXenotypes_Disabled>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_None>No Ratkin xenotypes were detected.</MouseDisaster_Settings_AdaptiveRatkinXenotypes_None>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_Reset>Reset Ratkin xenotype weights</MouseDisaster_Settings_AdaptiveRatkinXenotypes_Reset>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight>{0} generation weight: {1}</MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight_Tooltip>Def: {0}. The default weight for this candidate is {1}; the final chance is its weight divided by the total enabled weight.</MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight_Tooltip>
   <MouseDisaster_Settings_Section_DisplayDebug>Display</MouseDisaster_Settings_Section_DisplayDebug>
   <MouseDisaster_Settings_Section_Compat>Other mods</MouseDisaster_Settings_Section_Compat>
   <MouseDisaster_Settings_Status_On>On</MouseDisaster_Settings_Status_On>

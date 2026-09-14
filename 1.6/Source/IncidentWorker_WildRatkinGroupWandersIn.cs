@@ -28,28 +28,7 @@ namespace MouseDisaster
             }
 
             int count = MouseDisasterUtility.CalculateGroupCount(parms.points);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnWildGroup(map, cell, count, null));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (Pawn pawn in pawns)
-            {
-                pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_WildGroupWanderer);
-            }
-
-            if (MouseDisasterVisitorChoicePolicy.ShouldUpgradeToVisitorChoiceControl(def.defName) &&
-                MouseDisasterVisitorUtility.RegisterAndSendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                return true;
-            }
-
-            if (!MouseDisasterUtility.SendFoodGiveLetter(def, parms, map, pawns))
-            {
-                MouseDisasterUtility.SendIncidentLetter(def, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartWildGroup(def, parms, map, cell, count);
         }
     }
 }

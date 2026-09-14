@@ -14,7 +14,18 @@ namespace MouseDisaster
     {
         LargeRefugeeWave,
         GreatFamine,
-        TraderCaravan
+        TraderCaravan,
+        BeggarGroup,
+        ThiefGroup,
+        WildGroup,
+        TravelerGroup,
+        FamineRefugees,
+        SiegeBeggarGroup,
+        StrongSiegeGroup,
+        AirdropMistake,
+        ThiefChildGroup,
+        EggBombRetaliation,
+        PlagueRevengeWave
     }
 
     public class MouseDisasterPawnBatch : IExposable
@@ -35,6 +46,13 @@ namespace MouseDisaster
         public int generatedSlots;
         public int behaviorGroupId;
         public bool infectsWithPlague;
+        public float foodPercentage = 0.35f;
+        public IntVec3 exitCell;
+        public bool thiefLike;
+        public bool pureNegative;
+        public int stayHours;
+        public Faction sourceFaction;
+        public LetterDef specialLetterDef;
         public List<Pawn> pawns = new List<Pawn>();
         public Pawn traderPawn;
         public Pawn escortPawn;
@@ -60,10 +78,17 @@ namespace MouseDisaster
             Scribe_Values.Look(ref randomSeed, "randomSeed", 0);
             Scribe_Values.Look(ref generatedSlots, "generatedSlots", 0);
             Scribe_Values.Look(ref infectsWithPlague, "infectsWithPlague", false);
+            Scribe_Values.Look(ref foodPercentage, "foodPercentage", 0.35f);
+            Scribe_Values.Look(ref exitCell, "exitCell", IntVec3.Invalid);
+            Scribe_Values.Look(ref thiefLike, "thiefLike", false);
+            Scribe_Values.Look(ref pureNegative, "pureNegative", false);
+            Scribe_Values.Look(ref stayHours, "stayHours", 0);
             Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
             Scribe_References.Look(ref traderPawn, "traderPawn");
             Scribe_References.Look(ref escortPawn, "escortPawn");
             Scribe_References.Look(ref gatheringLord, "gatheringLord");
+            Scribe_References.Look(ref sourceFaction, "sourceFaction");
+            Scribe_Defs.Look(ref specialLetterDef, "specialLetterDef");
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
@@ -73,11 +98,11 @@ namespace MouseDisaster
         }
     }
 
-    public class GameComponent_MouseDisasterPawnGeneration : GameComponent
+    public partial class GameComponent_MouseDisasterPawnGeneration : GameComponent
     {
         private const int TargetGenerationTicks = 100;
         private const int MaxBatchLifetimeTicks = 10000;
-        private const int MaxGeneratedSlots = 64;
+        private const int MaxGeneratedSlots = 128;
 
         private List<MouseDisasterPawnBatch> batches = new List<MouseDisasterPawnBatch>();
 
@@ -239,7 +264,7 @@ namespace MouseDisaster
             }, count);
         }
 
-        public static bool TryStartTraderCaravan(IncidentDef incidentDef, IncidentParms parms, Map map, IntVec3 entryCell, Faction faction, int saleChildren)
+        public static bool TryStartTraderCaravan(IncidentDef incidentDef, IncidentParms parms, Map map, IntVec3 entryCell, Faction faction, int saleChildren, bool infectsWithPlague = false)
         {
             if (faction == null || saleChildren <= 0 || saleChildren > MaxGeneratedSlots - 2)
             {
@@ -255,7 +280,8 @@ namespace MouseDisaster
                 incidentDef = incidentDef,
                 parms = parms?.ShallowCopy(),
                 entryCell = entryCell,
-                remainingCount = totalCount
+                remainingCount = totalCount,
+                infectsWithPlague = infectsWithPlague
             }, totalCount);
         }
 
@@ -263,8 +289,10 @@ namespace MouseDisaster
         {
             GameComponent_MouseDisasterPawnGeneration component = Current.Game?.GetComponent<GameComponent_MouseDisasterPawnGeneration>();
             TickManager tickManager = Find.TickManager;
+            bool standalonePayload = IsStandalonePayloadBatch(batch);
             if (!MouseDisasterRuntime.AllowsNewContent || component == null || tickManager == null || totalCount <= 0 || totalCount > MaxGeneratedSlots ||
-                !IsBatchMapAvailable(batch) || !batch.entryCell.IsValid || batch.incidentDef == null || batch.parms == null)
+                !IsBatchMapAvailable(batch) || !batch.entryCell.IsValid ||
+                (!standalonePayload && (batch.incidentDef == null || batch.parms == null)))
             {
                 return false;
             }
@@ -275,9 +303,20 @@ namespace MouseDisaster
             batch.intervalTicks = Mathf.Max(1, Mathf.RoundToInt(TargetGenerationTicks / (float)totalCount));
             batch.randomSeed = Rand.Int;
             batch.deadlineTick = tickManager.TicksGame + MaxBatchLifetimeTicks;
+            bool disableMultiFrameGeneration = MouseDisasterMod.Settings?.disableMultiFrameIncidentGeneration == true;
             try
             {
-                ProcessNextPawn(batch);
+                if (disableMultiFrameGeneration)
+                {
+                    while (!batch.Complete && batch.generatedSlots < MaxGeneratedSlots)
+                    {
+                        ProcessNextPawn(batch);
+                    }
+                }
+                else
+                {
+                    ProcessNextPawn(batch);
+                }
             }
             catch (Exception exception)
             {
@@ -294,6 +333,10 @@ namespace MouseDisaster
             if (batch.Complete)
             {
                 TryFinalizeBatch(batch);
+            }
+            else if (disableMultiFrameGeneration)
+            {
+                TryTruncateBatch(batch, "synchronous generation limit reached");
             }
             else
             {
@@ -317,8 +360,8 @@ namespace MouseDisaster
         {
             return batch != null &&
                    Enum.IsDefined(typeof(MouseDisasterPawnBatchKind), batch.kind) &&
-                   batch.incidentDef != null &&
-                   batch.parms != null &&
+                   (batch.incidentDef != null || IsStandalonePayloadBatch(batch)) &&
+                   (batch.parms != null || IsStandalonePayloadBatch(batch)) &&
                    batch.pawns != null &&
                    batch.entryCell.IsValid;
         }
@@ -361,6 +404,29 @@ namespace MouseDisaster
                     }
                     batch.faction ??= batch.traderPawn?.Faction ?? batch.escortPawn?.Faction ?? batch.pawns.FirstOrDefault()?.Faction;
                     break;
+                case MouseDisasterPawnBatchKind.BeggarGroup:
+                case MouseDisasterPawnBatchKind.SiegeBeggarGroup:
+                case MouseDisasterPawnBatchKind.TravelerGroup:
+                    batch.adultsRemaining = Mathf.Clamp(batch.adultsRemaining, 0, 50);
+                    batch.childrenRemaining = Mathf.Clamp(batch.childrenRemaining, 0, 50 - batch.adultsRemaining);
+                    batch.remainingCount = 0;
+                    if (!batch.exitCell.IsValid && batch.map != null)
+                    {
+                        batch.exitCell = batch.map.Center;
+                    }
+                    break;
+                case MouseDisasterPawnBatchKind.ThiefGroup:
+                case MouseDisasterPawnBatchKind.ThiefChildGroup:
+                case MouseDisasterPawnBatchKind.WildGroup:
+                case MouseDisasterPawnBatchKind.FamineRefugees:
+                case MouseDisasterPawnBatchKind.StrongSiegeGroup:
+                case MouseDisasterPawnBatchKind.AirdropMistake:
+                case MouseDisasterPawnBatchKind.EggBombRetaliation:
+                case MouseDisasterPawnBatchKind.PlagueRevengeWave:
+                    batch.adultsRemaining = 0;
+                    batch.childrenRemaining = 0;
+                    batch.remainingCount = Mathf.Clamp(batch.remainingCount, 0, MaxGeneratedSlots);
+                    break;
             }
 
             if (batch.deadlineTick <= 0)
@@ -373,7 +439,7 @@ namespace MouseDisaster
         {
             if (batch.behaviorGroupId == 0)
                 batch.behaviorGroupId = MouseDisasterEventExecution.Current?.groupId ??
-                    GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(batch.incidentDef) ?? 0;
+                    GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(batch.incidentDef?.defName ?? batch.kind.ToString()) ?? 0;
             int firstNewPawn = batch.pawns.Count;
             int slot = batch.generatedSlots++;
             MouseDisasterTrace.Log("pawn generation slot begin; kind=" + batch.kind + "; slot=" + slot +
@@ -394,6 +460,31 @@ namespace MouseDisaster
                         case MouseDisasterPawnBatchKind.TraderCaravan:
                             GenerateTraderCaravanPawn(batch, slot);
                             break;
+                        case MouseDisasterPawnBatchKind.BeggarGroup:
+                        case MouseDisasterPawnBatchKind.SiegeBeggarGroup:
+                            GenerateBeggarGroupPawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.ThiefGroup:
+                        case MouseDisasterPawnBatchKind.ThiefChildGroup:
+                        case MouseDisasterPawnBatchKind.StrongSiegeGroup:
+                            GenerateThiefGroupPawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.WildGroup:
+                            GenerateWildGroupPawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.TravelerGroup:
+                            GenerateTravelerGroupPawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.FamineRefugees:
+                            GenerateFamineRefugeePawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.AirdropMistake:
+                            GenerateAirdropEggPawn(batch);
+                            break;
+                        case MouseDisasterPawnBatchKind.EggBombRetaliation:
+                        case MouseDisasterPawnBatchKind.PlagueRevengeWave:
+                            GenerateSpecialPayloadPawn(batch);
+                            break;
                         default:
                             throw new InvalidOperationException("Unknown pawn batch kind: " + batch.kind);
                     }
@@ -405,7 +496,7 @@ namespace MouseDisaster
             }
             if (batch.kind == MouseDisasterPawnBatchKind.TraderCaravan)
                 EnsureTraderGatheringLord(batch);
-            if (batch.pawns.Count > firstNewPawn)
+            if (batch.pawns.Count > firstNewPawn && !IsPayloadBatch(batch))
                 GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId,
                     batch.pawns.GetRange(firstNewPawn, batch.pawns.Count - firstNewPawn));
             MouseDisasterTrace.Log("pawn generation slot end; kind=" + batch.kind + "; slot=" + slot +
@@ -496,6 +587,10 @@ namespace MouseDisaster
                 batch.traderPawn = pawn;
                 MouseDisasterUtility.EnsureTradeLeader(pawn, MouseDisasterUtility.ResolveSlaveTraderKind());
                 pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_TraderCaravanTrader);
+                if (batch.infectsWithPlague)
+                {
+                    MouseDisasterPlagueUtility.InfectWithPlague(pawn);
+                }
             }
             else if (slot == 1)
             {
@@ -783,6 +878,12 @@ namespace MouseDisaster
         {
             ReleaseTraderGatheringLord(batch);
             TryRestoreTraderCaravanMembers(batch);
+            if (IsPayloadBatch(batch))
+            {
+                FinalizePayloadBatch(batch);
+                return;
+            }
+
             List<Pawn> pawns = ActivePawns(batch);
             MouseDisasterTrace.Log("pawn batch finalize; kind=" + (batch?.kind.ToString() ?? "unknown") +
                 "; generated=" + (batch?.generatedSlots ?? 0) + "; activePawns=" + pawns.Count +
@@ -805,10 +906,20 @@ namespace MouseDisaster
                         SendIncompleteTraderCaravanAway(batch, ActivePawns(batch));
                     }
                     break;
+                case MouseDisasterPawnBatchKind.BeggarGroup:
+                case MouseDisasterPawnBatchKind.ThiefGroup:
+                case MouseDisasterPawnBatchKind.ThiefChildGroup:
+                case MouseDisasterPawnBatchKind.WildGroup:
+                case MouseDisasterPawnBatchKind.TravelerGroup:
+                case MouseDisasterPawnBatchKind.FamineRefugees:
+                case MouseDisasterPawnBatchKind.SiegeBeggarGroup:
+                case MouseDisasterPawnBatchKind.StrongSiegeGroup:
+                    FinalizeMultiFrameGroup(batch, pawns);
+                    break;
             }
             try
             {
-                GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId, pawns);
+                GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId, ActivePawns(batch));
             }
             catch (Exception exception)
             {
@@ -827,6 +938,12 @@ namespace MouseDisaster
                 Log.Error("[MouseDisaster] Could not finalize staged pawn generation for " + (batch?.kind.ToString() ?? "unknown") + ": " + exception);
                 try
                 {
+                    if (IsPayloadBatch(batch))
+                    {
+                        FinalizePayloadBatch(batch);
+                        return;
+                    }
+
                     List<Pawn> pawns = ActivePawns(batch);
                     if (pawns.Count == 0 || !IsBatchMapAvailable(batch))
                     {
@@ -854,6 +971,12 @@ namespace MouseDisaster
             ReleaseTraderGatheringLord(batch);
             TryRestoreTraderCaravanMembers(batch);
             Log.Warning("[MouseDisaster] Truncating staged pawn generation for " + batch.kind + ": " + reason + ".");
+            if (IsPayloadBatch(batch))
+            {
+                FinalizePayloadBatch(batch);
+                return;
+            }
+
             List<Pawn> pawns = ActivePawns(batch);
             if (pawns.Count == 0 || !IsBatchMapAvailable(batch))
             {
@@ -866,6 +989,12 @@ namespace MouseDisaster
                 {
                     SendIncompleteTraderCaravanAway(batch, ActivePawns(batch));
                 }
+                return;
+            }
+
+            if (IsMultiFrameVisitorBatch(batch))
+            {
+                FinalizeMultiFrameGroup(batch, pawns);
                 return;
             }
 

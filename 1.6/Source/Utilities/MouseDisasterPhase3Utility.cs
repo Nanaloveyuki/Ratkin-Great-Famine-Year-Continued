@@ -197,6 +197,11 @@ namespace MouseDisaster
             }
 
             int actualCount = Mathf.Clamp(requestedCount, 4, 96);
+            if (GameComponent_MouseDisasterPawnGeneration.TryStartEggBombRetaliation(map, actualCount, infect, sourceFaction))
+            {
+                return;
+            }
+
             Faction faction = ResolveVisitorFaction();
             List<Thing> payload = new List<Thing>();
             for (int i = 0; i < actualCount; i++)

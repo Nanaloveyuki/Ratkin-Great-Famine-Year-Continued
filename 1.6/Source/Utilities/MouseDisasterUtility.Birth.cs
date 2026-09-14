@@ -111,8 +111,10 @@ namespace MouseDisaster
                    mother != null &&
                    IsRatkin(mother) &&
                    (IsMouseDisasterPawn(mother) ||
+                    IsMouseDisasterIncidentVisitor(mother) ||
                     HasAnyMouseDisasterGene(mother) ||
                     IsMouseDisasterPawn(newborn) ||
+                    IsMouseDisasterIncidentVisitor(newborn) ||
                     HasAnyMouseDisasterGene(newborn));
         }
 

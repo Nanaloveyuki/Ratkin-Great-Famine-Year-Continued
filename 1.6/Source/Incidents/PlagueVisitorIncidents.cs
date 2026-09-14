@@ -29,24 +29,7 @@ namespace MouseDisaster
             }
 
             int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 2, 8, 90f);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnWildGroup(map, cell, count, null));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterPlagueUtility.InfectMany(pawns);
-            if (MouseDisasterVisitorChoicePolicy.ShouldUpgradeToVisitorChoiceControl(def.defName) &&
-                MouseDisasterVisitorUtility.RegisterAndSendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                return true;
-            }
-
-            if (!MouseDisasterUtility.SendFoodGiveLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartWildGroup(def, parms, map, cell, count, infectsWithPlague: true);
         }
     }
 
@@ -167,78 +150,8 @@ namespace MouseDisaster
 
             MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
             MouseDisasterUtility.EnsureMouseDisasterFactionNeutralOnMap(map, faction);
-
-            List<Pawn> pawns = new List<Pawn>();
-            Pawn traderPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(
-                MouseDisasterDefOf.MouseDisaster_TraderRatkinAdult,
-                faction,
-                DevelopmentalStage.Adult,
-                0.65f,
-                allowViolenceDisabledTraits: false,
-                fixedGender: Gender.Female);
-            if (traderPawn == null)
-            {
-                return false;
-            }
-
-            GenSpawn.Spawn(traderPawn, CellFinder.RandomClosewalkCellNear(cell, map, 6), map);
-            MouseDisasterUtility.EnsureTradeLeader(traderPawn, MouseDisasterUtility.ResolveSlaveTraderKind());
-            MouseDisasterPlagueUtility.InfectWithPlague(traderPawn);
-            pawns.Add(traderPawn);
-
-            Pawn escortPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_TraderRatkinEscort, faction, DevelopmentalStage.Adult, 0.6f);
-            if (escortPawn == null)
-            {
-                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
-                return false;
-            }
-
-            GenSpawn.Spawn(escortPawn, CellFinder.RandomClosewalkCellNear(cell, map, 6), map);
-            pawns.Add(escortPawn);
-
             int saleChildren = Rand.RangeInclusive(5, 30);
-            for (int i = 0; i < saleChildren; i++)
-            {
-                Pawn child = MouseDisasterUtility.GenerateFactionRatkinPawn(MouseDisasterDefOf.MouseDisaster_BeggarRatkinChild, faction, DevelopmentalStage.Baby, 0.5f);
-                if (child == null)
-                {
-                    continue;
-                }
-
-                MouseDisasterUtility.SetBiologicalAgeYears(child, MouseDisasterUtility.RandomRatEggAgeYears());
-                GenSpawn.Spawn(child, CellFinder.RandomClosewalkCellNear(cell, map, 6), map);
-                MouseDisasterUtility.StripRatEggInventory(child);
-                MouseDisasterUtility.PrepareTradablePrisoner(child, faction);
-                pawns.Add(child);
-            }
-
-            if (pawns.Count <= 2)
-            {
-                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
-                return false;
-            }
-
-            MouseDisasterUtility.LinkIncidentParentToChildren(traderPawn, pawns.Where(p => p != traderPawn && p != escortPawn && p.DevelopmentalStage == DevelopmentalStage.Baby));
-            MouseDisasterUtility.TryStartLeadYourPetRelatedAdultLeashes(pawns);
-            if (!RCellFinder.TryFindRandomSpotJustOutsideColony(traderPawn.Position, map, traderPawn, out IntVec3 result))
-            {
-                result = map.Center;
-            }
-
-            List<Pawn> tradeGroup = new List<Pawn> { traderPawn, escortPawn };
-            tradeGroup.AddRange(pawns.Where(p => p != traderPawn && p != escortPawn && p.DevelopmentalStage == DevelopmentalStage.Baby));
-            Lord tradeLord = LordMaker.MakeNewLord(faction, new LordJob_TradeWithColony(faction, result), map, tradeGroup);
-            if (tradeLord != null)
-            {
-                MouseDisasterUtility.TryAssignLeadYourPetTravelMouseEggs(tradeLord);
-            }
-            MouseDisasterUtility.EnsureMouseDisasterFactionNeutralOnMap(map, faction);
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartTraderCaravan(def, parms, map, cell, faction, saleChildren, infectsWithPlague: true);
         }
     }
 
@@ -271,20 +184,16 @@ namespace MouseDisaster
                 MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
             }
 
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnTravelerGroup(map, entryCell, adults, children, faction));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterPlagueUtility.InfectMany(pawns);
-            MouseDisasterUtility.MakeTravelAndExitLord(map, pawns, exitCell, includeBabiesInExit: false);
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartTravelerGroup(
+                def,
+                parms,
+                map,
+                entryCell,
+                exitCell,
+                faction,
+                adults,
+                children,
+                infectsWithPlague: true);
         }
     }
 
@@ -306,43 +215,7 @@ namespace MouseDisaster
             }
 
             int count = Mathf.Clamp(Mathf.RoundToInt(parms.points / 200f) + 1, 1, 4);
-            List<Pawn> pawns = new List<Pawn>();
-            bool allowChildren = Find.Storyteller.difficulty.ChildrenAllowed;
-            for (int i = 0; i < count; i++)
-            {
-                bool spawnChild = allowChildren && Rand.Chance(0.5f);
-                PawnKindDef kindDef = spawnChild ? MouseDisasterDefOf.MouseDisaster_WildRatkinChild : MouseDisasterDefOf.MouseDisaster_WildRatkinAdult;
-                DevelopmentalStage stage = spawnChild ? DevelopmentalStage.Child : DevelopmentalStage.Adult;
-                Pawn pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(kindDef, null, stage, 0.28f);
-                if (pawn == null)
-                {
-                    continue;
-                }
-
-                pawn.SetFaction(null);
-                GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(cell, map, 4), map);
-                MouseDisasterUtility.StripRatEggInventory(pawn);
-                MouseDisasterPlagueUtility.InfectWithPlague(pawn);
-                pawns.Add(pawn);
-            }
-
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            ChoiceLetter_FamineRefugees letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_AcceptFamineRefugees, pawns) as ChoiceLetter_FamineRefugees;
-            if (letter == null)
-            {
-                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
-                return false;
-            }
-
-            letter.refugees = pawns;
-            letter.map = map;
-            Find.LetterStack.ReceiveLetter(letter, null);
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartFamineRefugees(def, parms, map, cell, count, infectsWithPlague: true);
         }
     }
 
@@ -401,27 +274,10 @@ namespace MouseDisaster
                 return false;
             }
 
-            if (MouseDisasterUtility.TryFindFormerFaction(out Faction faction))
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
             int total = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 3, 20, 85f);
             int children = Find.Storyteller.difficulty.ChildrenAllowed ? Mathf.Clamp(Mathf.RoundToInt(total * 0.4f), 0, total - 1) : 0;
             int adults = Mathf.Max(1, total - children);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnBeggarGroup(map, cell, adults, children));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterPlagueUtility.InfectMany(pawns);
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartBeggarGroup(def, parms, map, cell, null, adults, children, infectsWithPlague: true);
         }
     }
 
@@ -443,19 +299,7 @@ namespace MouseDisaster
             }
 
             int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 3, 18, 90f);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnThiefGroup(map, cell, count, childOnly: false));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterPlagueUtility.InfectMany(pawns);
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartThiefGroup(def, parms, map, cell, null, count, childOnly: false, infectsWithPlague: true);
         }
     }
 }

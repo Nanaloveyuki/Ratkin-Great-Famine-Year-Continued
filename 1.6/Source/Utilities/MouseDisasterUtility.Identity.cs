@@ -541,6 +541,7 @@ namespace MouseDisaster
             if (localDefaultSubtype != null)
             {
                 ratkinXenotypeDef = localDefaultSubtype;
+                return ratkinXenotypeDef;
             }
 
             for (int i = 0; i < PreferredRatkinXenotypeDefNames.Length; i++)
@@ -585,31 +586,13 @@ namespace MouseDisaster
 
         private static List<XenotypeDef> ResolveAllowedRatkinXenotypes()
         {
-            if (cachedAllowedRatkinXenotypesResolved)
+            List<XenotypeDef> allowed = MouseDisasterAdaptiveXenotypeUtility.GetEnabledCandidates();
+            if (allowed.Count == 0 && ModsConfig.BiotechActive && XenotypeDefOf.Baseliner != null)
             {
-                return cachedAllowedRatkinXenotypes;
+                allowed.Add(XenotypeDefOf.Baseliner);
             }
 
-            cachedAllowedRatkinXenotypesResolved = true;
-            List<XenotypeDef> allowed = DefDatabase<XenotypeDef>.AllDefsListForReading
-                .Where(def => def != null && IsRatkinXenotypeDef(def))
-                .OrderByDescending(def => PreferredRatkinXenotypeDefNames.Contains(def.defName))
-                .ThenBy(def => def.defName)
-                .ToList();
-
-            if (IsChineseLanguageActive())
-            {
-                List<XenotypeDef> localized = allowed
-                    .Where(def => HasChineseCharacters(def.label) || def.defName.EqualsIgnoreCase(RatkinXenotypeDefName))
-                    .ToList();
-                if (localized.Count > 0)
-                {
-                    allowed = localized;
-                }
-            }
-
-            cachedAllowedRatkinXenotypes = allowed;
-            return cachedAllowedRatkinXenotypes;
+            return allowed;
         }
 
         private static bool IsChineseLanguageActive()

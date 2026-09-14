@@ -244,8 +244,6 @@ namespace MouseDisaster
         private static ThingDef ratEggTailThingDef;
         private static ThingDef ratkinRaceDef;
         private static XenotypeDef ratkinXenotypeDef;
-        private static List<XenotypeDef> cachedAllowedRatkinXenotypes;
-        private static bool cachedAllowedRatkinXenotypesResolved;
         private static ThingDef clothStuffDef;
         private static ThingDef humanleatherStuffDef;
         private static PawnKindDef playerAffiliatedRatkinKindDef;

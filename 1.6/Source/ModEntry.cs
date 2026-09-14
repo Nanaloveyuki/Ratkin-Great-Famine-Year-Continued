@@ -70,6 +70,8 @@ namespace MouseDisaster
                 "MouseDisaster_Settings_AllowMouseDisasterFactionToLeaveWhenIdle_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations", ref Settings.preventUnnecessaryNeutralPawnRelations,
                 "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations_Tooltip");
+            DrawCheckbox(listing, "MouseDisaster_Settings_DisableMultiFrameIncidentGeneration", ref Settings.disableMultiFrameIncidentGeneration,
+                "MouseDisaster_Settings_DisableMultiFrameIncidentGeneration_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistAutoGiveFood", ref Settings.allowColonistAutoGiveFood, "MouseDisaster_Settings_AllowColonistAutoGiveFood_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs", ref Settings.allowColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowColonistChildcareForMouseDisasterEggs_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowNonColonistChildcareForMouseDisasterEggs", ref Settings.allowNonColonistChildcareForMouseDisasterEggs, "MouseDisaster_Settings_AllowNonColonistChildcareForMouseDisasterEggs_Tooltip");
@@ -318,6 +320,8 @@ namespace MouseDisaster
                 listing.Label("MouseDisaster_Settings_ChaosDisabledHint".Translate());
             }
 
+            DrawAdaptiveRatkinXenotypeSettings(listing);
+
             DrawSectionTitle(listing, "MouseDisaster_Settings_Section_Compat");
             DrawCheckbox(listing, "MouseDisaster_Settings_RatEggTraitBridge", ref Settings.enableRatEggTraitsBridge, "MouseDisaster_Settings_RatEggTraitBridge_Tooltip");
             if (Settings.enableRatEggTraitsBridge)
@@ -329,6 +333,55 @@ namespace MouseDisaster
                 listing.Label("MouseDisaster_Settings_CompatDisabledHint".Translate());
             }
 
+        }
+
+        private static void DrawAdaptiveRatkinXenotypeSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_AdaptiveRatkinXenotypes");
+            listing.Label("MouseDisaster_Settings_AdaptiveRatkinXenotypes_Hint".Translate());
+
+            if (!ModsConfig.BiotechActive)
+            {
+                listing.Label("MouseDisaster_Settings_AdaptiveRatkinXenotypes_Disabled".Translate());
+                return;
+            }
+
+            List<RimWorld.XenotypeDef> candidates = MouseDisasterAdaptiveXenotypeUtility.GetCandidates();
+            if (candidates.Count == 0)
+            {
+                listing.Label("MouseDisaster_Settings_AdaptiveRatkinXenotypes_None".Translate());
+                return;
+            }
+
+            if (listing.ButtonText("MouseDisaster_Settings_AdaptiveRatkinXenotypes_Reset".Translate()))
+            {
+                Settings.ResetRatkinXenotypeSpawnWeights();
+            }
+
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                RimWorld.XenotypeDef xenotype = candidates[i];
+                float weight = MouseDisasterAdaptiveXenotypeUtility.GetSpawnWeight(xenotype);
+                string displayName = xenotype.LabelCap.ToString();
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = xenotype.defName;
+                }
+                string label = "MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight".Translate(
+                    displayName,
+                    weight.ToString("0"));
+                string tooltip = "MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight_Tooltip".Translate(
+                    xenotype.defName,
+                    MouseDisasterAdaptiveXenotypeUtility.GetDefaultSpawnWeight(xenotype).ToString("0"));
+                listing.Label(label, -1f, new TipSignal(tooltip));
+                float updatedWeight = listing.Slider(weight,
+                    MouseDisasterSettings.MinRatkinXenotypeSpawnWeight,
+                    MouseDisasterSettings.MaxRatkinXenotypeSpawnWeight);
+                if (Mathf.Abs(updatedWeight - weight) > 0.001f)
+                {
+                    Settings.SetRatkinXenotypeSpawnWeight(xenotype.defName, updatedWeight);
+                }
+            }
         }
 
         private static void DrawSettingsFooter(Listing_Standard listing)

@@ -68,7 +68,7 @@ namespace MouseDisaster
                 return;
             }
 
-            if (!IsEligibleForMouseDisasterGenes(parent) || !HasAnyMouseDisasterGene(parent))
+            if (!IsMouseDisasterManagedGenePawn(parent) || !HasAnyMouseDisasterGene(parent))
             {
                 StripMouseDisasterGenes(newborn);
                 CleanupOrphanedChemicalDependencies(newborn);
@@ -88,16 +88,17 @@ namespace MouseDisaster
                 return;
             }
 
+            bool useMouseDisasterBirthIdentity = ShouldUseMouseDisasterBirthIdentity(newborn, mother);
             if (!MouseDisasterBirthPolicy.ShouldForceMouseDisasterBirthXenotype(
-                    shouldUseMouseDisasterBirthIdentity: ShouldUseMouseDisasterBirthIdentity(newborn, mother),
+                    shouldUseMouseDisasterBirthIdentity: useMouseDisasterBirthIdentity,
                     motherIsRatkin: IsRatkin(mother),
                     newbornIsRatkin: IsRatkin(newborn),
-                    newbornAlreadyRatkinXenotype: IsRatkinXenotypeDef(newborn.genes.Xenotype)))
+                    newbornAlreadyRatkinXenotype: !useMouseDisasterBirthIdentity && IsRatkinXenotypeDef(newborn.genes.Xenotype)))
             {
                 return;
             }
 
-            XenotypeDef ratkinXenotype = ResolveRatkinXenotypeDef();
+            XenotypeDef ratkinXenotype = MouseDisasterAdaptiveXenotypeUtility.Choose();
             if (ratkinXenotype != null)
             {
                 newborn.genes.SetXenotype(ratkinXenotype);

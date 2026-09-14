@@ -26,6 +26,13 @@
   <MouseDisaster_Settings_Section_FamineYear>大荒年</MouseDisaster_Settings_Section_FamineYear>
   <MouseDisaster_Settings_Section_Age>年龄与疾病</MouseDisaster_Settings_Section_Age>
   <MouseDisaster_Settings_Section_Genes>繁殖基因</MouseDisaster_Settings_Section_Genes>
+  <MouseDisaster_Settings_Section_AdaptiveRatkinXenotypes>自适应鼠族基因</MouseDisaster_Settings_Section_AdaptiveRatkinXenotypes>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_Hint>调整鼠灾事件生成时各鼠族基因类型的生成权重。权重为 0 时禁用该类型；其他模组新增的鼠族基因会自动识别。</MouseDisaster_Settings_AdaptiveRatkinXenotypes_Hint>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_Disabled>未启用 Biotech，无法调整基因类型生成。</MouseDisaster_Settings_AdaptiveRatkinXenotypes_Disabled>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_None>没有检测到鼠族基因类型。</MouseDisaster_Settings_AdaptiveRatkinXenotypes_None>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypes_Reset>恢复鼠族基因默认权重</MouseDisaster_Settings_AdaptiveRatkinXenotypes_Reset>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight>{0} 生成权重：{1}</MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight>
+  <MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight_Tooltip>Def：{0}。该候选的默认权重为 {1}；实际概率为它的权重除以所有启用候选的权重总和。</MouseDisaster_Settings_AdaptiveRatkinXenotypeWeight_Tooltip>
   <MouseDisaster_Settings_Section_DisplayDebug>显示</MouseDisaster_Settings_Section_DisplayDebug>
   <MouseDisaster_Settings_Section_Compat>联动兼容</MouseDisaster_Settings_Section_Compat>
   <MouseDisaster_Settings_Status_On>开启</MouseDisaster_Settings_Status_On>

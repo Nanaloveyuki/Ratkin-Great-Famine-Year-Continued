@@ -28,34 +28,8 @@ namespace MouseDisaster
             }
 
             Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
             int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 4, 16, 80f);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnThiefGroup(map, cell, count, childOnly: false));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < pawns.Count; i++)
-            {
-                MouseDisasterUtility.RegisterStrongSiegePawn(pawns[i]);
-            }
-
-            if (InfectsWithPlague)
-            {
-                MouseDisasterPlagueUtility.InfectMany(pawns);
-            }
-
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartStrongSiegeGroup(def, parms, map, cell, faction, count, InfectsWithPlague);
         }
     }
 

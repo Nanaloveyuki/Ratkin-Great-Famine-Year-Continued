@@ -128,11 +128,13 @@
     <Compile Include="HediffComp_MouseDisasterEmploymentTimer.cs" />
     <Compile Include="GameComponent_MouseDisasterPlague.cs" />
     <Compile Include="GameComponent_MouseDisasterPawnGeneration.cs" />
+    <Compile Include="GameComponent_MouseDisasterPawnGeneration.MultiFrame.cs" />
     <Compile Include="GameComponent_MouseDisasterVisitorControl.cs" />
     <Compile Include="MouseDisasterBroadcastHopePolicy.cs" />
     <Compile Include="MouseDisasterAbandonedDeliveryPolicy.cs" />
     <Compile Include="MouseDisasterBabyLeashPolicy.cs" />
     <Compile Include="MouseDisasterBirthPolicy.cs" />
+    <Compile Include="MouseDisasterAdaptiveXenotypeUtility.cs" />
     <Compile Include="MouseDisasterReliefAreaPolicy.cs" />
     <Compile Include="MouseDisasterRuntime.cs" />
     <Compile Include="MouseDisasterGeneRestorePolicy.cs" />

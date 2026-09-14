@@ -48,6 +48,10 @@ namespace MouseDisaster
         public const int MinHiredWorkerDurationDays = 5;
         public const int DefaultHiredWorkerDurationDays = GenDate.DaysPerYear;
         public const int MaxHiredWorkerDurationDays = GenDate.DaysPerYear * 10;
+        public const float MinRatkinXenotypeSpawnWeight = 0f;
+        public const float MaxRatkinXenotypeSpawnWeight = 100f;
+        public const float DefaultRatkinXenotypeSpawnWeight = 100f;
+        public const float DefaultExternalRatkinXenotypeSpawnWeight = 5f;
         public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
         public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
         public const float MinMouseDisasterEnvironmentTemperature = -35f;
@@ -66,8 +70,10 @@ namespace MouseDisaster
         public bool leaveAfterFed = true;
         public bool allowMouseDisasterFactionToLeaveWhenIdle = false;
         public bool preventUnnecessaryNeutralPawnRelations = true;
+        public bool disableMultiFrameIncidentGeneration = false;
         public int temporaryRecruitDurationDays = DefaultTemporaryRecruitDurationDays;
         public int hiredWorkerDurationDays = DefaultHiredWorkerDurationDays;
+        public Dictionary<string, float> ratkinXenotypeSpawnWeights = new Dictionary<string, float>();
         public bool countWithoutSuin = true;
         public bool endingsWithoutSuin = true;
         public float positiveIncidentDays = 3f;
@@ -169,8 +175,10 @@ namespace MouseDisaster
             leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
             allowMouseDisasterFactionToLeaveWhenIdle = false;
             preventUnnecessaryNeutralPawnRelations = true;
+            disableMultiFrameIncidentGeneration = false;
             temporaryRecruitDurationDays = DefaultTemporaryRecruitDurationDays;
             hiredWorkerDurationDays = DefaultHiredWorkerDurationDays;
+            ratkinXenotypeSpawnWeights = new Dictionary<string, float>();
             positiveIncidentDays = negativeIncidentDays = 3f;
             positiveIncidents.Clear();
             raidReplacementIncidents.Clear();
@@ -280,6 +288,7 @@ namespace MouseDisaster
                 MinTemporaryRecruitDurationDays, MaxTemporaryRecruitDurationDays);
             hiredWorkerDurationDays = Mathf.Clamp(hiredWorkerDurationDays,
                 MinHiredWorkerDurationDays, MaxHiredWorkerDurationDays);
+            NormalizeRatkinXenotypeSpawnWeights();
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
             ageDiseaseMultiplier = Mathf.Clamp(ageDiseaseMultiplier, MinAgeDiseaseMultiplier, MaxAgeDiseaseMultiplier);
             chaosPregnancyChancePercent = Mathf.Clamp(chaosPregnancyChancePercent, MinChaosPregnancyChancePercent, MaxChaosPregnancyChancePercent);
@@ -322,6 +331,34 @@ namespace MouseDisaster
         {
             return Mathf.Clamp(hiredWorkerDurationDays,
                 MinHiredWorkerDurationDays, MaxHiredWorkerDurationDays);
+        }
+
+        public float GetRatkinXenotypeSpawnWeight(string defName, float fallback)
+        {
+            float normalizedFallback = NormalizeRatkinXenotypeSpawnWeight(fallback);
+            if (string.IsNullOrWhiteSpace(defName) || ratkinXenotypeSpawnWeights == null ||
+                !ratkinXenotypeSpawnWeights.TryGetValue(defName, out float value))
+            {
+                return normalizedFallback;
+            }
+
+            return NormalizeRatkinXenotypeSpawnWeight(value);
+        }
+
+        public void SetRatkinXenotypeSpawnWeight(string defName, float value)
+        {
+            if (string.IsNullOrWhiteSpace(defName))
+            {
+                return;
+            }
+
+            ratkinXenotypeSpawnWeights ??= new Dictionary<string, float>();
+            ratkinXenotypeSpawnWeights[defName.Trim()] = NormalizeRatkinXenotypeSpawnWeight(value);
+        }
+
+        public void ResetRatkinXenotypeSpawnWeights()
+        {
+            ratkinXenotypeSpawnWeights = new Dictionary<string, float>();
         }
 
         public MouseDisasterTradePawnJoinMode GetRatkinYoungTradeJoinMode()
@@ -447,6 +484,32 @@ namespace MouseDisaster
                 .ToList();
         }
 
+        private void NormalizeRatkinXenotypeSpawnWeights()
+        {
+            var normalized = new Dictionary<string, float>();
+            if (ratkinXenotypeSpawnWeights != null)
+            {
+                foreach (KeyValuePair<string, float> entry in ratkinXenotypeSpawnWeights)
+                {
+                    if (string.IsNullOrWhiteSpace(entry.Key))
+                    {
+                        continue;
+                    }
+
+                    normalized[entry.Key.Trim()] = NormalizeRatkinXenotypeSpawnWeight(entry.Value);
+                }
+            }
+
+            ratkinXenotypeSpawnWeights = normalized;
+        }
+
+        private static float NormalizeRatkinXenotypeSpawnWeight(float value)
+        {
+            return float.IsNaN(value) || float.IsInfinity(value)
+                ? DefaultRatkinXenotypeSpawnWeight
+                : Mathf.Clamp(value, MinRatkinXenotypeSpawnWeight, MaxRatkinXenotypeSpawnWeight);
+        }
+
         public override void ExposeData()
         {
             Scribe_Values.Look(ref refugeePredationChancePercent, "refugeePredationChancePercent", 10f);
@@ -459,8 +522,10 @@ namespace MouseDisaster
             Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
             Scribe_Values.Look(ref allowMouseDisasterFactionToLeaveWhenIdle, "allowMouseDisasterFactionToLeaveWhenIdle", false);
             Scribe_Values.Look(ref preventUnnecessaryNeutralPawnRelations, "preventUnnecessaryNeutralPawnRelations", true);
+            Scribe_Values.Look(ref disableMultiFrameIncidentGeneration, "disableMultiFrameIncidentGeneration", false);
             Scribe_Values.Look(ref temporaryRecruitDurationDays, "temporaryRecruitDurationDays", DefaultTemporaryRecruitDurationDays);
             Scribe_Values.Look(ref hiredWorkerDurationDays, "hiredWorkerDurationDays", DefaultHiredWorkerDurationDays);
+            Scribe_Collections.Look(ref ratkinXenotypeSpawnWeights, "ratkinXenotypeSpawnWeights", LookMode.Value, LookMode.Value);
             Scribe_Values.Look(ref countWithoutSuin, "countWithoutSuin", true);
             Scribe_Values.Look(ref endingsWithoutSuin, "endingsWithoutSuin", true);
             Scribe_Values.Look(ref positiveIncidentDays, "positiveIncidentDays", 3f);

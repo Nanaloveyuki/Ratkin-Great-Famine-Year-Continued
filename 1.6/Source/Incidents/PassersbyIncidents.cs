@@ -34,29 +34,16 @@ namespace MouseDisaster
             int children = Find.Storyteller.difficulty.ChildrenAllowed ? Mathf.Clamp(Mathf.RoundToInt(total * 0.35f), 0, total - 1) : 0;
             int adults = Mathf.Max(1, total - children);
             Faction faction = MouseDisasterPhase3Utility.ResolveVisitorFaction();
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnTravelerGroup(map, entryCell, adults, children, faction));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            if (InfectsWithPlague)
-            {
-                MouseDisasterPlagueUtility.InfectMany(pawns);
-            }
-
-            MouseDisasterUtility.MakeTravelAndExitLord(map, pawns, exitCell, includeBabiesInExit: false);
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                SendStandardLetter(def.letterLabel, def.letterText, def.letterDef, parms, pawns);
-            }
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartTravelerGroup(
+                def,
+                parms,
+                map,
+                entryCell,
+                exitCell,
+                faction,
+                adults,
+                children,
+                InfectsWithPlague);
         }
     }
 

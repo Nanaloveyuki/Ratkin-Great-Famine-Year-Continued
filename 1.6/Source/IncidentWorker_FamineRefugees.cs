@@ -21,43 +21,7 @@ namespace MouseDisaster
             }
 
             int count = Mathf.Clamp(Mathf.RoundToInt(parms.points / 200f) + 1, 1, 4);
-            List<Pawn> pawns = new List<Pawn>();
-            bool allowChildren = Find.Storyteller.difficulty.ChildrenAllowed;
-            for (int i = 0; i < count; i++)
-            {
-                bool spawnChild = allowChildren && Rand.Chance(0.5f);
-                PawnKindDef kindDef = spawnChild ? MouseDisasterDefOf.MouseDisaster_WildRatkinChild : MouseDisasterDefOf.MouseDisaster_WildRatkinAdult;
-                DevelopmentalStage stage = spawnChild ? DevelopmentalStage.Child : DevelopmentalStage.Adult;
-                Pawn pawn = MouseDisasterUtility.GenerateFactionRatkinPawn(kindDef, null, stage, 0.28f);
-                if (pawn == null)
-                {
-                    continue;
-                }
-
-                pawn.SetFaction(null);
-                GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(cell, map, 4), map);
-                MouseDisasterUtility.StripRatEggInventory(pawn);
-                pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_FamineRefugee);
-                pawns.Add(pawn);
-            }
-
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            ChoiceLetter_FamineRefugees letter = LetterMaker.MakeLetter(def.letterLabel, def.letterText, MouseDisasterDefOf.MouseDisaster_AcceptFamineRefugees, pawns) as ChoiceLetter_FamineRefugees;
-            if (letter == null)
-            {
-                MouseDisasterUtility.DestroyFailedIncidentPawns(pawns);
-                return false;
-            }
-
-            letter.refugees = pawns;
-            letter.map = map;
-            Find.LetterStack.ReceiveLetter(letter, null);
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartFamineRefugees(def, parms, map, cell, count);
         }
     }
 }

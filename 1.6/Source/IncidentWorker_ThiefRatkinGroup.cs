@@ -26,37 +26,8 @@ namespace MouseDisaster
                 return false;
             }
 
-            if (MouseDisasterUtility.TryFindFormerFaction(out Faction faction))
-            {
-                MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
-            }
-
             int count = MouseDisasterUtility.CalculateEscalatingGroupCount(parms.points, 3, 20, 75f);
-            List<Pawn> pawns = new List<Pawn>(MouseDisasterUtility.SpawnThiefGroup(map, cell, count, childOnly: false));
-            if (pawns.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (Pawn pawn in pawns)
-            {
-                if (pawn.DevelopmentalStage == DevelopmentalStage.Adult)
-                {
-                    pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_ThiefAdult);
-                }
-                else
-                {
-                    pawn.health.AddHediff(MouseDisasterDefOf.MouseDisaster_ThiefChild);
-                }
-            }
-
-            MouseDisasterVisitorUtility.RegisterVisitors(pawns);
-            if (!MouseDisasterVisitorUtility.SendVisitorChoiceLetter(def, parms, map, pawns))
-            {
-                Messages.Message("MouseDisaster_UI_ThievesArrived".Translate().Resolve(), pawns, MessageTypeDefOf.NeutralEvent, false);
-            }
-            Find.TickManager.slower.SignalForceNormalSpeedShort();
-            return true;
+            return GameComponent_MouseDisasterPawnGeneration.TryStartThiefGroup(def, parms, map, cell, null, count, childOnly: false);
         }
     }
 }
