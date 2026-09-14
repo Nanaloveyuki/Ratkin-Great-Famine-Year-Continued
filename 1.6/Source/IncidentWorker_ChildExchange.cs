@@ -44,6 +44,7 @@ namespace MouseDisaster
             }
 
             GenSpawn.Spawn(trader, cell, map);
+            MouseDisasterUtility.EnsureTradeLeader(trader, MouseDisasterUtility.ResolveSlaveTraderKind());
             trader.health.AddHediff(MouseDisasterDefOf.MouseDisaster_ChildExchangeTrader);
 
             int childCount = Rand.RangeInclusive(6, 10);

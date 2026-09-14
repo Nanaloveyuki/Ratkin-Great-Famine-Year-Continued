@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -74,6 +75,7 @@ namespace MouseDisaster
                 return;
             }
 
+            visitorRecords ??= new List<MouseDisasterVisitorRecord>();
             foreach (Pawn pawn in pawns)
             {
                 if (!CanTrackPawn(pawn) || GetRecord(pawn) != null)
@@ -467,7 +469,8 @@ namespace MouseDisaster
             {
                 MouseDisasterVisitorRecord record = visitorRecords[i];
                 Pawn pawn = record?.pawn;
-                if (record == null || pawn == null || pawn.Dead)
+                if (record == null || pawn == null || pawn.Dead || pawn.Destroyed || pawn.mindState == null ||
+                    (!pawn.Spawned && pawn.MapHeld == null && !pawn.IsCaravanMember()))
                 {
                     RemoveRecordAt(i);
                     continue;
@@ -506,7 +509,23 @@ namespace MouseDisaster
 
         private MouseDisasterVisitorRecord GetRecord(Pawn pawn)
         {
-            return pawn != null && recordsByPawn.TryGetValue(pawn, out var record) ? record : null;
+            if (pawn == null)
+            {
+                return null;
+            }
+
+            if (recordsByPawn.TryGetValue(pawn, out var record))
+            {
+                if (record != null && record.pawn == pawn && record.slot >= 0 && record.slot < visitorRecords.Count &&
+                    visitorRecords[record.slot] == record)
+                {
+                    return record;
+                }
+
+                RebuildRecordIndex();
+            }
+
+            return recordsByPawn.TryGetValue(pawn, out record) ? record : null;
         }
 
         private void ForgetRecord(MouseDisasterVisitorRecord record)
@@ -517,8 +536,17 @@ namespace MouseDisaster
 
         private void RemoveRecordAt(int index)
         {
+            if (visitorRecords == null || index < 0 || index >= visitorRecords.Count)
+            {
+                return;
+            }
+
             MouseDisasterVisitorRecord record = visitorRecords[index];
-            if (record?.pawn != null) recordsByPawn.Remove(record.pawn);
+            if (record?.pawn != null && recordsByPawn.TryGetValue(record.pawn, out var indexedRecord) && indexedRecord == record)
+            {
+                recordsByPawn.Remove(record.pawn);
+            }
+
             int last = visitorRecords.Count - 1;
             visitorRecords[index] = visitorRecords[last];
             if (visitorRecords[index] != null) visitorRecords[index].slot = index;
@@ -528,6 +556,7 @@ namespace MouseDisaster
 
         private void RebuildRecordIndex()
         {
+            visitorRecords ??= new List<MouseDisasterVisitorRecord>();
             recordsByPawn.Clear();
             for (int i = 0; i < visitorRecords.Count; i++)
             {
@@ -541,40 +570,54 @@ namespace MouseDisaster
         private void NormalizeLoadedRecords()
         {
             int nowTick = Find.TickManager?.TicksGame ?? 0;
+            var seenPawns = new HashSet<Pawn>();
             for (int i = visitorRecords.Count - 1; i >= 0; i--)
             {
                 MouseDisasterVisitorRecord record = visitorRecords[i];
-                if (record?.pawn == null || record.pawn.Dead)
+                Pawn pawn = record?.pawn;
+                if (record == null || pawn == null || pawn.Dead || pawn.Destroyed || pawn.mindState == null ||
+                    (!pawn.Spawned && pawn.MapHeld == null && !pawn.IsCaravanMember()) || !seenPawns.Add(pawn))
                 {
                     RemoveRecordAt(i);
                     continue;
                 }
 
-                if (record.status != MouseDisasterVisitorStatus.TemporaryRecruit &&
-                    record.status != MouseDisasterVisitorStatus.HiredWorker)
+                try
                 {
-                    record.temporaryUntilTick = -1;
-                    record.employmentTimerPaused = false;
-                    SyncEmploymentMarkers(record.pawn, MouseDisasterVisitorStatus.Visitor);
-                    continue;
-                }
+                    if (record.status != MouseDisasterVisitorStatus.TemporaryRecruit &&
+                        record.status != MouseDisasterVisitorStatus.HiredWorker)
+                    {
+                        record.temporaryUntilTick = -1;
+                        record.employmentTimerPaused = false;
+                        SyncEmploymentMarkers(record.pawn, MouseDisasterVisitorStatus.Visitor);
+                        continue;
+                    }
 
-                if (record.employmentTimerPaused || IsIdentityChangedEmployment(record.pawn))
+                    if (record.employmentTimerPaused || IsIdentityChangedEmployment(record.pawn))
+                    {
+                        record.employmentTimerPaused = true;
+                        record.temporaryUntilTick = -1;
+                        SyncEmploymentMarkers(record.pawn, record.status, GenDate.TicksPerDay, true);
+                        Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeVisitorIdentityChanged(record.pawn);
+                        continue;
+                    }
+
+                    if (record.temporaryUntilTick <= 0)
+                    {
+                        record.temporaryUntilTick = nowTick + System.Math.Max(600, DurationTicksForStatus(record.status));
+                    }
+
+                    SyncEmploymentMarkers(record.pawn, record.status, GetRemainingTimerTicks(record), false);
+                }
+                catch (System.Exception exception)
                 {
-                    record.employmentTimerPaused = true;
-                    record.temporaryUntilTick = -1;
-                    SyncEmploymentMarkers(record.pawn, record.status, GenDate.TicksPerDay, true);
-                    Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.NotifyNarrativeVisitorIdentityChanged(record.pawn);
-                    continue;
+                    // Drop one malformed record during load instead of retrying it every tick.
+                    Log.Warning("[MouseDisaster] Removed an invalid visitor record after load: " + exception.Message);
+                    RemoveRecordAt(i);
                 }
-
-                if (record.temporaryUntilTick <= 0)
-                {
-                    record.temporaryUntilTick = nowTick + System.Math.Max(600, DurationTicksForStatus(record.status));
-                }
-
-                SyncEmploymentMarkers(record.pawn, record.status, GetRemainingTimerTicks(record), false);
             }
+
+            RebuildRecordIndex();
         }
 
         private static bool CanTrackPawn(Pawn pawn)

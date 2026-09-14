@@ -45,7 +45,7 @@ namespace MouseDisaster
 
         public static void EnsureTradeLeader(Pawn pawn, TraderKindDef preferredTraderKind)
         {
-            if (pawn == null)
+            if (pawn == null || pawn.mindState == null)
             {
                 return;
             }
@@ -64,6 +64,41 @@ namespace MouseDisaster
             {
                 pawn.trader.traderKind = preferredTraderKind ?? pawn.trader.traderKind;
             }
+        }
+
+        public static void RepairLoadedTradeLeaders()
+        {
+            TraderKindDef preferredTraderKind = ResolveSlaveTraderKind();
+            if (preferredTraderKind == null)
+            {
+                return;
+            }
+
+            foreach (Map map in Find.Maps ?? Enumerable.Empty<Map>())
+            {
+                IEnumerable<Pawn> pawns = map?.mapPawns?.AllPawnsSpawned;
+                if (pawns == null)
+                {
+                    continue;
+                }
+
+                foreach (Pawn pawn in pawns)
+                {
+                    if (!IsLoadedTradeLeaderCandidate(pawn))
+                    {
+                        continue;
+                    }
+
+                    EnsureTradeLeader(pawn, preferredTraderKind);
+                }
+            }
+        }
+
+        private static bool IsLoadedTradeLeaderCandidate(Pawn pawn)
+        {
+            return IsMouseDisasterTraderAdult(pawn) && pawn.Spawned && !pawn.Dead && !pawn.Destroyed &&
+                   !IsPlayerAffiliatedRatkin(pawn) &&
+                   (pawn.GetLord()?.LordJob is LordJob_TradeWithColony || HasActiveChildExchangeForTrader(pawn));
         }
 
         public static void ClearTradeLeaderState(Pawn pawn)
@@ -94,6 +129,11 @@ namespace MouseDisaster
         public static bool IsMouseDisasterTraderEscort(Pawn pawn)
         {
             return pawn != null && pawn.kindDef == MouseDisasterDefOf.MouseDisaster_TraderRatkinEscort;
+        }
+
+        internal static bool IsMouseDisasterRatkinTradeThingDef(ThingDef thingDef)
+        {
+            return thingDef != null && thingDef.category == ThingCategory.Pawn && IsRatkinRaceDef(thingDef);
         }
 
         public static bool IsMouseDisasterIncidentParentAdult(Pawn pawn)

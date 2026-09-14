@@ -335,6 +335,11 @@ namespace MouseDisaster
             return true;
         }
 
+        internal static bool HasActiveChildExchangeForTrader(Pawn pawn)
+        {
+            return pawn != null && ActiveChildExchangeByTraderId.ContainsKey(pawn.thingIDNumber);
+        }
+
         public static bool TryExecuteChildExchange(Pawn trader, int mode, out string message)
         {
             message = "MouseDisaster_UI_ExchangeFailed".Translate().Resolve();

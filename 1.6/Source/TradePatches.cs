@@ -174,7 +174,8 @@ namespace MouseDisaster
                 return;
             }
 
-            if (MouseDisasterTraderTradePolicy.IsRatEggTradeGood(td.defName, td.label))
+            if (MouseDisasterTraderTradePolicy.IsRatEggTradeGood(td.defName, td.label) ||
+                MouseDisasterUtility.IsMouseDisasterRatkinTradeThingDef(td))
             {
                 __result = true;
             }
@@ -187,14 +188,42 @@ namespace MouseDisaster
         private static readonly AccessTools.FieldRef<Pawn_TraderTracker, Pawn> PawnField =
             AccessTools.FieldRefAccess<Pawn_TraderTracker, Pawn>("pawn");
 
-        public static void Postfix(Pawn_TraderTracker __instance, ref bool __result)
+        public static void Prefix(Pawn_TraderTracker __instance)
         {
-            if (__result || __instance == null || !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(__instance.traderKind?.defName))
+            if (__instance == null)
             {
                 return;
             }
 
             Pawn pawn = PawnField(__instance);
+            if (pawn == null || !MouseDisasterUtility.IsMouseDisasterTraderAdult(pawn) || pawn.Dead ||
+                !pawn.Spawned || pawn.mindState == null || MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn))
+            {
+                return;
+            }
+
+            if (!pawn.mindState.wantsToTradeWithColony || __instance.traderKind == null ||
+                !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(__instance.traderKind.defName))
+            {
+                MouseDisasterUtility.EnsureTradeLeader(pawn, MouseDisasterUtility.ResolveSlaveTraderKind());
+            }
+        }
+
+        public static void Postfix(Pawn_TraderTracker __instance, ref bool __result)
+        {
+            if (__result || __instance == null)
+            {
+                return;
+            }
+
+            Pawn pawn = PawnField(__instance);
+            bool isMouseDisasterTrader = pawn != null && MouseDisasterUtility.IsMouseDisasterTraderAdult(pawn) &&
+                !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn);
+            if (!isMouseDisasterTrader && !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(__instance.traderKind?.defName))
+            {
+                return;
+            }
+
             if (pawn == null || pawn.Dead || !pawn.Spawned || pawn.mindState == null || !pawn.mindState.wantsToTradeWithColony ||
                 !pawn.CanCasuallyInteractNow(false, false, false, false) || pawn.Downed || pawn.IsPrisoner ||
                 pawn.Faction == Faction.OfPlayer || (pawn.Faction != null && pawn.Faction.HostileTo(Faction.OfPlayer)))
@@ -202,7 +231,8 @@ namespace MouseDisaster
                 return;
             }
 
-            __result = __instance.Goods.Any(thing => thing is Pawn tradePawn && MouseDisasterUtility.IsMouseDisasterTradePawn(tradePawn));
+            __result = (__instance.Goods ?? Enumerable.Empty<Thing>()).Any(thing =>
+                thing is Pawn tradePawn && MouseDisasterUtility.IsMouseDisasterTradePawn(tradePawn));
         }
     }
 
@@ -211,9 +241,17 @@ namespace MouseDisaster
     {
         public static void Postfix(Tradeable __instance, ref bool __result)
         {
-            if (__result || __instance == null || !__instance.HasAnyThing || !(TradeSession.trader?.TraderKind is TraderKindDef traderKind) ||
-                !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(traderKind.defName) ||
+            if (__result || __instance == null || !__instance.HasAnyThing ||
+                !(TradeSession.trader?.TraderKind is TraderKindDef traderKind) ||
                 !(__instance.AnyThing is Pawn pawn) || !MouseDisasterUtility.IsMouseDisasterTradePawn(pawn))
+            {
+                return;
+            }
+
+            Pawn traderPawn = TradeSession.trader as Pawn;
+            bool isMouseDisasterTrader = traderPawn != null && MouseDisasterUtility.IsMouseDisasterTraderAdult(traderPawn) &&
+                !MouseDisasterUtility.IsPlayerAffiliatedRatkin(traderPawn);
+            if (!isMouseDisasterTrader && !MouseDisasterTraderTradePolicy.ShouldForceTraderWillTrade(traderKind.defName))
             {
                 return;
             }
@@ -261,6 +299,11 @@ namespace MouseDisaster
 
         public static void Postfix(Pawn_TraderTracker __instance, ref IEnumerable<Thing> __result)
         {
+            if (__instance == null)
+            {
+                return;
+            }
+
             Pawn pawn = PawnField(__instance);
             if (!MouseDisasterUtility.IsMouseDisasterTraderAdult(pawn) ||
                 !(pawn.GetLord()?.LordJob is LordJob_TradeWithColony) ||

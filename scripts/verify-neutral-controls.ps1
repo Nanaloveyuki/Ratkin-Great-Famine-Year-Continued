@@ -14,7 +14,11 @@ $factions = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtil
 $generation = Get-Content (Join-Path $root '1.6/Source/MouseDisasterPawnGenerationPatches.cs') -Raw
 $generationUtility = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Generation.cs') -Raw
 $trade = Get-Content (Join-Path $root '1.6/Source/TradePatches.cs') -Raw
+$tradeUtility = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Trade.cs') -Raw
+$childExchangeIncident = Get-Content (Join-Path $root '1.6/Source/IncidentWorker_ChildExchange.cs') -Raw
 $childExchange = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.ChildExchange.cs') -Raw
+$pendingState = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterPendingState.cs') -Raw
+$eventBehavior = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterEventBehavior.cs') -Raw
 $lifecycle = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Lifecycle.cs') -Raw
 $visitorControl = Get-Content (Join-Path $root '1.6/Source/GameComponent_MouseDisasterVisitorControl.cs') -Raw
 $familyExit = Get-Content (Join-Path $root '1.6/Source/LordJob_MouseDisasterFamilyExit.cs') -Raw
@@ -42,6 +46,17 @@ Require-Text $trade '(!__state && !markedChattel && !forcePrisoner)' 'Read-loade
 Require-Text $trade 'private static bool IsMouseDisasterTraderIdleDeparture' 'Trader idle departure guard is missing.'
 Require-Text $trade 'transition.sources[0]?.GetType().Name != "LordToil_DefendTraderCaravan"' 'Trader timed departure guard does not identify the vanilla idle toil.'
 Require-Text $trade 'transition.triggers[0] is Trigger_TicksPassed' 'Trader timed departure guard is not limited to the idle timer.'
+Require-Text $trade 'public static void Prefix(Pawn_TraderTracker __instance)' 'Loaded trader tracker repair hook is missing.'
+Require-Text $trade 'MouseDisasterUtility.IsMouseDisasterRatkinTradeThingDef(td)' 'Ratkin trade goods are not covered by trader eligibility.'
+Require-Text $tradeUtility 'public static void RepairLoadedTradeLeaders()' 'Loaded trader repair routine is missing.'
+Require-Text $tradeUtility 'HasActiveChildExchangeForTrader(pawn)' 'Loaded trader repair is not scoped to active exchange state.'
+Require-Text $childExchangeIncident 'EnsureTradeLeader(trader, MouseDisasterUtility.ResolveSlaveTraderKind())' 'Child exchange traders are not initialized for trade.'
+Require-Text $pendingState 'MouseDisasterUtility.RepairLoadedTradeLeaders();' 'Loaded trader repair is not run during save recovery.'
+Require-Text $eventBehavior 'private void RebuildRuntimeIndexes()' 'Event runtime index rebuild is missing.'
+Require-Text $eventBehavior 'private static bool IsValidLoadedEventPawn(Pawn pawn)' 'Invalid event Pawn references are not filtered during load.'
+Require-Text $eventBehavior 'if (byPawn.TryGetValue(pawn, out var owner) && owner == group)' 'Event registration still assumes a valid Pawn index.'
+Require-Text $visitorControl 'var seenPawns = new HashSet<Pawn>();' 'Duplicate visitor records are not removed during load.'
+Require-Text $visitorControl 'Removed an invalid visitor record after load' 'Malformed visitor records are not dropped during load.'
 Require-Text $childExchange 'private static bool IsPersistedMouseDisasterTradePawn(Pawn pawn)' 'Read-loaded mouse egg recognition is missing.'
 Require-Text $childExchange 'pawn.guest.IsPrisoner' 'Read-loaded mouse egg recognition does not require prisoner state.'
 Require-Text $childExchange 'lord?.LordJob is LordJob_TradeWithColony' 'Read-loaded mouse egg recognition does not require a trade lord.'

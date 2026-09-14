@@ -85,15 +85,7 @@ namespace MouseDisaster
             fedPawnIds ??= new HashSet<int>();
             refeedingPawnIds ??= new HashSet<int>();
             groups ??= new List<MouseDisasterEventGroup>();
-            byId.Clear(); byPawn.Clear(); profiles.Clear(); pendingSpawn.Clear();
-            foreach (var group in groups)
-            {
-                if (group == null) continue;
-                nextId = Math.Max(nextId, group.id);
-                byId[group.id] = group;
-                foreach (Pawn pawn in group.pawns)
-                    if (pawn != null) IndexPawn(group, pawn);
-            }
+            RebuildRuntimeIndexes();
         }
 
         public int CreateGroup(IncidentDef incident) => CreateGroup(incident.defName);
@@ -116,6 +108,81 @@ namespace MouseDisaster
             profiles[pawn] = MouseDisasterEventPolicy.Compose(MouseDisasterUtility.IsThiefPawn(pawn), MouseDisasterUtility.IsBeggarPawn(pawn), group.attitude);
         }
 
+        private void RebuildRuntimeIndexes()
+        {
+            byId.Clear();
+            byPawn.Clear();
+            profiles.Clear();
+            pendingSpawn.Clear();
+            nextId = Math.Max(0, nextId);
+
+            var lastGroupById = new Dictionary<int, MouseDisasterEventGroup>();
+            foreach (MouseDisasterEventGroup group in groups)
+            {
+                if (group != null && group.id > 0)
+                {
+                    lastGroupById[group.id] = group;
+                }
+            }
+
+            var normalizedGroups = new List<MouseDisasterEventGroup>();
+            foreach (MouseDisasterEventGroup group in groups)
+            {
+                if (group == null || group.id <= 0 || lastGroupById[group.id] != group)
+                {
+                    continue;
+                }
+
+                group.pawns ??= new List<Pawn>();
+                group.predationRolledMaps = (group.predationRolledMaps ?? new List<int>())
+                    .Where(mapId => mapId >= 0)
+                    .Distinct()
+                    .ToList();
+                normalizedGroups.Add(group);
+            }
+
+            // Keep the last serialized owner, matching the previous dictionary rebuild,
+            // while removing references that can no longer be safely acted on.
+            var ownedPawns = new HashSet<Pawn>();
+            for (int groupIndex = normalizedGroups.Count - 1; groupIndex >= 0; groupIndex--)
+            {
+                MouseDisasterEventGroup group = normalizedGroups[groupIndex];
+                var normalizedPawns = new List<Pawn>();
+                for (int pawnIndex = group.pawns.Count - 1; pawnIndex >= 0; pawnIndex--)
+                {
+                    Pawn pawn = group.pawns[pawnIndex];
+                    if (!IsValidLoadedEventPawn(pawn) || !ownedPawns.Add(pawn))
+                    {
+                        continue;
+                    }
+
+                    normalizedPawns.Add(pawn);
+                }
+
+                normalizedPawns.Reverse();
+                group.pawns = normalizedPawns;
+            }
+
+            groups = normalizedGroups;
+            foreach (MouseDisasterEventGroup group in groups)
+            {
+                nextId = Math.Max(nextId, group.id);
+                byId[group.id] = group;
+                foreach (Pawn pawn in group.pawns)
+                {
+                    IndexPawn(group, pawn);
+                }
+            }
+        }
+
+        private static bool IsValidLoadedEventPawn(Pawn pawn)
+        {
+            return pawn != null && !pawn.Destroyed && !pawn.Dead && pawn.mindState != null &&
+                   MouseDisasterUtility.IsRatkin(pawn) &&
+                   !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) &&
+                   (pawn.Spawned || pawn.MapHeld != null || pawn.IsCaravanMember());
+        }
+
         public void Register(int groupId, IEnumerable<Pawn> pawns, bool apply = true)
         {
             if (!byId.TryGetValue(groupId, out var group) || pawns == null) return;
@@ -127,16 +194,17 @@ namespace MouseDisaster
                 if (pawn == null || !MouseDisasterUtility.IsRatkin(pawn) || MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn)) continue;
                 if (!byPawn.ContainsKey(pawn))
                 {
+                    group.pawns ??= new List<Pawn>();
                     group.pawns.Add(pawn); IndexPawn(group, pawn);
                     if (pawn.inventory != null)
                         foreach (Thing held in pawn.inventory.innerContainer)
                             if (held is Pawn child) pending.Enqueue(child);
                 }
-                if (byPawn[pawn] == group) added.Add(pawn);
+                if (byPawn.TryGetValue(pawn, out var owner) && owner == group) added.Add(pawn);
             }
             if (apply) Apply(group, added);
             foreach (var mapGroup in added.Where(p => p.MapHeld?.IsPlayerHome == true).GroupBy(p => p.MapHeld))
-                mapGroup.Key.GetComponent<MapComponent_MouseDisasterPredation>().Register(group, mapGroup);
+                mapGroup.Key.GetComponent<MapComponent_MouseDisasterPredation>()?.Register(group, mapGroup);
         }
 
         public bool TryGetGroup(Pawn pawn, out MouseDisasterEventGroup group)
@@ -168,12 +236,12 @@ namespace MouseDisaster
         {
             affected = 0;
             var handled = new HashSet<int>();
-            foreach (Pawn pawn in pawns)
+            foreach (Pawn pawn in pawns ?? Enumerable.Empty<Pawn>())
             {
                 if (pawn == null || MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) || !byPawn.TryGetValue(pawn, out var group) || !handled.Add(group.id)) continue;
                 var reaction = MouseDisasterEventPolicy.React(group.attitude, forcedAway);
                 if (reaction == MouseDisasterEventReaction.None) continue;
-                int memberCount = group.pawns.Count(p => p != null && p.Spawned && !p.Dead && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p));
+                int memberCount = group.pawns?.Count(p => p != null && p.Spawned && !p.Dead && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p)) ?? 0;
                 if (reaction == MouseDisasterEventReaction.GroupHostile)
                 {
                     if (group.hostile) { affected += memberCount; continue; }
@@ -200,7 +268,13 @@ namespace MouseDisaster
 
         private void Apply(MouseDisasterEventGroup group, IEnumerable<Pawn> members)
         {
-            var active = members.Where(p => p != null && p.Spawned && !p.Dead && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p)).Distinct().ToList();
+            if (group == null || members == null)
+            {
+                return;
+            }
+
+            var active = members.Where(p => p != null && p.Spawned && !p.Dead && p.mindState != null &&
+                !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p)).Distinct().ToList();
             if (active.Count == 0) return;
             Faction faction = MouseDisasterUtility.GetEventFaction(group.hostile, group.attitude == MouseDisasterEventAttitude.Friendly);
             if (faction == null) return;
@@ -226,7 +300,7 @@ namespace MouseDisaster
                     // Detach first so a peaceful cohort does not lose its lord or trigger departure transitions.
                     if (preserveDuty) lord?.RemovePawn(pawn);
                     pawn.SetFaction(faction);
-                    if (visitorState != null && !pawn.mindState.mentalStateHandler.TryStartMentalState(
+                    if (visitorState != null && pawn.mindState.mentalStateHandler != null && !pawn.mindState.mentalStateHandler.TryStartMentalState(
                         visitorState, forced: true, forceWake: true, transitionSilently: true))
                         Log.Warning("[MouseDisaster] Could not restore visitor state after faction change: " + pawn);
                     if (preserveDuty)
@@ -240,7 +314,7 @@ namespace MouseDisaster
                 if (!group.hostile && !group.leaving) MapComponent_MouseDisasterFoodTargets.Prime(pawn);
             }
             foreach (Lord lord in oldLords)
-                if (lord.ownedPawns.Count > 0 && lord.ownedPawns.All(p => p.Faction == faction)) lord.faction = faction;
+                if (lord != null && lord.ownedPawns != null && lord.ownedPawns.Count > 0 && lord.ownedPawns.All(p => p.Faction == faction)) lord.faction = faction;
             if (group.leaving) Flee(active);
             else if (group.hostile)
                 foreach (var mapPawns in active.Where(p => !p.Downed && p.DevelopmentalStage != DevelopmentalStage.Baby).GroupBy(p => p.Map))
@@ -267,11 +341,16 @@ namespace MouseDisaster
 
         public void NotifySpawned(Pawn pawn)
         {
-            if (pawn != null && byPawn.ContainsKey(pawn)) pendingSpawn.Add(pawn);
+            if (pawn != null && byPawn.TryGetValue(pawn, out _)) pendingSpawn.Add(pawn);
         }
 
         public override void GameComponentTick()
         {
+            if (Find.TickManager == null)
+            {
+                return;
+            }
+
             if (pendingSpawn.Count > 0)
             {
                 var pending = pendingSpawn.ToList(); pendingSpawn.Clear();
@@ -280,7 +359,7 @@ namespace MouseDisaster
                     {
                         Apply(group, new[] { pawn });
                         if (pawn.Map?.IsPlayerHome == true)
-                            pawn.Map.GetComponent<MapComponent_MouseDisasterPredation>().Register(group, new[] { pawn });
+                            pawn.Map.GetComponent<MapComponent_MouseDisasterPredation>()?.Register(group, new[] { pawn });
                     }
             }
             if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
@@ -288,6 +367,7 @@ namespace MouseDisaster
             {
                 var group = groups[i];
                 if (group == null) { groups.RemoveAt(i); continue; }
+                group.pawns ??= new List<Pawn>();
                 for (int j = group.pawns.Count - 1; j >= 0; j--)
                 {
                     Pawn pawn = group.pawns[j];
@@ -297,7 +377,7 @@ namespace MouseDisaster
                     if (pawn != null) { byPawn.Remove(pawn); profiles.Remove(pawn); }
                     group.pawns.RemoveAt(j);
                 }
-                if (group.pawns.Count == 0 && Current.Game.GetComponent<GameComponent_MouseDisasterPawnGeneration>()?.HasPendingBehaviorGroup(group.id) != true)
+                if (group.pawns.Count == 0 && Current.Game?.GetComponent<GameComponent_MouseDisasterPawnGeneration>()?.HasPendingBehaviorGroup(group.id) != true)
                 {
                     byId.Remove(group.id); groups.RemoveAt(i);
                 }

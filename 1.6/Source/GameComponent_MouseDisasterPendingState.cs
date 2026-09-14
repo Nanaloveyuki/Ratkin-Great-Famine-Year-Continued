@@ -85,6 +85,7 @@ namespace MouseDisaster
             MouseDisasterUtility.ResetLoadedGameTransientState();
             MouseDisasterPhase2Utility.CleanupLoadedPendingState();
             MouseDisasterUtility.CleanupLoadedPendingState();
+            MouseDisasterUtility.RepairLoadedTradeLeaders();
             MouseDisasterUtility.RestoreAbandonedDeliveryDuties();
             // Earlier versions cleared duties after creating the child-exchange defend Lord.
             foreach (Map map in Find.Maps)
