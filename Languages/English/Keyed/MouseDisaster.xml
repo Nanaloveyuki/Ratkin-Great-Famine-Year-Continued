@@ -213,6 +213,8 @@
   <MouseDisaster_VisitorControl_TemporaryRecruit>Take in the whole group temporarily ({0})</MouseDisaster_VisitorControl_TemporaryRecruit>
   <MouseDisaster_VisitorControl_HireAll>Hire the whole group ({0})</MouseDisaster_VisitorControl_HireAll>
   <MouseDisaster_VisitorControl_JoinAll>Let the whole group join the colony</MouseDisaster_VisitorControl_JoinAll>
+  <MouseDisaster_VisitorControl_EnslaveAll>Enslave the whole group</MouseDisaster_VisitorControl_EnslaveAll>
+  <MouseDisaster_VisitorControl_CaptureAll>Capture the whole group</MouseDisaster_VisitorControl_CaptureAll>
   <MouseDisaster_VisitorControl_AttackAll>Drive away the whole group by force</MouseDisaster_VisitorControl_AttackAll>
   <MouseDisaster_VisitorControl_SendToPrison>Send to prison</MouseDisaster_VisitorControl_SendToPrison>
   <MouseDisaster_VisitorControl_Hire>Hire as a worker ({0})</MouseDisaster_VisitorControl_Hire>
@@ -222,6 +224,8 @@
   <MouseDisaster_VisitorControl_TemporaryRecruit_Success>Temporarily took in {0} Ratkin visitors for {1}.</MouseDisaster_VisitorControl_TemporaryRecruit_Success>
   <MouseDisaster_VisitorControl_HireAll_Success>Hired {0} Ratkin visitors for {1}.</MouseDisaster_VisitorControl_HireAll_Success>
   <MouseDisaster_VisitorControl_JoinAll_Success>Allowed {0} Ratkin visitors to join the colony.</MouseDisaster_VisitorControl_JoinAll_Success>
+  <MouseDisaster_VisitorControl_EnslaveAll_Success>Enslaved {0} Ratkin visitors.</MouseDisaster_VisitorControl_EnslaveAll_Success>
+  <MouseDisaster_VisitorControl_CaptureAll_Success>Captured {0} Ratkin visitors as prisoners.</MouseDisaster_VisitorControl_CaptureAll_Success>
   <MouseDisaster_VisitorControl_AttackAll_Success>Drove {0} Ratkin visitors into hostility.</MouseDisaster_VisitorControl_AttackAll_Success>
   <MouseDisaster_VisitorControl_SendToPrison_Success>Sent {0} Ratkin visitors to the prison area.</MouseDisaster_VisitorControl_SendToPrison_Success>
   <MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>There is no available prison area on this map.</MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>

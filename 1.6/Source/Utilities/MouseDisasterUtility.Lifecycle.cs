@@ -187,11 +187,30 @@ namespace MouseDisaster
             }
 
             StripNonMouseDisasterGenes(pawn);
+            bool isManagedPawn = IsMouseDisasterPawn(pawn) || IsMouseDisasterIncidentVisitor(pawn);
+            bool hasVirtualDefaultRatkinXenotype =
+                MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(pawn.genes.Xenotype);
+            if (hasVirtualDefaultRatkinXenotype)
+            {
+                MouseDisasterSubtypeUtility.MigrateVirtualDefaultRatkinXenotype(pawn);
+            }
+
+            bool hasRatkinLikeXenotype = pawn.genes.Xenotype != null &&
+                                         MouseDisasterBirthPolicy.IsRatkinLikeXenotype(
+                                             pawn.genes.Xenotype.defName,
+                                             pawn.genes.Xenotype.label) &&
+                                         !MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(
+                                             pawn.genes.Xenotype);
+            bool hasManualRemovalMarker = HasManualMouseDisasterGeneRemovalMarker(pawn);
+            if (isManagedPawn && !hasRatkinLikeXenotype && !hasManualRemovalMarker)
+            {
+                MouseDisasterSubtypeUtility.ApplyDefaultSubtypeGenes(pawn);
+            }
 
             MouseDisasterGeneRestoreDecision decision = MouseDisasterGeneRestorePolicy.DecideMissingGeneRestore(
                 isIncidentVisitor: IsMouseDisasterIncidentVisitor(pawn),
                 hasMouseDisasterGenes: HasAnyMouseDisasterGene(pawn),
-                hasManualRemovalMarker: HasManualMouseDisasterGeneRemovalMarker(pawn));
+                hasManualRemovalMarker: hasManualRemovalMarker);
 
             if (decision == MouseDisasterGeneRestoreDecision.SuppressRestore)
             {

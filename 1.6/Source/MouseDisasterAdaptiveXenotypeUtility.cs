@@ -9,6 +9,7 @@ namespace MouseDisaster
     internal static class MouseDisasterAdaptiveXenotypeUtility
     {
         private const string MouseDisasterXenotypePrefix = "MouseDisasterSubtype_";
+        private const string VirtualDefaultRatkinXenotypeDefName = "MouseDisasterSubtype_ratkin";
 
         public static List<XenotypeDef> GetCandidates()
         {
@@ -37,6 +38,12 @@ namespace MouseDisaster
             return xenotype != null &&
                    !string.IsNullOrEmpty(xenotype.defName) &&
                    xenotype.defName.StartsWith(MouseDisasterXenotypePrefix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsVirtualDefaultRatkinXenotype(XenotypeDef xenotype)
+        {
+            return xenotype != null &&
+                   string.Equals(xenotype.defName, VirtualDefaultRatkinXenotypeDefName, StringComparison.OrdinalIgnoreCase);
         }
 
         public static float GetDefaultSpawnWeight(XenotypeDef xenotype)
@@ -68,7 +75,8 @@ namespace MouseDisaster
             for (int i = 0; i < candidates.Count; i++)
             {
                 XenotypeDef candidate = candidates[i];
-                if (excludedDefNames != null && excludedDefNames.Contains(candidate.defName))
+                XenotypeDef resolvedCandidate = ResolveGeneratedXenotype(candidate);
+                if (resolvedCandidate == null || IsExcluded(candidate, resolvedCandidate, excludedDefNames))
                 {
                     continue;
                 }
@@ -86,7 +94,8 @@ namespace MouseDisaster
             for (int i = 0; i < candidates.Count; i++)
             {
                 XenotypeDef candidate = candidates[i];
-                if (excludedDefNames != null && excludedDefNames.Contains(candidate.defName))
+                XenotypeDef resolvedCandidate = ResolveGeneratedXenotype(candidate);
+                if (resolvedCandidate == null || IsExcluded(candidate, resolvedCandidate, excludedDefNames))
                 {
                     continue;
                 }
@@ -101,11 +110,39 @@ namespace MouseDisaster
                 roll -= weight;
                 if (roll <= 0f)
                 {
-                    return candidate;
+                    return resolvedCandidate;
                 }
             }
 
-            return lastCandidate;
+            return ResolveGeneratedXenotype(lastCandidate);
+        }
+
+        private static bool IsExcluded(
+            XenotypeDef candidate,
+            XenotypeDef resolvedCandidate,
+            ISet<string> excludedDefNames)
+        {
+            if (excludedDefNames == null)
+            {
+                return false;
+            }
+
+            if (candidate != null && excludedDefNames.Contains(candidate.defName))
+            {
+                return true;
+            }
+
+            return resolvedCandidate != null && excludedDefNames.Contains(resolvedCandidate.defName);
+        }
+
+        private static XenotypeDef ResolveGeneratedXenotype(XenotypeDef candidate)
+        {
+            if (!IsVirtualDefaultRatkinXenotype(candidate))
+            {
+                return candidate;
+            }
+
+            return MouseDisasterUtility.ResolveRatkinBaseXenotype();
         }
     }
 }

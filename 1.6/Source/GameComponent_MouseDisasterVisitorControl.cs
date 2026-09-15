@@ -305,6 +305,64 @@ namespace MouseDisaster
             return joinedCount > 0;
         }
 
+        public bool TryEnslave(IEnumerable<Pawn> pawns, out int enslavedCount, out string failureMessage)
+        {
+            enslavedCount = 0;
+            failureMessage = "MouseDisaster_VisitorControl_NoValidTarget".Translate();
+            if (!ModsConfig.IdeologyActive)
+            {
+                return false;
+            }
+
+            List<Pawn> validPawns = GetRecruitableVisitors(pawns);
+            if (validPawns.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < validPawns.Count; i++)
+            {
+                Pawn pawn = validPawns[i];
+                MouseDisasterVisitorRecord record = GetRecord(pawn);
+                if (record == null || !TrySetVisitorCaptiveStatus(pawn, GuestStatus.Slave))
+                {
+                    continue;
+                }
+
+                ForgetRecord(record);
+                enslavedCount++;
+            }
+
+            return enslavedCount > 0;
+        }
+
+        public bool TryCapture(IEnumerable<Pawn> pawns, out int capturedCount, out string failureMessage)
+        {
+            capturedCount = 0;
+            failureMessage = "MouseDisaster_VisitorControl_NoValidTarget".Translate();
+
+            List<Pawn> validPawns = GetRecruitableVisitors(pawns);
+            if (validPawns.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < validPawns.Count; i++)
+            {
+                Pawn pawn = validPawns[i];
+                MouseDisasterVisitorRecord record = GetRecord(pawn);
+                if (record == null || !TrySetVisitorCaptiveStatus(pawn, GuestStatus.Prisoner))
+                {
+                    continue;
+                }
+
+                ForgetRecord(record);
+                capturedCount++;
+            }
+
+            return capturedCount > 0;
+        }
+
         public bool TrySendToPrison(IEnumerable<Pawn> pawns, Map map, out int imprisonedCount, out string failureMessage)
         {
             imprisonedCount = 0;
@@ -657,6 +715,62 @@ namespace MouseDisaster
             }
 
             MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+        }
+
+        private static bool TrySetVisitorCaptiveStatus(Pawn pawn, GuestStatus status)
+        {
+            if (pawn == null || pawn.Dead || !pawn.Spawned || pawn.Map == null)
+            {
+                return false;
+            }
+
+            PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, actAsIfSpawned: true);
+            if (pawn.guest == null)
+            {
+                PawnComponentsUtility.CreateInitialComponents(pawn);
+            }
+
+            if (pawn.guest == null)
+            {
+                return false;
+            }
+
+            ReleaseGuestState(pawn);
+            MouseDisasterUtility.UnmarkTradableChattel(pawn);
+            MouseDisasterUtility.ConsumeForcedPrisonerOnPurchase(pawn);
+            MouseDisasterUtility.ClearTradeLeaderState(pawn);
+            MouseDisasterUtility.ResetBeggarState(pawn);
+            MouseDisasterUtility.RemoveAllIncidentVisitorHediffs(pawn);
+            pawn.mindState?.mentalStateHandler?.Reset();
+            if (pawn.mindState != null)
+            {
+                pawn.mindState.duty = null;
+                pawn.mindState.canFleeIndividual = false;
+                pawn.mindState.exitMapAfterTick = -1;
+            }
+
+            pawn.jobs?.StopAll();
+            pawn.GetLord()?.RemovePawn(pawn);
+            pawn.guest.joinStatus = status == GuestStatus.Slave
+                ? JoinStatus.JoinAsSlave
+                : JoinStatus.JoinAsColonist;
+
+            if (status == GuestStatus.Prisoner)
+            {
+                if (pawn.Faction == Faction.OfPlayer)
+                {
+                    pawn.SetFaction(null);
+                }
+
+                pawn.guest.CapturedBy(Faction.OfPlayer);
+            }
+            else
+            {
+                pawn.guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Slave);
+            }
+
+            MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+            return status == GuestStatus.Slave ? pawn.IsSlaveOfColony : pawn.IsPrisonerOfColony;
         }
 
         private static bool TrySendPawnToPrison(Pawn pawn, Map map, IntVec3 prisonCell)
@@ -1024,6 +1138,35 @@ namespace MouseDisaster
             return !IsN007ControlBlocked(pawns) && Component != null && Component.TryJoin(pawns, out joinedCount);
         }
 
+        public static bool TryEnslaveAll(IEnumerable<Pawn> pawns, out int enslavedCount, out string failureMessage)
+        {
+            enslavedCount = 0;
+            failureMessage = "MouseDisaster_VisitorControl_NoValidTarget".Translate();
+            if (IsN007ControlBlocked(pawns))
+            {
+                failureMessage = "MouseDisaster_N007_VisitorControlBlocked".Translate();
+                return false;
+            }
+
+            return ModsConfig.IdeologyActive &&
+                   Component != null &&
+                   Component.TryEnslave(pawns, out enslavedCount, out failureMessage);
+        }
+
+        public static bool TryCaptureAll(IEnumerable<Pawn> pawns, out int capturedCount, out string failureMessage)
+        {
+            capturedCount = 0;
+            failureMessage = "MouseDisaster_VisitorControl_NoValidTarget".Translate();
+            if (IsN007ControlBlocked(pawns))
+            {
+                failureMessage = "MouseDisaster_N007_VisitorControlBlocked".Translate();
+                return false;
+            }
+
+            return Component != null &&
+                   Component.TryCapture(pawns, out capturedCount, out failureMessage);
+        }
+
         public static bool HasAvailablePrisonArea(Map map)
         {
             return MouseDisasterPrisonTransferUtility.HasAvailablePrisonArea(map);
@@ -1064,24 +1207,43 @@ namespace MouseDisaster
 
         public static bool SendVisitorChoiceLetter(IncidentDef incidentDef, IncidentParms parms, Map map, IEnumerable<Pawn> pawns)
         {
-            List<Pawn> visitorList = GetActiveVisitors(pawns);
-            if (incidentDef == null || map == null || visitorList.Count == 0)
+            if (incidentDef == null || map == null)
             {
                 return false;
             }
 
-            ChoiceLetter_MouseDisasterVisitorControl letter =
-                LetterMaker.MakeLetter(incidentDef.letterLabel, incidentDef.letterText, MouseDisasterDefOf.MouseDisaster_VisitorControlLetter, visitorList) as ChoiceLetter_MouseDisasterVisitorControl;
-            if (letter == null)
+            List<Pawn> candidates = pawns?
+                .Where(pawn => pawn != null && !pawn.Dead && pawn.Spawned && pawn.Map == map)
+                .Distinct()
+                .ToList() ?? new List<Pawn>();
+            RegisterVisitors(candidates);
+            List<Pawn> visitorList = GetActiveVisitors(candidates);
+            if (visitorList.Count == 0)
             {
                 return false;
             }
 
-            letter.map = map;
-            letter.visitors = visitorList;
-            letter.incidentDefName = incidentDef.defName;
-            Find.LetterStack.ReceiveLetter(letter, null);
-            return true;
+            try
+            {
+                ChoiceLetter_MouseDisasterVisitorControl letter =
+                    LetterMaker.MakeLetter(incidentDef.letterLabel, incidentDef.letterText, MouseDisasterDefOf.MouseDisaster_VisitorControlLetter, visitorList) as ChoiceLetter_MouseDisasterVisitorControl;
+                if (letter == null)
+                {
+                    Log.Warning("[MouseDisaster] Visitor choice letter could not be created for " + incidentDef.defName + ".");
+                    return false;
+                }
+
+                letter.map = map;
+                letter.visitors = visitorList;
+                letter.incidentDefName = incidentDef.defName;
+                Find.LetterStack.ReceiveLetter(letter, null);
+                return true;
+            }
+            catch (System.Exception exception)
+            {
+                Log.Error("[MouseDisaster] Visitor choice letter failed for " + incidentDef.defName + ": " + exception);
+                return false;
+            }
         }
 
         public static bool RegisterAndSendVisitorChoiceLetter(IncidentDef incidentDef, IncidentParms parms, Map map, IEnumerable<Pawn> pawns)

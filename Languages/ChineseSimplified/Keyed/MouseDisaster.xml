@@ -216,6 +216,8 @@
   <MouseDisaster_VisitorControl_TemporaryRecruit>临时招募整批（{0}）</MouseDisaster_VisitorControl_TemporaryRecruit>
   <MouseDisaster_VisitorControl_HireAll>雇佣整批为长工（{0}）</MouseDisaster_VisitorControl_HireAll>
   <MouseDisaster_VisitorControl_JoinAll>同意整批加入殖民地</MouseDisaster_VisitorControl_JoinAll>
+  <MouseDisaster_VisitorControl_EnslaveAll>奴役整批</MouseDisaster_VisitorControl_EnslaveAll>
+  <MouseDisaster_VisitorControl_CaptureAll>俘虏整批</MouseDisaster_VisitorControl_CaptureAll>
   <MouseDisaster_VisitorControl_AttackAll>驱赶攻击整批</MouseDisaster_VisitorControl_AttackAll>
   <MouseDisaster_VisitorControl_SendToPrison>监狱需要你</MouseDisaster_VisitorControl_SendToPrison>
   <MouseDisaster_VisitorControl_Hire>雇佣长工（{0}）</MouseDisaster_VisitorControl_Hire>
@@ -225,6 +227,8 @@
   <MouseDisaster_VisitorControl_TemporaryRecruit_Success>已临时招募 {0} 名鼠灾访客，期限 {1}。</MouseDisaster_VisitorControl_TemporaryRecruit_Success>
   <MouseDisaster_VisitorControl_HireAll_Success>已雇佣 {0} 名鼠灾访客为长工，期限 {1}。</MouseDisaster_VisitorControl_HireAll_Success>
   <MouseDisaster_VisitorControl_JoinAll_Success>已同意 {0} 名鼠灾访客加入殖民地。</MouseDisaster_VisitorControl_JoinAll_Success>
+  <MouseDisaster_VisitorControl_EnslaveAll_Success>已将 {0} 名鼠灾访客奴役。</MouseDisaster_VisitorControl_EnslaveAll_Success>
+  <MouseDisaster_VisitorControl_CaptureAll_Success>已将 {0} 名鼠灾访客俘虏为囚犯。</MouseDisaster_VisitorControl_CaptureAll_Success>
   <MouseDisaster_VisitorControl_AttackAll_Success>这批鼠灾访客已被驱赶为敌对，共 {0} 名。</MouseDisaster_VisitorControl_AttackAll_Success>
   <MouseDisaster_VisitorControl_SendToPrison_Success>已将 {0} 名鼠灾访客丢进监狱区域。</MouseDisaster_VisitorControl_SendToPrison_Success>
   <MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>当前地图没有可用的边缘监狱区域。</MouseDisaster_VisitorControl_SendToPrison_NoPrisonArea>

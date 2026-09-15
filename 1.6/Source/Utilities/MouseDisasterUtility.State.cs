@@ -17,6 +17,7 @@ namespace MouseDisaster
         private const string RatkinXenotypeDefName = "Ratkin";
         private static readonly string[] PreferredRatkinXenotypeDefNames =
         {
+            "RK_XenoType_Ratkin",
             "Ratkin_HouseMouse",
             "Ratkin_Mole",
             "Ratkin_LabRat",

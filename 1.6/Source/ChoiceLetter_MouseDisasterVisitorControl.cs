@@ -107,6 +107,52 @@ namespace MouseDisaster
                     joinAll.resolveTree = true;
                 }
 
+                DiaOption enslaveAll = new DiaOption("MouseDisaster_VisitorControl_EnslaveAll".Translate());
+                if (!ModsConfig.IdeologyActive || recruitableVisitors.Count == 0)
+                {
+                    enslaveAll.Disable(null);
+                }
+                else
+                {
+                    enslaveAll.action = delegate
+                    {
+                        if (MouseDisasterVisitorUtility.TryEnslaveAll(recruitableVisitors, out int enslavedCount, out string message))
+                        {
+                            Messages.Message("MouseDisaster_VisitorControl_EnslaveAll_Success".Translate(enslavedCount), recruitableVisitors, MessageTypeDefOf.NeutralEvent, historical: false);
+                        }
+                        else
+                        {
+                            Messages.Message(message, MessageTypeDefOf.RejectInput);
+                        }
+
+                        Find.LetterStack.RemoveLetter(this);
+                    };
+                    enslaveAll.resolveTree = true;
+                }
+
+                DiaOption captureAll = new DiaOption("MouseDisaster_VisitorControl_CaptureAll".Translate());
+                if (recruitableVisitors.Count == 0)
+                {
+                    captureAll.Disable(null);
+                }
+                else
+                {
+                    captureAll.action = delegate
+                    {
+                        if (MouseDisasterVisitorUtility.TryCaptureAll(recruitableVisitors, out int capturedCount, out string message))
+                        {
+                            Messages.Message("MouseDisaster_VisitorControl_CaptureAll_Success".Translate(capturedCount), recruitableVisitors, MessageTypeDefOf.NeutralEvent, historical: false);
+                        }
+                        else
+                        {
+                            Messages.Message(message, MessageTypeDefOf.RejectInput);
+                        }
+
+                        Find.LetterStack.RemoveLetter(this);
+                    };
+                    captureAll.resolveTree = true;
+                }
+
                 DiaOption attackAll = new DiaOption("MouseDisaster_VisitorControl_AttackAll".Translate());
                 if (recruitableVisitors.Count == 0)
                 {
@@ -159,12 +205,16 @@ namespace MouseDisaster
                     temporaryRecruit.Disable(reason);
                     hireAll.Disable(reason);
                     joinAll.Disable(reason);
+                    enslaveAll.Disable(reason);
+                    captureAll.Disable(reason);
                     attackAll.Disable(reason);
                 }
 
                 yield return temporaryRecruit;
                 yield return hireAll;
                 yield return joinAll;
+                yield return enslaveAll;
+                yield return captureAll;
                 yield return attackAll;
                 yield return giveFood;
 

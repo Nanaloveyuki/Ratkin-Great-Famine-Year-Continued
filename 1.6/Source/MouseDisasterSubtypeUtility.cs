@@ -10,6 +10,7 @@ namespace MouseDisaster
     public static class MouseDisasterSubtypeUtility
     {
         private const string DefaultSubtypeKey = "ratkin";
+        private const string LocalSubtypeXenotypePrefix = "MouseDisasterSubtype_";
 
         private static readonly string[] SubtypeAnchorKeywords =
         {
@@ -50,7 +51,7 @@ namespace MouseDisaster
             { "experiment", new[] { "Ratkin_VolePrototype", "Ratkin_LabRat" } },
             { "gerbil", new[] { "Ratkin_Vole", "Ratkin_HouseMouse" } },
             { "shrew", new[] { "Ratkin_Squirrel", "Ratkin_HouseMouse" } },
-            { "ratkin", new[] { "Ratkin_HouseMouse", "Ratkin" } }
+            { "ratkin", new[] { "RK_XenoType_Ratkin", "Ratkin_HouseMouse", "Ratkin" } }
         };
 
         private static readonly string[] ExternalMarkerGeneNamePool =
@@ -163,6 +164,35 @@ namespace MouseDisaster
 
         public static void ApplySubtypeGenes(Pawn pawn, Pawn subtypeSource = null)
         {
+            ApplySubtypeGenesCore(pawn, subtypeSource, chooseSpawnSubtype: true, forcedSubtypeKey: null);
+        }
+
+        public static void ApplyDefaultSubtypeGenes(Pawn pawn)
+        {
+            ApplySubtypeGenesCore(pawn, subtypeSource: null, chooseSpawnSubtype: false, forcedSubtypeKey: DefaultSubtypeKey);
+        }
+
+        public static void MigrateVirtualDefaultRatkinXenotype(Pawn pawn)
+        {
+            if (!ModsConfig.BiotechActive || pawn?.genes == null ||
+                !MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(pawn.genes.Xenotype))
+            {
+                return;
+            }
+
+            XenotypeDef defaultRatkinXenotype = MouseDisasterUtility.ResolveRatkinBaseXenotype();
+            if (defaultRatkinXenotype != null && pawn.genes.Xenotype != defaultRatkinXenotype)
+            {
+                pawn.genes.SetXenotype(defaultRatkinXenotype);
+            }
+        }
+
+        private static void ApplySubtypeGenesCore(
+            Pawn pawn,
+            Pawn subtypeSource,
+            bool chooseSpawnSubtype,
+            string forcedSubtypeKey)
+        {
             if (!ModsConfig.BiotechActive || pawn?.genes == null || !MouseDisasterUtility.IsRatkin(pawn))
             {
                 return;
@@ -174,8 +204,14 @@ namespace MouseDisaster
                 return;
             }
 
-            string subtypeKey = ResolveSubtypeKey(subtypeSource ?? pawn);
-            if (string.Equals(subtypeKey, DefaultSubtypeKey, StringComparison.OrdinalIgnoreCase) && (subtypeSource == null || subtypeSource == pawn))
+            string subtypeKey = forcedSubtypeKey.NullOrEmpty()
+                ? ResolveSubtypeKey(subtypeSource ?? pawn)
+                : forcedSubtypeKey;
+            if (chooseSpawnSubtype &&
+                string.Equals(subtypeKey, DefaultSubtypeKey, StringComparison.OrdinalIgnoreCase) &&
+                (subtypeSource == null || subtypeSource == pawn) &&
+                !MouseDisasterAdaptiveXenotypeUtility.IsMouseDisasterXenotype(pawn.genes.Xenotype) &&
+                !IsDefaultRatkinXenotype(pawn.genes.Xenotype))
             {
                 subtypeKey = ChooseSpawnSubtypeKey(pawn);
             }
@@ -186,6 +222,7 @@ namespace MouseDisaster
                 return;
             }
 
+            ApplySubtypeXenotype(pawn, subtypeKey);
             RemoveMouseDisasterGenes(pawn, genePool);
             for (int i = 0; i < targetGenes.Count; i++)
             {
@@ -208,6 +245,17 @@ namespace MouseDisaster
             if (pawn == null)
             {
                 return DefaultSubtypeKey;
+            }
+
+            if (IsDefaultRatkinXenotype(pawn.genes?.Xenotype))
+            {
+                return DefaultSubtypeKey;
+            }
+
+            string localXenotypeKey = ResolveLocalXenotypeKey(pawn.genes?.Xenotype);
+            if (!localXenotypeKey.NullOrEmpty())
+            {
+                return localXenotypeKey;
             }
 
             string fromGenes = ResolveSubtypeKeyFromActiveGenes(pawn);
@@ -496,10 +544,10 @@ namespace MouseDisaster
                     continue;
                 }
 
-                const string prefix = "MouseDisasterSubtype_";
-                if (defName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && defName.Length > prefix.Length)
+                if (defName.StartsWith(LocalSubtypeXenotypePrefix, StringComparison.OrdinalIgnoreCase) &&
+                    defName.Length > LocalSubtypeXenotypePrefix.Length)
                 {
-                    keys.Add(defName.Substring(prefix.Length).ToLowerInvariant());
+                    keys.Add(defName.Substring(LocalSubtypeXenotypePrefix.Length).ToLowerInvariant());
                 }
             }
 
@@ -730,11 +778,32 @@ namespace MouseDisaster
                 return;
             }
 
+            XenotypeDef currentXenotype = pawn.genes.Xenotype;
+            if (currentXenotype != null &&
+                MouseDisasterBirthPolicy.IsRatkinLikeXenotype(currentXenotype.defName, currentXenotype.label) &&
+                !MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(currentXenotype))
+            {
+                return;
+            }
+
             XenotypeDef subtypeXenotype = ResolveSubtypeXenotypeDef(subtypeKey);
             if (subtypeXenotype != null && pawn.genes.Xenotype != subtypeXenotype)
             {
                 pawn.genes.SetXenotype(subtypeXenotype);
             }
+        }
+
+        private static string ResolveLocalXenotypeKey(XenotypeDef xenotype)
+        {
+            string defName = xenotype?.defName;
+            if (defName.NullOrEmpty() ||
+                !defName.StartsWith(LocalSubtypeXenotypePrefix, StringComparison.OrdinalIgnoreCase) ||
+                defName.Length <= LocalSubtypeXenotypePrefix.Length)
+            {
+                return null;
+            }
+
+            return defName.Substring(LocalSubtypeXenotypePrefix.Length).ToLowerInvariant();
         }
 
         private static XenotypeDef ResolveSubtypeXenotypeDef(string subtypeKey)
@@ -744,8 +813,18 @@ namespace MouseDisaster
                 return null;
             }
 
-            XenotypeDef localSubtype = DefDatabase<XenotypeDef>.GetNamedSilentFail("MouseDisasterSubtype_" + subtypeKey);
-            if (localSubtype != null)
+            if (string.Equals(subtypeKey, DefaultSubtypeKey, StringComparison.OrdinalIgnoreCase))
+            {
+                XenotypeDef defaultRatkinXenotype = MouseDisasterUtility.ResolveRatkinBaseXenotype();
+                if (defaultRatkinXenotype != null)
+                {
+                    return defaultRatkinXenotype;
+                }
+            }
+
+            bool isDefaultSubtype = string.Equals(subtypeKey, DefaultSubtypeKey, StringComparison.OrdinalIgnoreCase);
+            XenotypeDef localSubtype = DefDatabase<XenotypeDef>.GetNamedSilentFail(LocalSubtypeXenotypePrefix + subtypeKey);
+            if (!isDefaultSubtype && localSubtype != null)
             {
                 return localSubtype;
             }
@@ -775,6 +854,13 @@ namespace MouseDisaster
             }
 
             return DefDatabase<XenotypeDef>.GetNamedSilentFail("Ratkin") ?? DefDatabase<XenotypeDef>.GetNamedSilentFail("Baseliner");
+        }
+
+        private static bool IsDefaultRatkinXenotype(XenotypeDef xenotype)
+        {
+            return xenotype != null &&
+                   !MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(xenotype) &&
+                   xenotype == MouseDisasterUtility.ResolveRatkinBaseXenotype();
         }
 
         private static bool CanResolveSubtypeXenotype(string subtypeKey)

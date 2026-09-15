@@ -46,25 +46,113 @@ namespace MouseDisaster
                     attemptedXenotypeDefNames.Add(selectedXenotype.defName);
                 }
 
-                Pawn generated = PawnGenerator.GeneratePawn(CreateRatkinGenerationRequest(
+                pawn = TryGenerateRatkinPawnCandidate(
                     generationKindDef,
                     requestFaction,
                     stage,
                     allowViolenceDisabledTraits,
                     fixedGender,
-                    selectedXenotype));
-                if (generated != null && (expectedRace == null || generated.def == expectedRace))
+                    fixedAgeYears,
+                    expectedRace,
+                    selectedXenotype,
+                    safeXenotypeFallback: false);
+                if (pawn != null)
                 {
-                    pawn = generated;
                     break;
                 }
-
-                generated?.Destroy(DestroyMode.Vanish);
             }
 
+            if (pawn == null)
+            {
+                pawn = TryGenerateRatkinPawnCandidate(
+                    generationKindDef,
+                    formerFaction,
+                    stage,
+                    allowViolenceDisabledTraits,
+                    fixedGender,
+                    fixedAgeYears,
+                    expectedRace,
+                    selectedXenotype: null,
+                    safeXenotypeFallback: true);
+                if (pawn != null)
+                {
+                    Log.Warning("[MouseDisaster] Ratkin pawn generation used the safe Ratkin xenotype fallback for " +
+                        generationKindDef.defName + " (" + stage + ").");
+                }
+            }
+
+            return pawn;
+        }
+
+        private static Pawn TryGenerateRatkinPawnCandidate(
+            PawnKindDef generationKindDef,
+            Faction requestFaction,
+            DevelopmentalStage stage,
+            bool allowViolenceDisabledTraits,
+            Gender? fixedGender,
+            float? fixedAgeYears,
+            ThingDef expectedRace,
+            XenotypeDef selectedXenotype,
+            bool safeXenotypeFallback)
+        {
+            Pawn generated = null;
+            XenotypeDef requestedXenotype = selectedXenotype;
+            if (requestedXenotype == null && safeXenotypeFallback)
+            {
+                requestedXenotype = ResolveRatkinBaseXenotype();
+            }
+
+            try
+            {
+                generated = PawnGenerator.GeneratePawn(CreateRatkinGenerationRequest(
+                    generationKindDef,
+                    requestFaction,
+                    stage,
+                    allowViolenceDisabledTraits,
+                    fixedGender,
+                    selectedXenotype,
+                    safeXenotypeFallback));
+                if (generated == null || (expectedRace != null && generated.def != expectedRace))
+                {
+                    generated?.Destroy(DestroyMode.Vanish);
+                    return null;
+                }
+
+                if (!TryPrepareRatkinPawn(generated, generationKindDef, stage, fixedAgeYears, requestedXenotype))
+                {
+                    generated.Destroy(DestroyMode.Vanish);
+                    return null;
+                }
+
+                return generated;
+            }
+            catch (Exception exception)
+            {
+                generated?.Destroy(DestroyMode.Vanish);
+                Log.Warning("[MouseDisaster] Ratkin pawn generation attempt failed for " +
+                    generationKindDef.defName + " (" + stage + ", xenotype=" +
+                    (requestedXenotype?.defName ?? (safeXenotypeFallback ? "SafeRatkinFallback" : "default")) +
+                    "): " + exception);
+                return null;
+            }
+        }
+
+        private static bool TryPrepareRatkinPawn(
+            Pawn pawn,
+            PawnKindDef generationKindDef,
+            DevelopmentalStage stage,
+            float? fixedAgeYears,
+            XenotypeDef requestedXenotype)
+        {
             if (!IsRatkin(pawn))
             {
-                return null;
+                return false;
+            }
+
+            if (ModsConfig.BiotechActive && pawn.genes != null && requestedXenotype != null &&
+                pawn.genes.Xenotype != requestedXenotype)
+            {
+                pawn.genes.SetXenotype(requestedXenotype);
             }
 
             EnsureRatkinIdentity(pawn, generationKindDef, stage);
@@ -102,7 +190,7 @@ namespace MouseDisaster
             MouseDisasterPawnHistoryCatalog.TryApply(pawn, stage);
             RefreshRatkinDevelopmentalPresentation(pawn);
 
-            return pawn;
+            return true;
         }
 
         private static PawnGenerationRequest CreateRatkinGenerationRequest(
@@ -111,8 +199,34 @@ namespace MouseDisaster
             DevelopmentalStage stage,
             bool allowViolenceDisabledTraits,
             Gender? fixedGender,
-            XenotypeDef selectedXenotype)
+            XenotypeDef selectedXenotype,
+            bool safeXenotypeFallback)
         {
+            List<XenotypeDef> allowedXenotypes = null;
+            if (ModsConfig.BiotechActive)
+            {
+                if (safeXenotypeFallback)
+                {
+                    XenotypeDef safeRatkinXenotype = ResolveRatkinBaseXenotype();
+                    if (safeRatkinXenotype != null)
+                    {
+                        allowedXenotypes = new List<XenotypeDef> { safeRatkinXenotype };
+                    }
+                    else if (XenotypeDefOf.Baseliner != null)
+                    {
+                        allowedXenotypes = new List<XenotypeDef> { XenotypeDefOf.Baseliner };
+                    }
+                }
+                else if (selectedXenotype != null)
+                {
+                    allowedXenotypes = new List<XenotypeDef> { selectedXenotype };
+                }
+                else
+                {
+                    allowedXenotypes = ResolveAllowedRatkinXenotypes();
+                }
+            }
+
             return new PawnGenerationRequest(
                 kindDef,
                 faction,
@@ -124,9 +238,7 @@ namespace MouseDisaster
                 developmentalStages: stage,
                 fixedGender: fixedGender,
                 forceBaselinerChance: 0f,
-                allowedXenotypes: selectedXenotype == null
-                    ? ResolveAllowedRatkinXenotypes()
-                    : new List<XenotypeDef> { selectedXenotype });
+                allowedXenotypes: allowedXenotypes);
         }
 
         private static void EnsureRatkinIdentity(Pawn pawn, PawnKindDef generatedKindDef, DevelopmentalStage stage)

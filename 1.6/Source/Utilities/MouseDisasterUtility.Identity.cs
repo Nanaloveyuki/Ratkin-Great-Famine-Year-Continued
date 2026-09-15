@@ -524,7 +524,7 @@ namespace MouseDisaster
             return ratkinRaceDef;
         }
 
-        private static XenotypeDef ResolveRatkinXenotypeDef()
+        internal static XenotypeDef ResolveRatkinBaseXenotype()
         {
             if (ratkinXenotypeResolved)
             {
@@ -534,20 +534,17 @@ namespace MouseDisaster
             ratkinXenotypeResolved = true;
             bool preferChineseLabel = IsChineseLanguageActive();
             List<XenotypeDef> ratkinXenotypes = DefDatabase<XenotypeDef>.AllDefsListForReading
-                .Where(def => def != null && IsRatkinXenotypeDef(def))
+                .Where(def => def != null &&
+                              IsRatkinXenotypeDef(def) &&
+                              !MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(def))
                 .ToList();
-
-            XenotypeDef localDefaultSubtype = DefDatabase<XenotypeDef>.GetNamedSilentFail("MouseDisasterSubtype_ratkin");
-            if (localDefaultSubtype != null)
-            {
-                ratkinXenotypeDef = localDefaultSubtype;
-                return ratkinXenotypeDef;
-            }
 
             for (int i = 0; i < PreferredRatkinXenotypeDefNames.Length; i++)
             {
                 XenotypeDef preferred = DefDatabase<XenotypeDef>.GetNamedSilentFail(PreferredRatkinXenotypeDefNames[i]);
-                if (preferred != null && IsRatkinXenotypeDef(preferred))
+                if (preferred != null &&
+                    IsRatkinXenotypeDef(preferred) &&
+                    !MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(preferred))
                 {
                     ratkinXenotypeDef = preferred;
                     return ratkinXenotypeDef;
@@ -563,7 +560,7 @@ namespace MouseDisaster
             {
                 XenotypeDef localized = ratkinXenotypes
                     .Where(def => HasChineseCharacters(def.label) || def.defName.EqualsIgnoreCase(RatkinXenotypeDefName))
-                    .OrderByDescending(def => def.defName.EqualsIgnoreCase("MouseDisasterSubtype_ratkin"))
+                    .OrderByDescending(def => def.defName.EqualsIgnoreCase("RK_XenoType_Ratkin"))
                     .ThenByDescending(def => def.defName.EqualsIgnoreCase(RatkinXenotypeDefName))
                     .ThenByDescending(def => HasChineseCharacters(def.label))
                     .ThenBy(def => def.defName)
@@ -578,7 +575,7 @@ namespace MouseDisaster
             ratkinXenotypeDef = ratkinXenotypes
                 .OrderBy(def => (def.defName ?? string.Empty).IndexOf("waster", StringComparison.OrdinalIgnoreCase) >= 0)
                 .ThenByDescending(IsRatkinXenotypeDef)
-                .ThenByDescending(def => def.defName.EqualsIgnoreCase("MouseDisasterSubtype_ratkin"))
+                .ThenByDescending(def => def.defName.EqualsIgnoreCase("RK_XenoType_Ratkin"))
                 .ThenByDescending(def => def.defName.EqualsIgnoreCase(RatkinXenotypeDefName))
                 .FirstOrDefault(IsRatkinXenotypeDef);
             return ratkinXenotypeDef;
@@ -587,9 +584,31 @@ namespace MouseDisaster
         private static List<XenotypeDef> ResolveAllowedRatkinXenotypes()
         {
             List<XenotypeDef> allowed = MouseDisasterAdaptiveXenotypeUtility.GetEnabledCandidates();
-            if (allowed.Count == 0 && ModsConfig.BiotechActive && XenotypeDefOf.Baseliner != null)
+            for (int i = 0; i < allowed.Count; i++)
             {
-                allowed.Add(XenotypeDefOf.Baseliner);
+                if (!MouseDisasterAdaptiveXenotypeUtility.IsVirtualDefaultRatkinXenotype(allowed[i]))
+                {
+                    continue;
+                }
+
+                allowed[i] = ResolveRatkinBaseXenotype();
+            }
+
+            allowed = allowed
+                .Where(def => def != null)
+                .Distinct()
+                .ToList();
+            if (allowed.Count == 0 && ModsConfig.BiotechActive)
+            {
+                XenotypeDef defaultRatkinXenotype = ResolveRatkinBaseXenotype();
+                if (defaultRatkinXenotype != null)
+                {
+                    allowed.Add(defaultRatkinXenotype);
+                }
+                else if (XenotypeDefOf.Baseliner != null)
+                {
+                    allowed.Add(XenotypeDefOf.Baseliner);
+                }
             }
 
             return allowed;

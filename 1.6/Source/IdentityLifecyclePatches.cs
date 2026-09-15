@@ -38,9 +38,22 @@ namespace MouseDisaster
 
         public static void Postfix(Pawn __instance)
         {
-            // SpawnSetup 的 Postfix 只处理地图缓存和事件通知，不再修改服饰或渲染状态。
+            // SpawnSetup 的 Postfix 处理地图缓存、事件通知和已加载鼠族 pawn 的身份迁移；
+            // 温度服饰仍只在 Prefix 中处理，避免在动态绘制注册后修改渲染树。
             MouseDisasterUtility.MarkMapPawnCacheDirty(__instance);
             GameComponent_MouseDisasterEventBehavior.Component?.NotifySpawned(__instance);
+            if (__instance != null && __instance.Spawned)
+            {
+                try
+                {
+                    MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(__instance);
+                }
+                catch (Exception exception)
+                {
+                    Log.Warning("[MouseDisaster] Spawned pawn xenotype normalization failed for " +
+                        MouseDisasterTrace.DescribePawn(__instance) + ": " + exception);
+                }
+            }
         }
     }
 

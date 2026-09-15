@@ -50,7 +50,7 @@ namespace MouseDisaster
         public const int MaxHiredWorkerDurationDays = GenDate.DaysPerYear * 10;
         public const float MinRatkinXenotypeSpawnWeight = 0f;
         public const float MaxRatkinXenotypeSpawnWeight = 100f;
-        public const float DefaultRatkinXenotypeSpawnWeight = 100f;
+        public const float DefaultRatkinXenotypeSpawnWeight = 15f;
         public const float DefaultExternalRatkinXenotypeSpawnWeight = 5f;
         public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
         public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
