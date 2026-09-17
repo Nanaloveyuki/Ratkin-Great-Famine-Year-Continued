@@ -28,8 +28,10 @@ namespace MouseDisaster
         public static bool HasTemporarySatiety(Pawn pawn) =>
             pawn?.health?.hediffSet?.HasHediff(MouseDisasterDefOf.MouseDisaster_GuanyinTuSatiety) == true;
 
-        public static bool ShouldLeaveAfterFed(Pawn pawn) => MouseDisasterMod.Settings?.leaveAfterFed != false && HasSatisfied(pawn);
-        public static bool IsSeekingSuppressed(Pawn pawn) => ShouldLeaveAfterFed(pawn) || HasTemporarySatiety(pawn);
+        public static bool ShouldLeaveAfterFed(Pawn pawn) => MouseDisasterMod.Settings?.leaveAfterFed != false && HasSatisfied(pawn) &&
+            GameComponent_MouseDisasterEventBehavior.Component?.FedDepartureDue(pawn) == true;
+        public static bool IsSeekingSuppressed(Pawn pawn) =>
+            (MouseDisasterMod.Settings?.leaveAfterFed != false && HasSatisfied(pawn)) || HasTemporarySatiety(pawn);
 
         internal static bool IsFull(float level) =>
             !float.IsNaN(level) && !float.IsInfinity(level) && level >= SatisfiedFoodLevel;

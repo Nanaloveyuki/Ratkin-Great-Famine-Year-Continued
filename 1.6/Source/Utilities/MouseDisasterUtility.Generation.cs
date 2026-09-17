@@ -526,7 +526,13 @@ namespace MouseDisaster
 
         public static int CalculateEscalatingFixedCount(float points, int min, int max, float pointsPerStep)
         {
-            return Mathf.Clamp(Mathf.RoundToInt(points / pointsPerStep) + min, min, max);
+            return LimitEventPawnCount(Mathf.Clamp(Mathf.RoundToInt(points / pointsPerStep) + min, min, max), min);
+        }
+
+        public static int LimitEventPawnCount(int requested, int minimum = 1)
+        {
+            int limit = Mathf.Clamp(MouseDisasterMod.Settings?.maxEventPawns ?? 30, 1, 100);
+            return limit < minimum ? requested : Mathf.Min(requested, limit);
         }
 
         public static PawnKindDef RandomWildKind(bool allowChildren)

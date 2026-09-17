@@ -84,20 +84,6 @@ namespace MouseDisaster
             hostile.AddPostAction(new TransitionAction_EndAllJobs());
             graph.AddTransition(hostile, false);
 
-            Transition dangerousTemperature = new Transition(wait, exit, false, true);
-            dangerousTemperature.AddSource(travel);
-            if (faction != null && faction.def != null)
-            {
-                dangerousTemperature.AddPreAction(new TransitionAction_Message(
-                    "MessageVisitorsDangerousTemperature".Translate(
-                        faction.def.pawnsPlural.CapitalizeFirst(),
-                        faction.Name),
-                    null,
-                    1f));
-            }
-            dangerousTemperature.AddPostAction(new TransitionAction_EndAllJobs());
-            dangerousTemperature.AddTrigger(new Trigger_PawnExperiencingDangerousTemperatures());
-            graph.AddTransition(dangerousTemperature, false);
             return graph;
         }
 

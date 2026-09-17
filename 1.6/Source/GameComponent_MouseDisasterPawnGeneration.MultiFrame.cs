@@ -516,7 +516,6 @@ namespace MouseDisaster
             MouseDisasterVisitorUtility.RegisterVisitors(pawns);
             if (batch.kind == MouseDisasterPawnBatchKind.TravelerGroup)
             {
-                MouseDisasterUtility.MakeTravelAndExitLord(batch.map, pawns, batch.exitCell, includeBabiesInExit: false);
                 SendVisitorOrStandardLetter(batch, pawns);
                 return;
             }

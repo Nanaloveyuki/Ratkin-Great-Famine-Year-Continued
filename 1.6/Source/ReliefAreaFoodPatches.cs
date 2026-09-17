@@ -10,9 +10,6 @@ namespace MouseDisaster
     {
         public static void Postfix(Pawn p, Thing food, ref bool __result)
         {
-            if (__result && food?.Spawned == true && GameComponent_MouseDisasterEventBehavior.HasBehavior(p, MouseDisasterPawnBehavior.ReliefOnly) &&
-                MouseDisasterUtility.GetReliefArea(food.Map)?[food.Position] != true)
-                __result = false;
             if (__result && MouseDisasterUtility.ShouldBlockColonistReliefFood(p, food))
             {
                 __result = false;
@@ -58,11 +55,6 @@ namespace MouseDisaster
         {
             __state = null;
             if (getter != eater || !MapComponent_MouseDisasterFoodTargets.Eligible(getter)) return true;
-            if (GameComponent_MouseDisasterEventBehavior.HasBehavior(getter, MouseDisasterPawnBehavior.ReliefOnly))
-            {
-                allowSociallyImproper = false;
-                allowHarvest = false;
-            }
             var cache = getter.Map.GetComponent<MapComponent_MouseDisasterFoodTargets>();
             int key = MapComponent_MouseDisasterFoodTargets.Key(desperate, canRefillDispenser, canUseInventory,
                 canUsePackAnimalInventory, allowForbidden, allowCorpse, allowSociallyImproper, allowHarvest,
@@ -168,12 +160,6 @@ namespace MouseDisaster
             }
             finally
             {
-                if (__result && foodSource?.Spawned == true &&
-                    GameComponent_MouseDisasterEventBehavior.HasBehavior(getter, MouseDisasterPawnBehavior.ReliefOnly) &&
-                    MouseDisasterUtility.GetReliefArea(foodSource.Map)?[foodSource.Position] != true)
-                {
-                    foodSource = null; foodDef = null; __result = false;
-                }
                 __state?.cache.Store(getter, __state.key, foodSource, foodDef, __result);
             }
         }

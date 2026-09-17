@@ -77,6 +77,7 @@ public enum MouseDisasterPawnBehavior { SeekFood }
 public class MouseDisasterSettings { public bool leaveAfterFed = true; }
 public static class MouseDisasterMod { public static MouseDisasterSettings Settings = new MouseDisasterSettings(); }
 public class GameComponent_MouseDisasterEventBehavior {
+    public bool FedDepartureDue(Pawn pawn)=>true;
     public static GameComponent_MouseDisasterEventBehavior Component=new GameComponent_MouseDisasterEventBehavior();
     HashSet<int> fed=new HashSet<int>(), refed=new HashSet<int>();
     public bool HasCompletedFeeding(Pawn p)=>fed.Contains(p.thingIDNumber);

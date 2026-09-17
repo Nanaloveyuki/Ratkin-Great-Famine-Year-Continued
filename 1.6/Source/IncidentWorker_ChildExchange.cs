@@ -47,7 +47,7 @@ namespace MouseDisaster
             MouseDisasterUtility.EnsureTradeLeader(trader, MouseDisasterUtility.ResolveSlaveTraderKind());
             trader.health.AddHediff(MouseDisasterDefOf.MouseDisaster_ChildExchangeTrader);
 
-            int childCount = Rand.RangeInclusive(6, 10);
+            int childCount = MouseDisasterUtility.LimitEventPawnCount(Rand.RangeInclusive(6, 10) + 1, 2) - 1;
             List<Pawn> children = new List<Pawn>();
             for (int i = 0; i < childCount; i++)
             {

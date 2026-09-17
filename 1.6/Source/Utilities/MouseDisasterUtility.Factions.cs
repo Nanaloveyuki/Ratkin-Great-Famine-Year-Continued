@@ -16,6 +16,12 @@ namespace MouseDisaster
 
         public static bool TryFindFormerFaction(out Faction formerFaction)
         {
+            int groupId = MouseDisasterEventExecution.Current?.groupId ?? 0;
+            if (groupId > 0)
+            {
+                formerFaction = GameComponent_MouseDisasterEventBehavior.Component?.FactionForGroup(groupId);
+                if (formerFaction != null) return true;
+            }
             return TryGetMouseDisasterHiddenFaction(out formerFaction);
         }
 
@@ -412,10 +418,9 @@ namespace MouseDisaster
             if (Current.CreatingWorld != null || Find.FactionManager == null) return null;
             FactionDef def = hostile ? MouseDisasterDefOf.MouseDisaster_HostileVisitors : friendly ?
                 MouseDisasterDefOf.MouseDisaster_FriendlyVisitors : MouseDisasterDefOf.MouseDisaster_NeutralVisitors;
-            Faction faction = Find.FactionManager.FirstFactionOfDef(def);
-            if (faction != null) return faction;
-            faction = CreateMouseDisasterHiddenFaction(def);
+            Faction faction = CreateMouseDisasterHiddenFaction(def);
             if (faction == null) return null;
+            faction.temporary = true;
             Find.FactionManager.Add(faction);
             foreach (Faction other in Find.FactionManager.AllFactionsListForReading)
             {

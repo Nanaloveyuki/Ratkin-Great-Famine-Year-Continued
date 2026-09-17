@@ -68,6 +68,7 @@ namespace MouseDisaster
                                                 IsThiefPawn(pawn) ||
                                                 IsWildMouseDisasterKind(pawn) ||
                                                 IsMouseDisasterTraderAdult(pawn) ||
+                                                IsMouseDisasterTraderEscort(pawn) ||
                                                 IsMouseEggOrChild(pawn));
             return MouseDisasterReliefAreaPolicy.CanUseReliefFood(isMouseDisasterFoodConsumer, IsPlayerColonist(pawn));
         }
@@ -290,7 +291,6 @@ namespace MouseDisaster
             {
                 return reliefFoodJob;
             }
-            if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly)) return null;
 
             bool desperate = pawn.needs.food.CurCategory == HungerCategory.Starving;
             suppressReliefAreaPostfix = true;

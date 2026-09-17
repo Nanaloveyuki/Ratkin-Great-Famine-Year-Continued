@@ -30,6 +30,7 @@ namespace MouseDisaster
         public static bool IsCandidate(XenotypeDef xenotype)
         {
             return xenotype != null &&
+                   !IsVirtualDefaultRatkinXenotype(xenotype) &&
                    MouseDisasterBirthPolicy.IsRatkinLikeXenotype(xenotype.defName, xenotype.label);
         }
 

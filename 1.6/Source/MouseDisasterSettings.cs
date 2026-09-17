@@ -68,6 +68,10 @@ namespace MouseDisaster
         public bool wildPredatorsHuntHomeAreaRatkin = false;
         public int wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
         public bool leaveAfterFed = true;
+        public int maxEventPawns = 30;
+        public float fedWanderDays = 0.5f;
+        public bool waitWhenNoFood = true;
+        public float noFoodWaitDays = 0.5f;
         public bool allowMouseDisasterFactionToLeaveWhenIdle = false;
         public bool preventUnnecessaryNeutralPawnRelations = true;
         public bool disableMultiFrameIncidentGeneration = false;
@@ -173,6 +177,9 @@ namespace MouseDisaster
             wildPredatorsHuntHomeAreaRatkin = false;
             wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
             leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
+            maxEventPawns = 30;
+            fedWanderDays = noFoodWaitDays = 0.5f;
+            waitWhenNoFood = true;
             allowMouseDisasterFactionToLeaveWhenIdle = false;
             preventUnnecessaryNeutralPawnRelations = true;
             disableMultiFrameIncidentGeneration = false;
@@ -289,6 +296,9 @@ namespace MouseDisaster
             hiredWorkerDurationDays = Mathf.Clamp(hiredWorkerDurationDays,
                 MinHiredWorkerDurationDays, MaxHiredWorkerDurationDays);
             NormalizeRatkinXenotypeSpawnWeights();
+            maxEventPawns = Mathf.Clamp(maxEventPawns, 1, 100);
+            fedWanderDays = float.IsNaN(fedWanderDays) ? 0.5f : Mathf.Clamp(fedWanderDays, 0f, 5f);
+            noFoodWaitDays = float.IsNaN(noFoodWaitDays) ? 0.5f : Mathf.Clamp(noFoodWaitDays, 0f, 5f);
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
             ageDiseaseMultiplier = Mathf.Clamp(ageDiseaseMultiplier, MinAgeDiseaseMultiplier, MaxAgeDiseaseMultiplier);
             chaosPregnancyChancePercent = Mathf.Clamp(chaosPregnancyChancePercent, MinChaosPregnancyChancePercent, MaxChaosPregnancyChancePercent);
@@ -520,6 +530,10 @@ namespace MouseDisaster
             Scribe_Values.Look(ref wildPredatorsHuntHomeAreaRatkin, "wildPredatorsHuntHomeAreaRatkin", false);
             Scribe_Values.Look(ref wildPredatorSearchIntervalTicks, "wildPredatorSearchIntervalTicks", DefaultWildPredatorSearchIntervalTicks);
             Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
+            Scribe_Values.Look(ref maxEventPawns, "maxEventPawns", 30);
+            Scribe_Values.Look(ref fedWanderDays, "fedWanderDays", 0.5f);
+            Scribe_Values.Look(ref waitWhenNoFood, "waitWhenNoFood", true);
+            Scribe_Values.Look(ref noFoodWaitDays, "noFoodWaitDays", 0.5f);
             Scribe_Values.Look(ref allowMouseDisasterFactionToLeaveWhenIdle, "allowMouseDisasterFactionToLeaveWhenIdle", false);
             Scribe_Values.Look(ref preventUnnecessaryNeutralPawnRelations, "preventUnnecessaryNeutralPawnRelations", true);
             Scribe_Values.Look(ref disableMultiFrameIncidentGeneration, "disableMultiFrameIncidentGeneration", false);

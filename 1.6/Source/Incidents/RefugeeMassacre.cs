@@ -134,6 +134,7 @@ namespace MouseDisaster
             }
             int adults = Rand.RangeInclusive(2, 4);
             int children = Rand.RangeInclusive(8, 16);
+            children = System.Math.Min(children, MouseDisasterUtility.LimitEventPawnCount(adults + children, 10) - adults);
             for (int i = 0; i < adults + children; i++)
             {
                 bool adult = i < adults;

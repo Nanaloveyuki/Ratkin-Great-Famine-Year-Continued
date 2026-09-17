@@ -196,7 +196,7 @@ namespace MouseDisaster
                 return;
             }
 
-            int actualCount = Mathf.Clamp(requestedCount, 4, 96);
+            int actualCount = MouseDisasterUtility.LimitEventPawnCount(Mathf.Clamp(requestedCount, 4, 96), 4);
             if (GameComponent_MouseDisasterPawnGeneration.TryStartEggBombRetaliation(map, actualCount, infect, sourceFaction))
             {
                 return;
@@ -240,7 +240,7 @@ namespace MouseDisaster
 
             Faction faction = ResolveVisitorFaction();
             List<Thing> payload = new List<Thing>();
-            for (int i = 0; i < Mathf.Max(1, count); i++)
+            for (int i = 0; i < MouseDisasterUtility.LimitEventPawnCount(Mathf.Max(1, count)); i++)
             {
                 Pawn pawn = CreatePlagueRevengePawn(faction);
                 if (pawn != null)

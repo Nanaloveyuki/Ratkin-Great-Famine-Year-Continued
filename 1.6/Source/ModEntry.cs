@@ -66,6 +66,16 @@ namespace MouseDisaster
         {
             DrawSectionTitle(listing, "MouseDisaster_IrisMenus_PawnBehavior");
             listing.CheckboxLabeled("MouseDisaster_Settings_LeaveAfterFed".Translate(), ref Settings.leaveAfterFed);
+            listing.Label("MouseDisaster_Settings_MaxEventPawns".Translate(Settings.maxEventPawns), tooltip: "MouseDisaster_Settings_MaxEventPawns_Tooltip".Translate());
+            Settings.maxEventPawns = Mathf.RoundToInt(listing.Slider(Settings.maxEventPawns, 1, 100));
+            listing.Label("MouseDisaster_Settings_FedWanderDays".Translate(Settings.fedWanderDays.ToString("0.00")), tooltip: "MouseDisaster_Settings_FedWanderDays_Tooltip".Translate());
+            Settings.fedWanderDays = Mathf.Round(listing.Slider(Settings.fedWanderDays, 0f, 5f) * 100f) / 100f;
+            DrawCheckbox(listing, "MouseDisaster_Settings_WaitWhenNoFood", ref Settings.waitWhenNoFood, "MouseDisaster_Settings_WaitWhenNoFood_Tooltip");
+            if (Settings.waitWhenNoFood)
+            {
+                listing.Label("MouseDisaster_Settings_NoFoodWaitDays".Translate(Settings.noFoodWaitDays.ToString("0.00")));
+                Settings.noFoodWaitDays = Mathf.Round(listing.Slider(Settings.noFoodWaitDays, 0f, 5f) * 100f) / 100f;
+            }
             DrawCheckbox(listing, "MouseDisaster_Settings_AllowMouseDisasterFactionToLeaveWhenIdle", ref Settings.allowMouseDisasterFactionToLeaveWhenIdle,
                 "MouseDisaster_Settings_AllowMouseDisasterFactionToLeaveWhenIdle_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRelations", ref Settings.preventUnnecessaryNeutralPawnRelations,

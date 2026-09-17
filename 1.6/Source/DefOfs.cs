@@ -8,6 +8,7 @@ namespace MouseDisaster
     public static class MouseDisasterDefOf
     {
         public static DutyDef MouseDisaster_FamilyExit;
+        public static DutyDef MouseDisaster_ReliefVisit;
         public static BackstoryDef MouseDisaster_Newborn;
         public static BackstoryDef MouseDisaster_Refugee;
         public static HediffDef MouseDisaster_Plague;

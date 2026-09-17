@@ -69,6 +69,7 @@
     <Compile Include="MouseDisasterFeeding.cs" />
     <Compile Include="MouseDisasterEventPolicy.cs" />
     <Compile Include="GameComponent_MouseDisasterEventBehavior.cs" />
+    <Compile Include="GameComponent_MouseDisasterEventBehavior.Visits.cs" />
     <Compile Include="MapComponent_MouseDisasterFoodTargets.cs" />
     <Compile Include="GameComponent_MouseDisasterRemoval.cs" />
     <Compile Include="MouseDisasterSaveCleanup.cs" />

@@ -297,8 +297,29 @@ namespace MouseDisaster
                 return false;
             }
 
+            int minimum = batch.kind == MouseDisasterPawnBatchKind.TraderCaravan ? 3 :
+                batch.kind == MouseDisasterPawnBatchKind.LargeRefugeeWave ? 10 :
+                batch.kind == MouseDisasterPawnBatchKind.GreatFamine ? 8 :
+                batch.kind == MouseDisasterPawnBatchKind.BeggarGroup || batch.kind == MouseDisasterPawnBatchKind.ThiefGroup ||
+                batch.kind == MouseDisasterPawnBatchKind.ThiefChildGroup || batch.kind == MouseDisasterPawnBatchKind.SiegeBeggarGroup ? 3 :
+                batch.kind == MouseDisasterPawnBatchKind.TravelerGroup || batch.kind == MouseDisasterPawnBatchKind.StrongSiegeGroup ||
+                batch.kind == MouseDisasterPawnBatchKind.AirdropMistake || batch.kind == MouseDisasterPawnBatchKind.EggBombRetaliation ? 4 :
+                batch.kind == MouseDisasterPawnBatchKind.WildGroup ? 2 :
+                batch.adultsRemaining > 0 && batch.childrenRemaining > 0 ? 2 : 1;
+            int limited = MouseDisasterUtility.LimitEventPawnCount(totalCount, minimum);
+            if (limited < totalCount)
+            {
+                if (batch.adultsRemaining + batch.childrenRemaining > 0)
+                {
+                    int children = batch.childrenRemaining > 0 ? Mathf.Clamp(Mathf.RoundToInt(limited * batch.childrenRemaining / (float)totalCount), 1, limited - 1) : 0;
+                    batch.childrenRemaining = children;
+                    batch.adultsRemaining = limited - children;
+                }
+                else batch.remainingCount = limited;
+                totalCount = limited;
+            }
             MouseDisasterTrace.Log("pawn batch start; kind=" + batch.kind + "; requested=" + totalCount +
-                "; incident=" + batch.incidentDef.defName + "; " + MouseDisasterTrace.DescribeMap(batch.map) +
+                "; incident=" + batch.incidentDef?.defName + "; " + MouseDisasterTrace.DescribeMap(batch.map) +
                 "; entry=" + batch.entryCell);
             batch.intervalTicks = Mathf.Max(1, Mathf.RoundToInt(TargetGenerationTicks / (float)totalCount));
             batch.randomSeed = Rand.Int;
@@ -440,6 +461,7 @@ namespace MouseDisaster
             if (batch.behaviorGroupId == 0)
                 batch.behaviorGroupId = MouseDisasterEventExecution.Current?.groupId ??
                     GameComponent_MouseDisasterEventBehavior.Component?.CreateGroup(batch.incidentDef?.defName ?? batch.kind.ToString()) ?? 0;
+            batch.faction = GameComponent_MouseDisasterEventBehavior.Component?.FactionForGroup(batch.behaviorGroupId) ?? batch.faction;
             int firstNewPawn = batch.pawns.Count;
             int slot = batch.generatedSlots++;
             MouseDisasterTrace.Log("pawn generation slot begin; kind=" + batch.kind + "; slot=" + slot +
@@ -498,7 +520,7 @@ namespace MouseDisaster
                 EnsureTraderGatheringLord(batch);
             if (batch.pawns.Count > firstNewPawn && !IsPayloadBatch(batch))
                 GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId,
-                    batch.pawns.GetRange(firstNewPawn, batch.pawns.Count - firstNewPawn));
+                    batch.pawns.GetRange(firstNewPawn, batch.pawns.Count - firstNewPawn), apply: batch.kind != MouseDisasterPawnBatchKind.TraderCaravan);
             MouseDisasterTrace.Log("pawn generation slot end; kind=" + batch.kind + "; slot=" + slot +
                 "; created=" + (batch.pawns.Count - firstNewPawn) + "; totalPawns=" + batch.pawns.Count +
                 "; remaining=" + batch.remainingCount);
@@ -998,12 +1020,7 @@ namespace MouseDisaster
                 return;
             }
 
-            Faction faction = batch.faction ?? pawns[0].Faction;
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionHostileToPlayer(faction, explicitDriveAway: true);
-                LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: false, canTimeoutOrFlee: false, canSteal: true, breachers: true), batch.map, pawns);
-            }
+            GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId, pawns);
 
             if (HasRequiredState(batch))
             {
@@ -1027,13 +1044,7 @@ namespace MouseDisaster
 
         private static void FinalizeAssaultBatch(MouseDisasterPawnBatch batch, List<Pawn> pawns)
         {
-            Faction faction = batch.faction ?? pawns[0].Faction;
-            if (faction != null)
-            {
-                MouseDisasterUtility.MakeFactionHostileToPlayer(faction, explicitDriveAway: true);
-                LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: false, canTimeoutOrFlee: false, canSteal: true, breachers: true), batch.map, pawns);
-            }
-
+            GameComponent_MouseDisasterEventBehavior.Component?.Register(batch.behaviorGroupId, pawns);
             SendBatchLetter(batch, pawns);
         }
 
@@ -1109,7 +1120,7 @@ namespace MouseDisaster
             Lord tradeLord;
             try
             {
-                tradeLord = LordMaker.MakeNewLord(tradeFaction, new LordJob_TradeWithColony(tradeFaction, exitCell), batch.map, pawns);
+                tradeLord = LordMaker.MakeNewLord(tradeFaction, new LordJob_MouseDisasterTrade(tradeFaction, exitCell), batch.map, pawns);
             }
             catch (Exception exception)
             {

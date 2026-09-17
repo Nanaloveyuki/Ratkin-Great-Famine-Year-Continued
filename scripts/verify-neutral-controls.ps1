@@ -34,7 +34,7 @@ Require-Text $modEntry 'MouseDisaster_Settings_PreventUnnecessaryNeutralPawnRela
 Require-Text $travel 'if (!force && ShouldBlockIdleDeparture(pawn))' 'Ordinary departure is not guarded by the setting.'
 Require-Text $travel 'IsMouseDisasterNeutralFaction(pawn.Faction)' 'Departure guard does not target the neutral Mouse Disaster faction.'
 Require-Text $factions 'public static bool IsMouseDisasterNeutralFaction(Faction faction)' 'Neutral Mouse Disaster faction helper is missing.'
-Require-Text $visitorControl 'ExitMapJob(pawn, force: true)' 'Explicit visitor departure was not preserved.'
+Require-Text $visitorControl 'RequestDeparture(pawn)' 'Explicit visitor departure is not persisted for retries.'
 Require-Text $lifecycle 'ExitMapJob(pawn, force: true)' 'Explicit lifecycle departure was not preserved.'
 Require-Text $familyExit 'ExitMapJob(pawn, force: true)' 'Explicit family departure was not preserved.'
 

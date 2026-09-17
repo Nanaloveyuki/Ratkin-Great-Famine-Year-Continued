@@ -102,6 +102,8 @@ namespace MouseDisaster
             return GetRecord(pawn) != null;
         }
 
+        internal bool ReferencesFaction(Faction faction) => visitorRecords.Any(r => r?.originalFaction == faction);
+
         public void NotifyPawnIdentityChanged(Pawn pawn)
         {
             MouseDisasterVisitorRecord record = GetRecord(pawn);
@@ -845,6 +847,11 @@ namespace MouseDisaster
                 return;
             }
 
+            // Identity callbacks during restoration must not pause an already expired contract.
+            record.status = MouseDisasterVisitorStatus.Visitor;
+            record.temporaryUntilTick = -1;
+            record.employmentTimerPaused = false;
+
             ReleaseGuestState(pawn);
             MouseDisasterUtility.UnmarkTradableChattel(pawn);
             MouseDisasterUtility.ConsumeForcedPrisonerOnPurchase(pawn);
@@ -872,25 +879,7 @@ namespace MouseDisaster
             SyncEmploymentMarkers(pawn, MouseDisasterVisitorStatus.Visitor);
             MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
 
-            if (pawn.Spawned && pawn.Map != null)
-            {
-                if (!CanLeaveMapUnderOwnPower(pawn))
-                {
-                    pawn.DeSpawnOrDeselect();
-                    if (!Find.WorldPawns.Contains(pawn))
-                    {
-                        Find.WorldPawns.PassToWorld(pawn);
-                    }
-
-                    return;
-                }
-
-                Job exitJob = MouseDisasterUtility.ExitMapJob(pawn, force: true);
-                if (exitJob != null)
-                {
-                    pawn.jobs?.TryTakeOrderedJob(exitJob, JobTag.Misc);
-                }
-            }
+            GameComponent_MouseDisasterEventBehavior.Component?.RequestDeparture(pawn);
         }
 
         private static void SyncEmploymentMarkers(Pawn pawn, MouseDisasterVisitorStatus status,

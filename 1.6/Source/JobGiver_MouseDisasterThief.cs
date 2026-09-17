@@ -11,6 +11,7 @@ namespace MouseDisaster
 
         protected override Job TryGiveJob(Pawn pawn)
         {
+            if (GameComponent_MouseDisasterEventBehavior.Component?.TryVisitJob(pawn, out Job visitJob) == true) return visitJob;
             if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||
                 !MouseDisasterUtility.IsThiefPawn(pawn) ||
                 (!MouseDisasterUtility.IsInThiefMentalState(pawn) && (!MouseDisasterFeeding.HasSatisfied(pawn) || pawn.InMentalState)) ||

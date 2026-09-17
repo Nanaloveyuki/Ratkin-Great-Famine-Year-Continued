@@ -29,7 +29,8 @@ public static class Scribe_Collections {
 }
 public static class Scribe_References { public static void Look<T>(ref T value,string key) {} }
 public static class Scribe_Defs { public static void Look<T>(ref T value,string key) {} }
-public static class GenDate { public const int TicksPerHour=2500; }
+public static class GenDate { public const int TicksPerHour=2500, TicksPerDay=60000; }
+public static class Rand { public static float Range(float min,float max)=>(min+max)/2; }
 public struct IntVec3 {
     public int x; public static IntVec3 Invalid => new IntVec3 { x=-1 };
     public static bool operator ==(IntVec3 a,IntVec3 b) { return a.x==b.x; }
@@ -77,10 +78,11 @@ public class Pawn:Thing {
     public bool IsCaravanMember()=>false;
     public void PostApplyDamage(DamageInfo info,float total) {}
 }
-public class Faction { public static Faction OfPlayer=new Faction(); }
+public class Faction { public static Faction OfPlayer=new Faction(); public int kind; public bool temporary; }
+public class FactionManager { public List<Faction> AllFactionsListForReading=new List<Faction>(); public void Notify_PawnLeftFaction(Faction f) {} }
 public class IncidentDef { public string defName; }
 public class TickManager { public int TicksGame; }
-public static class Find { public static TickManager TickManager=new TickManager(); }
+public static class Find { public static TickManager TickManager=new TickManager(); public static FactionManager FactionManager=new FactionManager(); }
 public class Lister { public List<Thing> foods=new List<Thing>(); public List<Thing> ThingsInGroup(ThingRequestGroup group)=>foods; }
 public class ReliefArea { public int TrueCount; public bool this[IntVec3 cell]=>false; }
 public class Map {
@@ -118,6 +120,7 @@ public static class LordMaker {
 }
 public static class RCellFinder { public static bool TryFindBestExitSpot(Pawn pawn,out IntVec3 exit) { exit=new IntVec3(); return true; } }
 public class Settings {
+    public float fedWanderDays=0.5f;
     public MouseDisasterEventAttitude attitude;
     public Dictionary<string,MouseDisasterEventAttitude> eventAttitudes=new Dictionary<string,MouseDisasterEventAttitude>();
     public MouseDisasterEventAttitude GetEventAttitude(string name)=>eventAttitudes.TryGetValue(name,out var value) ? MouseDisasterEventPolicy.Normalize(value) : attitude;
@@ -133,10 +136,21 @@ public static class MouseDisasterUtility {
     public static bool IsPlayerAffiliatedRatkin(Pawn pawn)=>pawn==null || pawn.player || pawn.Faction==Faction.OfPlayer;
     public static bool IsThiefPawn(Pawn pawn)=>pawn!=null && pawn.thief;
     public static bool IsBeggarPawn(Pawn pawn)=>pawn!=null && pawn.beggar;
-    public static Faction GetEventFaction(bool hostile,bool friendly)=>hostile?MouseDisasterUtility.hostile:friendly?MouseDisasterUtility.friendly:neutral;
+    public static Faction GetEventFaction(bool hostile,bool friendly)=>new Faction { kind=hostile?1:friendly?2:0 };
+    public static void MakeFactionHostileToPlayer(Faction faction,bool explicitDriveAway) { faction.kind=1; }
+    public static bool IsEventBehaviorFaction(Faction faction)=>true;
+    public static bool ShouldPrioritizeReliefAreaFood(Pawn pawn)=>false;
     public static void MakeTravelAndExitLord(Map map,List<Pawn> pawns,IntVec3 exit,bool includeBabiesInExit) { exits++; }
     public static ReliefArea GetReliefArea(Map map)=>map.area;
     public static bool IsAreaFoodSourceThing(Thing t,bool harvest)=>t!=null && t.Spawned && !t.Destroyed && t.IngestibleNow;
+}
+// The visit controller has its own production-method harness in verify-visits.ps1.
+public sealed partial class GameComponent_MouseDisasterEventBehavior {
+    private Dictionary<int,int> fedDepartureTicks=new Dictionary<int,int>();
+    private HashSet<Pawn> departingPawns=new HashSet<Pawn>();
+    private void ExposeVisitTimers() {} private void TickVisits() {}
+    private void ForgetVisitTimers(Pawn pawn) {}
+    private static void AssignVisitLord(IEnumerable<Pawn> pawns) {}
 }
 public static class MouseDisasterFeeding {
     public static bool HasSatisfied(Pawn pawn)=>pawn?.fedOnce==true || GameComponent_MouseDisasterEventBehavior.Component?.HasCompletedFeeding(pawn)==true;
@@ -210,25 +224,25 @@ public static class Harness {
         }
         var c=Reset(); var map=NewMap(); var a1=NewPawn(map,1); var a2=NewPawn(map,2); var b1=NewPawn(map,3);
         Group(c,MouseDisasterEventAttitude.HostileLeaning,a1,a2); Group(c,MouseDisasterEventAttitude.HostileLeaning,b1);
-        Check(a1.Faction==MouseDisasterUtility.neutral && b1.Faction==a1.Faction,"initial leaning hostility");
+        Check(a1.Faction.kind==0 && b1.Faction!=a1.Faction && a1.Faction==a2.Faction,"independent event factions");
         MouseDisasterEventDamagePatch.Postfix(a1,new DamageInfo { Instigator=b1,Def=new DamageDef() },1);
-        Check(a2.Faction==MouseDisasterUtility.neutral,"non-colony damage triggered group");
+        Check(a2.Faction.kind==0,"non-colony damage triggered group");
         MouseDisasterEventDamagePatch.Postfix(a1,new DamageInfo { Instigator=new Thing { Faction=Faction.OfPlayer },Def=new DamageDef() },0);
-        Check(a2.Faction==MouseDisasterUtility.neutral,"zero damage triggered group");
+        Check(a2.Faction.kind==0,"zero damage triggered group");
         a1.Dead=true; c.NotifyDamage(a1);
-        Check(a2.Faction==MouseDisasterUtility.hostile && b1.Faction==MouseDisasterUtility.neutral,"lethal damage did not isolate group");
+        Check(a2.Faction.kind==1 && b1.Faction.kind==0,"lethal damage did not isolate group");
         int assaults=LordMaker.assaults; c.NotifyDamage(a2); Check(LordMaker.assaults==assaults,"repeated hit rebuilt assault");
         Check(c.TryGetGroup(a2,out var group) && group.hostile,"reaction state absent");
         Scribe.mode=LoadSaveMode.PostLoadInit; c.ExposeData(); Check(c.TryGetGroup(a2,out var loaded) && loaded==group,"post-load index");
         MouseDisasterMod.Settings.attitude=MouseDisasterEventAttitude.Friendly; Check(group.attitude==MouseDisasterEventAttitude.HostileLeaning,"settings rewrote existing group");
-        var late=NewPawn(map,4); c.Register(group.id,new[]{late}); Check(late.Faction==MouseDisasterUtility.hostile,"late batch member ignored group reaction");
+        var late=NewPawn(map,4); c.Register(group.id,new[]{late}); Check(late.Faction==a2.Faction && late.Faction.kind==1,"late batch member ignored group reaction");
         a2.player=true; c.NotifyDamage(a2); Check(GameComponent_MouseDisasterEventBehavior.Profile(a2)==MouseDisasterPawnBehavior.None,"recruited pawn controlled");
         var friendly=NewPawn(map,5); Group(c,MouseDisasterEventAttitude.Friendly,friendly); c.React(new[]{friendly},true,out _);
-        Check(friendly.Faction==MouseDisasterUtility.friendly && MouseDisasterUtility.exits==1,"friendly expulsion became hostile");
+        Check(friendly.Faction.kind==2 && MouseDisasterUtility.exits==1,"friendly expulsion became hostile");
         Check(GameComponent_MouseDisasterEventBehavior.HasBehavior(friendly,MouseDisasterPawnBehavior.ReliefOnly),"leaving friendly lost food restriction");
         c.NotifyDamage(friendly); Check(MouseDisasterUtility.exits==1,"repeated hit rebuilt exit lord");
         var neutral=NewPawn(map,6); Group(c,MouseDisasterEventAttitude.Neutral,neutral); c.NotifyDamage(neutral);
-        Check(neutral.Faction==MouseDisasterUtility.neutral && GameComponent_MouseDisasterEventBehavior.HasBehavior(neutral,MouseDisasterPawnBehavior.IgnoreCombatFear),"neutral thief lost behavior");
+        Check(neutral.Faction.kind==0 && GameComponent_MouseDisasterEventBehavior.HasBehavior(neutral,MouseDisasterPawnBehavior.IgnoreCombatFear),"neutral thief lost behavior");
         var countA=NewPawn(map,61); var countB=NewPawn(map,62); Group(c,MouseDisasterEventAttitude.FriendlyLeaning,countA,countB);
         c.React(new[]{countA,countB},true,out int affected); Check(affected==2,"expulsion counted groups instead of pawns");
         Job fleeing=new Job(); Check(!MouseDisasterThiefCombatFearPatch.Prefix(neutral,b1,ref fleeing) && fleeing==null,"thief combat flee not suppressed");

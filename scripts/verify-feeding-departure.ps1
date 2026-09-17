@@ -21,7 +21,11 @@ public static class Current { public static Game Game=new Game(); }
 public class Game { public T GetComponent<T>() where T:new()=>new T(); }
 public class GameComponent_MouseDisasterNarrative { public bool IsWaitingEnvoy(Pawn p)=>false; }
 public enum MouseDisasterPawnBehavior { ReliefOnly }
-public static class GameComponent_MouseDisasterEventBehavior { public static bool HasBehavior(Pawn p,MouseDisasterPawnBehavior b)=>p.relief; }
+public class GameComponent_MouseDisasterEventBehavior {
+ public static GameComponent_MouseDisasterEventBehavior Component;
+ public bool TryVisitJob(Pawn p,out Job job) { job=null; return false; }
+ public static bool HasBehavior(Pawn p,MouseDisasterPawnBehavior b)=>p.relief;
+}
 public class Settings { public bool leaveAfterFed=true; }
 public static class MouseDisasterMod { public static Settings Settings=new Settings(); }
 public static class MouseDisasterFeeding {

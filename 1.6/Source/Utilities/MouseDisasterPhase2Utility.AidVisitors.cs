@@ -185,6 +185,9 @@ namespace MouseDisaster
 
             int adultCount = Mathf.Clamp(1 + Mathf.RoundToInt(map.mapPawns.FreeColonistsSpawnedCount * 0.15f), 1, 3);
             int childCount = Find.Storyteller.difficulty.ChildrenAllowed ? Mathf.Clamp(Mathf.RoundToInt(adultCount * 0.5f), 0, 2) : 0;
+            int limit = MouseDisasterUtility.LimitEventPawnCount(adultCount + childCount, childCount > 0 ? 2 : 1);
+            adultCount = Mathf.Min(adultCount, limit - (childCount > 0 ? 1 : 0));
+            childCount = Mathf.Min(childCount, limit - adultCount);
 
             targetPawn = MouseDisasterUtility.GenerateFactionRatkinPawn(
                 MouseDisasterDefOf.MouseDisaster_BeggarRatkinAdult,

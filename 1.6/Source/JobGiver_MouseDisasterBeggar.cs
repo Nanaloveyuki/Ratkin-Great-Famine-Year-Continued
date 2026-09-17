@@ -7,8 +7,17 @@ namespace MouseDisaster
 {
     public class JobGiver_MouseDisasterBeggar : ThinkNode_JobGiver
     {
+        internal static Job TryCreateVisitorBeggingJob(Pawn pawn)
+        {
+            if (!MouseDisasterUtility.IsBeggarPawn(pawn) || pawn.DevelopmentalStage == DevelopmentalStage.Baby ||
+                !MouseDisasterUtility.CanBegAgain(pawn)) return null;
+            Pawn target = FindClosestReachableColonist(pawn, preferUnbegged: true);
+            return target != null ? JobMaker.MakeJob(MouseDisasterDefOf.MouseDisaster_BegForFood, target) : null;
+        }
+
         protected override Job TryGiveJob(Pawn pawn)
         {
+            if (GameComponent_MouseDisasterEventBehavior.Component?.TryVisitJob(pawn, out Job visitJob) == true) return visitJob;
             if (MouseDisasterUtility.IsPendingAbandonedChild(pawn)) return null;
             if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||
                 !MouseDisasterUtility.IsBeggarPawn(pawn) ||

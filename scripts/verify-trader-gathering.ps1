@@ -41,6 +41,9 @@ public class MentalStateHandler { public void Reset() { } }
 public class LordJob_DefendPoint {
     public LordJob_DefendPoint(IntVec3 cell, float wanderRadius) { }
 }
+public class LordJob_MouseDisasterTrade : LordJob_TradeWithColony {
+    public LordJob_MouseDisasterTrade(Faction faction,IntVec3 cell) : base(faction,cell) { }
+}
 public class LordJob_TradeWithColony {
     public LordJob_TradeWithColony(Faction faction, IntVec3 cell) { }
 }

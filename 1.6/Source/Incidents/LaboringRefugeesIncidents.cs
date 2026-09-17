@@ -34,7 +34,7 @@ namespace MouseDisaster
                 MouseDisasterUtility.MakeFactionNeutralToPlayer(faction, force: true);
             }
 
-            int count = Rand.RangeInclusive(1, 3);
+            int count = MouseDisasterUtility.LimitEventPawnCount(Rand.RangeInclusive(1, 3));
             List<Pawn> pawns = new List<Pawn>();
             for (int i = 0; i < count; i++)
             {

@@ -17,6 +17,7 @@ namespace MouseDisaster
         public MouseDisasterEventAttitude attitude;
         public bool hostile;
         public bool leaving;
+        public Faction faction;
         public List<int> predationRolledMaps = new List<int>();
         public List<Pawn> pawns = new List<Pawn>();
 
@@ -27,6 +28,7 @@ namespace MouseDisaster
             Scribe_Values.Look(ref attitude, "attitude", MouseDisasterEventAttitude.Neutral);
             Scribe_Values.Look(ref hostile, "hostile");
             Scribe_Values.Look(ref leaving, "leaving");
+            Scribe_References.Look(ref faction, "faction");
             Scribe_Collections.Look(ref predationRolledMaps, "predationRolledMaps", LookMode.Value);
             if (Scribe.mode == LoadSaveMode.PostLoadInit) predationRolledMaps ??= new List<int>();
             Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
@@ -45,7 +47,7 @@ namespace MouseDisaster
         public float? temperature;
     }
 
-    public sealed class GameComponent_MouseDisasterEventBehavior : GameComponent
+    public sealed partial class GameComponent_MouseDisasterEventBehavior : GameComponent
     {
         private List<MouseDisasterEventGroup> groups = new List<MouseDisasterEventGroup>();
         private readonly Dictionary<int, MouseDisasterEventGroup> byId = new Dictionary<int, MouseDisasterEventGroup>();
@@ -57,7 +59,12 @@ namespace MouseDisaster
         private HashSet<int> refeedingPawnIds = new HashSet<int>();
 
         internal bool HasCompletedFeeding(Pawn pawn) => pawn != null && fedPawnIds?.Contains(pawn.thingIDNumber) == true;
-        internal void CompleteFeeding(Pawn pawn) => (fedPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber);
+        internal void CompleteFeeding(Pawn pawn)
+        {
+            if ((fedPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber))
+                fedDepartureTicks[pawn.thingIDNumber] = (Find.TickManager?.TicksGame ?? 0) +
+                    (int)((MouseDisasterMod.Settings?.fedWanderDays ?? 0.5f) * GenDate.TicksPerDay * Rand.Range(0.5f, 1.5f));
+        }
         internal bool HasAppliedRefeeding(Pawn pawn) => refeedingPawnIds?.Contains(pawn.thingIDNumber) == true;
         internal void RecordRefeeding(Pawn pawn) => (refeedingPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber);
         internal bool HasFoodSeekingProfile(Pawn pawn) => TryGetGroup(pawn, out _) &&
@@ -81,6 +88,7 @@ namespace MouseDisaster
             Scribe_Values.Look(ref nextId, "nextId");
             Scribe_Collections.Look(ref fedPawnIds, "fedPawnIds", LookMode.Value);
             Scribe_Collections.Look(ref refeedingPawnIds, "refeedingPawnIds", LookMode.Value);
+            ExposeVisitTimers();
             if (Scribe.mode != LoadSaveMode.PostLoadInit) return;
             fedPawnIds ??= new HashSet<int>();
             refeedingPawnIds ??= new HashSet<int>();
@@ -89,6 +97,12 @@ namespace MouseDisaster
         }
 
         public int CreateGroup(IncidentDef incident) => CreateGroup(incident.defName);
+
+        internal Faction FactionForGroup(int id)
+        {
+            if (!byId.TryGetValue(id, out var group)) return null;
+            return group.faction ??= MouseDisasterUtility.GetEventFaction(group.hostile, group.attitude == MouseDisasterEventAttitude.Friendly);
+        }
 
         public int CreateGroup(string settingsKey)
         {
@@ -106,6 +120,7 @@ namespace MouseDisaster
         {
             byPawn[pawn] = group;
             profiles[pawn] = MouseDisasterEventPolicy.Compose(MouseDisasterUtility.IsThiefPawn(pawn), MouseDisasterUtility.IsBeggarPawn(pawn), group.attitude);
+            if (MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(pawn)) profiles[pawn] |= MouseDisasterPawnBehavior.SeekFood;
         }
 
         private void RebuildRuntimeIndexes()
@@ -276,11 +291,13 @@ namespace MouseDisaster
             var active = members.Where(p => p != null && p.Spawned && !p.Dead && p.mindState != null &&
                 !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p)).Distinct().ToList();
             if (active.Count == 0) return;
-            Faction faction = MouseDisasterUtility.GetEventFaction(group.hostile, group.attitude == MouseDisasterEventAttitude.Friendly);
+            Faction faction = FactionForGroup(group.id);
             if (faction == null) return;
+            if (group.hostile) MouseDisasterUtility.MakeFactionHostileToPlayer(faction, explicitDriveAway: true);
             var oldLords = new HashSet<Lord>();
             foreach (Pawn pawn in active)
             {
+                if (group.hostile || group.leaving) departingPawns.Remove(pawn);
                 Lord lord = pawn.GetLord();
                 if (lord != null) oldLords.Add(lord);
                 bool preserveDuty = !group.hostile && !group.leaving && !(lord?.LordJob is LordJob_AssaultColony);
@@ -316,6 +333,7 @@ namespace MouseDisaster
             foreach (Lord lord in oldLords)
                 if (lord != null && lord.ownedPawns != null && lord.ownedPawns.Count > 0 && lord.ownedPawns.All(p => p.Faction == faction)) lord.faction = faction;
             if (group.leaving) Flee(active);
+            else if (!group.hostile) AssignVisitLord(active);
             else if (group.hostile)
                 foreach (var mapPawns in active.Where(p => !p.Downed && p.DevelopmentalStage != DevelopmentalStage.Baby).GroupBy(p => p.Map))
                     LordMaker.MakeNewLord(faction, new LordJob_AssaultColony(faction, canKidnap: false, canTimeoutOrFlee: false, canSteal: true), mapPawns.Key, mapPawns.ToList());
@@ -362,6 +380,7 @@ namespace MouseDisaster
                             pawn.Map.GetComponent<MapComponent_MouseDisasterPredation>()?.Register(group, new[] { pawn });
                     }
             }
+            TickVisits();
             if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
             for (int i = groups.Count - 1; i >= 0; i--)
             {
@@ -374,7 +393,7 @@ namespace MouseDisaster
                     if (pawn != null && !pawn.Destroyed && !pawn.Dead &&
                         !MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) &&
                         (pawn.Spawned || pawn.MapHeld != null || pawn.IsCaravanMember())) continue;
-                    if (pawn != null) { byPawn.Remove(pawn); profiles.Remove(pawn); }
+                    if (pawn != null) { byPawn.Remove(pawn); profiles.Remove(pawn); ForgetVisitTimers(pawn); }
                     group.pawns.RemoveAt(j);
                 }
                 if (group.pawns.Count == 0 && Current.Game?.GetComponent<GameComponent_MouseDisasterPawnGeneration>()?.HasPendingBehaviorGroup(group.id) != true)
@@ -382,6 +401,9 @@ namespace MouseDisaster
                     byId.Remove(group.id); groups.RemoveAt(i);
                 }
             }
+            foreach (Faction faction in Find.FactionManager.AllFactionsListForReading)
+                if (faction.temporary && MouseDisasterUtility.IsEventBehaviorFaction(faction))
+                    Find.FactionManager.Notify_PawnLeftFaction(faction);
         }
     }
 
