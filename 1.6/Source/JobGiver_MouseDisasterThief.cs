@@ -29,7 +29,7 @@ namespace MouseDisaster
             bool mustStayOnMap = MouseDisasterUtility.MustStayForAirDropError(pawn);
             if (MouseDisasterFeeding.ShouldLeaveAfterFed(pawn))
                 return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
-            if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
+            if (MouseDisasterFeeding.HasSatisfied(pawn) || MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
             if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly))
                 return MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
 

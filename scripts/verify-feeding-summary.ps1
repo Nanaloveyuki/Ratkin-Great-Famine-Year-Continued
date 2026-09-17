@@ -115,7 +115,7 @@ public static class FeedingHarness {
         Check(MouseDisasterFeeding.ShouldLeaveAfterFed(p),"default departure disabled");
         MouseDisasterMod.Settings.leaveAfterFed=false;
         Check(!MouseDisasterFeeding.ShouldLeaveAfterFed(p),"departure ignores toggle");
-        Check(!MouseDisasterFeeding.IsSeekingSuppressed(p),"disabled departure permanently prevents feeding");
+        Check(MouseDisasterFeeding.IsSeekingSuppressed(p),"disabled departure resumed feeding after completion");
         Check(MouseDisasterFeeding.HasSatisfied(p),"toggle erased feeding history");
         var staying = new Pawn { MentalStateDef=MouseDisasterDefOf.MouseDisaster_ThievingState };
         MouseDisasterFeeding.Evaluate(staying,0.9f);

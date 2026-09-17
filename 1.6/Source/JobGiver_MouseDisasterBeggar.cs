@@ -37,7 +37,7 @@ namespace MouseDisaster
                 Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.IsWaitingEnvoy(pawn) == true;
             if (MouseDisasterFeeding.ShouldLeaveAfterFed(pawn))
                 return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
-            if (MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
+            if (MouseDisasterFeeding.HasSatisfied(pawn) || MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
             if (!MouseDisasterUtility.CanBegAgain(pawn))
                 return MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
 

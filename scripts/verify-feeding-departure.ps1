@@ -73,8 +73,10 @@ public static class DepartureHarness {
     Check(ai.Run(p)==null,"disabled full visitor left: "+ai.GetType().Name);
     MouseDisasterMod.Settings.leaveAfterFed=true;Check(ai.Run(p)?.name=="exit","enabled full visitor stayed");
     p.stay=true;Check(ai.Run(p)==null,"feeding bypassed story wait");
-    p.stay=false;p.temporary=true;MouseDisasterMod.Settings.leaveAfterFed=false;Check(ai.Run(p)==null,"temporary satiety ignored");
+   p.stay=false;p.temporary=true;MouseDisasterMod.Settings.leaveAfterFed=false;Check(ai.Run(p)==null,"temporary satiety ignored");
    }
+   var fedRelief=new Pawn{completed=true,relief=true};MouseDisasterMod.Settings.leaveAfterFed=false;
+   Check(ai.Run(fedRelief)==null,"disabled departure resumed relief feeding: "+ai.GetType().Name);
    var hungry=new Pawn();hungry.needs.food.CurLevelPercentage=0.2f;
    Check(ai.Run(hungry)?.name=="exit","disabled feeding departure blocked unrelated no-food exit");
   }

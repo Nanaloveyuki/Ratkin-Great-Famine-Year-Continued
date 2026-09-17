@@ -31,7 +31,7 @@ namespace MouseDisaster
         public static bool ShouldLeaveAfterFed(Pawn pawn) => MouseDisasterMod.Settings?.leaveAfterFed != false && HasSatisfied(pawn) &&
             GameComponent_MouseDisasterEventBehavior.Component?.FedDepartureDue(pawn) == true;
         public static bool IsSeekingSuppressed(Pawn pawn) =>
-            (MouseDisasterMod.Settings?.leaveAfterFed != false && HasSatisfied(pawn)) || HasTemporarySatiety(pawn);
+            HasSatisfied(pawn) || HasTemporarySatiety(pawn);
 
         internal static bool IsFull(float level) =>
             !float.IsNaN(level) && !float.IsInfinity(level) && level >= SatisfiedFoodLevel;
