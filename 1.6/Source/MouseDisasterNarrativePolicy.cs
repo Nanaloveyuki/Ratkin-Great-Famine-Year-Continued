@@ -65,12 +65,19 @@ namespace MouseDisaster
         public static bool IsAidComplete(bool delivered, bool driven, int count, int left, int settled,
             int identityChanged)
         {
+            return IsAidComplete(delivered, driven, count, left, settled, identityChanged,
+                Math.Min(Math.Max(0, count - left - settled), Math.Max(0, identityChanged)));
+        }
+
+        public static bool IsAidComplete(bool delivered, bool driven, int count, int left, int settled,
+            int identityChanged, int detainedIdentityChanged)
+        {
             int normalizedIdentityChanged = Math.Max(0, Math.Min(count, identityChanged));
-            int completedWithoutIdentityChange = left + settled;
+            int exempt = Math.Max(0, Math.Min(normalizedIdentityChanged, detainedIdentityChanged));
             return count > 0 && !driven &&
                 !IsIdentityChangeFailure(count, normalizedIdentityChanged) &&
-                completedWithoutIdentityChange + normalizedIdentityChanged == count &&
-                (delivered || settled + normalizedIdentityChanged == count);
+                left + settled + exempt == count &&
+                (delivered || settled + exempt == count);
         }
 
         public static bool IsIdentityChangeFailure(int totalPawnCount, int identityChangedCount)

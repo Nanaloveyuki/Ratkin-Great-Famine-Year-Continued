@@ -338,7 +338,8 @@ namespace MouseDisaster
                     detained = summary.detained, missing = summary.missing;
                 if (CountsNarrativeState && MouseDisasterNarrativePolicy.IsAidComplete(
                     visit.delivered && visit.scene != "S07", visit.driven, visit.people.Count, left, settled,
-                    summary.identityChanged))
+                    summary.identityChanged,
+                    visit.people.Count(p => p.identityChanged && p.end == NarrativePawnEnd.Detained)))
                 {
                     visit.counted = true;
                     summary.counted = true;

@@ -659,7 +659,8 @@ namespace MouseDisaster
                 MouseDisasterN007PawnRecord pawnRecord = record.pawnRecords[i];
                 Pawn pawn = ResolveN007Pawn(pawnRecord, map);
                 if (pawn == null || pawn.Dead || pawn.Destroyed || pawn.Map != map || !pawn.Spawned ||
-                    pawnRecord.handled || pawnRecord.leftMap || !MouseDisasterVisitorUtility.IsManagedVisitor(pawn) ||
+                    pawnRecord.handled || pawnRecord.leftMap || MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||
+                    !MouseDisasterVisitorUtility.IsManagedVisitor(pawn) ||
                     (recoveredOnly && (!pawnRecord.recovered || HasN007Plague(pawn))))
                 {
                     continue;
@@ -802,6 +803,17 @@ namespace MouseDisaster
                 {
                     pawnRecord.died = true;
                     summary.HasDied = true;
+                    continue;
+                }
+
+                if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn))
+                {
+                    pawnRecord.handled = true;
+                    pawnRecord.recovered = !HasN007Plague(pawn);
+                    summary.HasHandled = true;
+                    summary.HasRecovered |= pawnRecord.recovered;
+                    summary.AllRecoveredOrDied &= pawnRecord.recovered;
+                    summary.AllDied = false;
                     continue;
                 }
 

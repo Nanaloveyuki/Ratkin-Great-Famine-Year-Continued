@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+  <MouseDisaster_N004_7_Label>Suin: a family apart</MouseDisaster_N004_7_Label>
+  <MouseDisaster_N004_7_Text>The family has separated. Those who stayed have gone their own ways; those who left are still on the road. Suin has written to ask after them.</MouseDisaster_N004_7_Text>
+  <MouseDisaster_N004_8_Label>Suin: news gone quiet</MouseDisaster_N004_8_Label>
+  <MouseDisaster_N004_8_Text>There has been no clear news of the family for some time. Suin has asked travelers to inquire, but only scattered rumors have come back.</MouseDisaster_N004_8_Text>
   <MouseDisaster_ModName>Ratkin: Great Famine Year</MouseDisaster_ModName>
   <MouseDisaster_Settings_Section_General>Event frequency</MouseDisaster_Settings_Section_General>
   <MouseDisaster_Settings_Section_Environment>Environment adaptation</MouseDisaster_Settings_Section_Environment>
@@ -64,10 +68,10 @@
   <MouseDisaster_N004_4_Label>Suin: no one left</MouseDisaster_N004_4_Label>
   <MouseDisaster_N004_4_Text>Neither the mother nor her children survived. Suin's record ends here.</MouseDisaster_N004_4_Text>
   <MouseDisaster_N004_5_Label>Suin: separate roads</MouseDisaster_N004_5_Label>
-  <MouseDisaster_N004_5_Text>The mother and her children left the map alive. They never returned, and Suin has heard nothing more.</MouseDisaster_N004_5_Text>
+  <MouseDisaster_N004_5_Text>The mother and her children have left. Suin is still asking travelers for news of them.</MouseDisaster_N004_5_Text>
   <MouseDisaster_N004_6_Label>Suin: the children she could not save</MouseDisaster_N004_6_Label>
   <MouseDisaster_N004_6_Text>The mother survived, but not all her children did. She keeps walking, as if she still does not know where to take them.</MouseDisaster_N004_6_Text>
-  <MouseDisaster_N004_4_Message>It is only a story, isn't it? Everything was written in advance.</MouseDisaster_N004_4_Message>
+  <MouseDisaster_N004_4_Message>The mother and her children did not survive.</MouseDisaster_N004_4_Message>
   <MouseDisaster_N004_Revisit_Label>Suin: meeting again</MouseDisaster_N004_Revisit_Label>
   <MouseDisaster_N004_Revisit_Text>Your caravan has encountered {0} on the road. They neither approach nor flee. They wait for you to decide what to do this time.</MouseDisaster_N004_Revisit_Text>
   <MouseDisaster_N004_Revisit_Ignore>Ignore them</MouseDisaster_N004_Revisit_Ignore>
@@ -241,7 +245,7 @@
   <MouseDisaster_FoodGive_Fail>Food delivery cannot be arranged for these Ratkin.</MouseDisaster_FoodGive_Fail>
   <MouseDisaster_Letter_Ignore>Leave it for now; stop reminding me</MouseDisaster_Letter_Ignore>
   <MouseDisaster_N007_EntryLabel>The quarantine line</MouseDisaster_N007_EntryLabel>
-  <MouseDisaster_N007_EntryText>Some of the visitors have Ratkin plague. They are still here, but their stay cannot be handled like an ordinary visit.\n\nYou can keep them under observation or let them go. The disease will not wait for your decision.</MouseDisaster_N007_EntryText>
+  <MouseDisaster_N007_EntryText>Some visitors have Ratkin plague. The group has stopped nearby. The patients need treatment and somewhere to rest.</MouseDisaster_N007_EntryText>
   <MouseDisaster_N007_RecoveryLabel>Beyond the quarantine line</MouseDisaster_N007_RecoveryLabel>
   <MouseDisaster_N007_RecoveryText>Those who remain no longer show signs of Ratkin plague. It is time to decide what comes next.\n\nYou can let them leave or welcome the recovered visitors into your colony.</MouseDisaster_N007_RecoveryText>
   <MouseDisaster_N007_Quarantine>Quarantine and observe</MouseDisaster_N007_Quarantine>
@@ -252,7 +256,7 @@
   <MouseDisaster_N007_ActionFailed>The visitors' situation has changed. This choice is no longer available.</MouseDisaster_N007_ActionFailed>
   <MouseDisaster_N007_VisitorControlBlocked>These visitors are in quarantine. Resolve the quarantine letter first.</MouseDisaster_N007_VisitorControlBlocked>
   <MouseDisaster_N007_Quarantine_Message>Kept {0} patients here for now. They still need care, not merely orders to stay.</MouseDisaster_N007_Quarantine_Message>
-  <MouseDisaster_N007_Release_Message>Arranged for {0} patients to leave. Those unable to walk must wait; their departure is recorded only once they leave.</MouseDisaster_N007_Release_Message>
+  <MouseDisaster_N007_Release_Message>Departure has been arranged for {0} patients. Those unable to travel are still waiting.</MouseDisaster_N007_Release_Message>
   <MouseDisaster_N007_Defer_Message>You chose not to intervene. The patients' condition will still be followed.</MouseDisaster_N007_Defer_Message>
   <MouseDisaster_N007_Recovered_Message>The recovered visitors are no longer here. Their quarantine record is closed.</MouseDisaster_N007_Recovered_Message>
   <MouseDisaster_N007_RecoveredRelease_Message>Arranged for {0} recovered visitors to leave.</MouseDisaster_N007_RecoveredRelease_Message>
@@ -268,5 +272,5 @@
   <MouseDisaster_N007_Died_Label>They never crossed the line</MouseDisaster_N007_Died_Label>
   <MouseDisaster_N007_Died_Text>None of these patients survived. The quarantine is over.</MouseDisaster_N007_Died_Text>
   <MouseDisaster_N007_Handled_Label>An unfinished quarantine record</MouseDisaster_N007_Handled_Label>
-  <MouseDisaster_N007_Handled_Text>The patients are no longer under the original visiting arrangements, or their whereabouts are unknown. The quarantine is closed; what remains unknown is recorded as such.</MouseDisaster_N007_Handled_Text>
+  <MouseDisaster_N007_Handled_Text>The patients have gone their separate ways. News of some still arrives; others have not been heard from. Suin has put away the old list.</MouseDisaster_N007_Handled_Text>
 </LanguageData>

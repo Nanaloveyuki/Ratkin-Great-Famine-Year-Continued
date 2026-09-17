@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+  <MouseDisaster_Story_WaitGrowth>等待孩子长大</MouseDisaster_Story_WaitGrowth>
+  <MouseDisaster_Story_ClosedCounts>已结束：{0} 批；成功接济：{1} 次。</MouseDisaster_Story_ClosedCounts>
+  <MouseDisaster_Story_ChildAge>孩子年龄：{0} 岁</MouseDisaster_Story_ChildAge>
+  <MouseDisaster_Story_WaitMissing>等待消息</MouseDisaster_Story_WaitMissing>
+  <MouseDisaster_Story_WaitTransferred>已由殖民地接管</MouseDisaster_Story_WaitTransferred>
+  <MouseDisaster_Story_WaitDeparture>等待离开或安置</MouseDisaster_Story_WaitDeparture>
+  <MouseDisaster_Story_WaitTreatment>需要治疗或进食</MouseDisaster_Story_WaitTreatment>
+  <MouseDisaster_Story_WaitDecision>等待决定去留</MouseDisaster_Story_WaitDecision>
+  <MouseDisaster_Story_WaitCare>正在照料</MouseDisaster_Story_WaitCare>
+  <MouseDisaster_Story_CareDays>{0} / {1} 天</MouseDisaster_Story_CareDays>
+  <MouseDisaster_Story_ObservationDays>剩余观察时间：{0} 天</MouseDisaster_Story_ObservationDays>
+  <MouseDisaster_Story_EndLeft>已离开</MouseDisaster_Story_EndLeft>
+  <MouseDisaster_Story_EndSettled>已安置</MouseDisaster_Story_EndSettled>
+  <MouseDisaster_Story_EndDead>已死亡</MouseDisaster_Story_EndDead>
+  <MouseDisaster_Story_EndDetained>已被拘押或奴役</MouseDisaster_Story_EndDetained>
+  <MouseDisaster_Story_EndMissing>去向或安置未明</MouseDisaster_Story_EndMissing>
   <MouseDisaster_Story_ExchangeRejected>你拒绝了交换。商人开始收拢鼠蛋，准备离开。</MouseDisaster_Story_ExchangeRejected>
   <MouseDisaster_Story_ExchangeAccepted>交换已确认。留下的鼠蛋成为殖民地囚犯；商人正在带走交出的婴儿。</MouseDisaster_Story_ExchangeAccepted>
   <MouseDisaster_Story_ExchangeTimedOut>等待时间已到。商人开始收拢鼠蛋，准备离开。</MouseDisaster_Story_ExchangeTimedOut>
@@ -33,8 +49,8 @@
   <MouseDisaster_Story_RelicChoice5>毁掉记录</MouseDisaster_Story_RelicChoice5>
   <MouseDisaster_Story_RelicCost>本次获得白银：{0}。取走或共同保管可保留记录物。毁弃无奖励，主动毁弃使信任下降 2 点。处置后无法重新选择。</MouseDisaster_Story_RelicCost>
   <MouseDisaster_Story_VisitCounts>已确认离开：{0}；完成安置：{1}；死亡：{2}；被拘押：{3}；去向或安置未明：{4}。</MouseDisaster_Story_VisitCounts>
-  <MouseDisaster_Story_AidCounted>这次已计入广义接济。</MouseDisaster_Story_AidCounted>
-  <MouseDisaster_Story_AidNotCounted>这次未计入安全送走或持续安置的接济数量。</MouseDisaster_Story_AidNotCounted>
+  <MouseDisaster_Story_AidCounted>成功接济 +1。</MouseDisaster_Story_AidCounted>
+  <MouseDisaster_Story_AidNotCounted>本次已结束，未增加成功接济次数。</MouseDisaster_Story_AidNotCounted>
   <MouseDisaster_Story_N005Care_Label>给孩子一个名字</MouseDisaster_Story_N005Care_Label>
   <MouseDisaster_Story_N005Care_Text>这几天总有人得停下手里的活照看孩子。现在，至少不用每次哭起来都先问该叫谁。\n\n旧名字还在。要不要改，是你们自己的事。</MouseDisaster_Story_N005Care_Text>
   <MouseDisaster_Story_N005Dead_Label>空下来的位置</MouseDisaster_Story_N005Dead_Label>
@@ -42,42 +58,42 @@
   <MouseDisaster_Story_N005Left_Label>人不在这里了</MouseDisaster_Story_N005Left_Label>
   <MouseDisaster_Story_N005Left_Text>孩子已经离开了你的照料范围。接手的人会怎样照顾，眼下还不知道。</MouseDisaster_Story_N005Left_Text>
   <MouseDisaster_Story_N005Missing_Label>没有安顿下来</MouseDisaster_Story_N005Missing_Label>
-  <MouseDisaster_Story_N005Missing_Text>接收手续已经过去一段时间，孩子的安置仍没有一个确定的结果。这封信不把它算作已经照料妥当。</MouseDisaster_Story_N005Missing_Text>
+  <MouseDisaster_Story_N005Missing_Text>交接已经过去许久，仍没有孩子安顿下来的消息。穗音在来信中问起了他们的近况。</MouseDisaster_Story_N005Missing_Text>
   <MouseDisaster_Story_BroadcastEcho_Label>还在发的广播</MouseDisaster_Story_BroadcastEcho_Label>
   <MouseDisaster_Story_BroadcastEcho_Text>“那段广播还在发。收到它的人，不会知道今天这扇门为什么关着。”</MouseDisaster_Story_BroadcastEcho_Text>
   <MouseDisaster_Story_N008Entry_Label>来问路的人</MouseDisaster_Story_N008Entry_Label>
-  <MouseDisaster_Story_N008Entry_Text>“我替还活着的那一部分人来的。”\n\n{0} 把想说的话重排了一遍。\n\n“我们需要吃的，也需要知道哪条路还能走。你肯给六份简单食物，我留下一处旧存放点的位置。你也可以先查我说的是不是实话。”\n\n来客最多等候三天。已有遗物地点时提供该线索；遗物任务已结束时改为普通情报地点。</MouseDisaster_Story_N008Entry_Text>
+  <MouseDisaster_Story_N008Entry_Text>“我替还活着的人来问问。”\n\n{0} 攥着衣角，停了一会儿才继续说。\n\n“我们需要吃的。我知道一处旧存放点，你肯给六份简单食物，我就把位置告诉你。先核对也行，我在这里等三天。”</MouseDisaster_Story_N008Entry_Text>
   <MouseDisaster_Story_N008Verified_Label>这件事对得上</MouseDisaster_Story_N008Verified_Label>
   <MouseDisaster_Story_N008Verified_Text>“这件事对得上。别的我不能保证，你也不用现在就信。”\n\n来客提到的事情有本地已完成的记录可以核对。交换的条件仍然有效。</MouseDisaster_Story_N008Verified_Text>
   <MouseDisaster_Story_N008Unverified_Label>找错了地方</MouseDisaster_Story_N008Unverified_Label>
   <MouseDisaster_Story_N008Unverified_Text>没有查到可以对照的往事。\n\n“我可能找错地方了。”来客没有再坚持。</MouseDisaster_Story_N008Unverified_Text>
   <MouseDisaster_Story_N008Traded_Label>回程的东西</MouseDisaster_Story_N008Traded_Label>
-  <MouseDisaster_Story_N008Traded_Text>“够了。别再拿了，我一个人背不了那么多。”\n\n来客交出了约好的位置，又确认了一遍回程方向。等人安全离场，这一笔才算送走。</MouseDisaster_Story_N008Traded_Text>
+  <MouseDisaster_Story_N008Traded_Text>“够了。别再拿了，我一个人背不了那么多。”\n\n来客交出了约好的位置，又确认了一遍回程方向。</MouseDisaster_Story_N008Traded_Text>
   <MouseDisaster_Story_N008Rejected_Label>继续赶路</MouseDisaster_Story_N008Rejected_Label>
   <MouseDisaster_Story_N008Rejected_Text>“那就算了。我还得在天黑前走出去。”\n\n来客收起东西，准备离开。</MouseDisaster_Story_N008Rejected_Text>
   <MouseDisaster_Story_N008Dead_Label>口信到此为止</MouseDisaster_Story_N008Dead_Label>
-  <MouseDisaster_Story_N008Dead_Text>使者已经死亡。这次会面无法继续，尚未完成的交换不会收取物资。</MouseDisaster_Story_N008Dead_Text>
+  <MouseDisaster_Story_N008Dead_Text>使者死了，没说完的口信也断在了这里。</MouseDisaster_Story_N008Dead_Text>
   <MouseDisaster_Story_N008Missing_Label>失去联系</MouseDisaster_Story_N008Missing_Label>
-  <MouseDisaster_Story_N008Missing_Text>使者或会面地点已经无法确认。尚未完成的交换到此中止，去向不明保留为去向不明。</MouseDisaster_Story_N008Missing_Text>
+  <MouseDisaster_Story_N008Missing_Text>约好的地方已经找不到使者。那场没谈完的交换，也失去了下文。</MouseDisaster_Story_N008Missing_Text>
   <MouseDisaster_Story_N008Left_Label>会面中断</MouseDisaster_Story_N008Left_Label>
-  <MouseDisaster_Story_N008Left_Text>使者已离开会面地点，或不再具备原来的访客身份。原先的交换条件已经失效。</MouseDisaster_Story_N008Left_Text>
+  <MouseDisaster_Story_N008Left_Text>使者已经离席，桌上的交易也搁下了。</MouseDisaster_Story_N008Left_Text>
   <MouseDisaster_Story_N008Timeout_Label>等候结束</MouseDisaster_Story_N008Timeout_Label>
   <MouseDisaster_Story_N008Timeout_Text>三天已经过去，使者没有继续等候。尚未交出的物资仍留在殖民地。</MouseDisaster_Story_N008Timeout_Text>
-  <MouseDisaster_Story_N008ExtraSite>遗物那条线索已经结束。来客另外给出了一个普通情报地点，现场仍需亲自查看。</MouseDisaster_Story_N008ExtraSite>
+  <MouseDisaster_Story_N008ExtraSite>来客在地图上又标了一处地方。那里是否还有东西，要到现场才知道。</MouseDisaster_Story_N008ExtraSite>
   <MouseDisaster_Story_N009Entry_Label>旧存放点</MouseDisaster_Story_N009Entry_Label>
-  <MouseDisaster_Story_N009Entry_Text>有人留下了一处旧存放点的位置。那里可能还保管着迁移清单。\n\n线索有效期为十五天。抵达后检查实际的记录箱，再决定取走、留下或转交。</MouseDisaster_Story_N009Entry_Text>
+  <MouseDisaster_Story_N009Entry_Text>来客在地图上指了一处旧存放点，说那里还存着迁移时留下的清单。\n\n“有人会来搬走那些东西。要去的话，最好在十五天内动身。”</MouseDisaster_Story_N009Entry_Text>
   <MouseDisaster_Story_N009Result1_Label>带回去</MouseDisaster_Story_N009Result1_Label>
   <MouseDisaster_Story_N009Result1_Text>能带走的已经收好了。里面有几页粘在一起，先别硬撕。\n\n记录和白银留在箱子附近，记得带走。</MouseDisaster_Story_N009Result1_Text>
   <MouseDisaster_Story_N009Result2_Label>留给后来的人</MouseDisaster_Story_N009Result2_Label>
   <MouseDisaster_Story_N009Result2_Text>你们没有带走箱子。位置已经记下，至于下一批来的人会不会拿走，就不由这里决定了。</MouseDisaster_Story_N009Result2_Text>
   <MouseDisaster_Story_N009Result3_Label>交给来者</MouseDisaster_Story_N009Result3_Label>
-  <MouseDisaster_Story_N009Result3_Text>你把保管权交给了先前取得联系的人。约定的白银留在现场，记录不再作为你的奖励领取。</MouseDisaster_Story_N009Result3_Text>
+  <MouseDisaster_Story_N009Result3_Text>你把记录交给了先前取得联系的人。对方留下约定的白银，仔细包好了那些旧纸。</MouseDisaster_Story_N009Result3_Text>
   <MouseDisaster_Story_N009Result4_Label>各留一份</MouseDisaster_Story_N009Result4_Label>
   <MouseDisaster_Story_N009Result4_Text>“留一份给我们。搬走以后，别让我们再求你一遍。”\n\n保管约定已经确定。你的副本留在现场，这次没有白银报酬。</MouseDisaster_Story_N009Result4_Text>
   <MouseDisaster_Story_N009Result5_Label>损毁的清单</MouseDisaster_Story_N009Result5_Label>
   <MouseDisaster_Story_N009Result5_Text>纸和木箱已经没法用了。清单上的内容没有另一份能在这里核对。</MouseDisaster_Story_N009Result5_Text>
   <MouseDisaster_Story_N009Result6_Label>空窖</MouseDisaster_Story_N009Result6_Label>
-  <MouseDisaster_Story_N009Result6_Text>约好的位置或有效期限已经失去。能取的东西不再向这里开放，这条线索结束了。</MouseDisaster_Story_N009Result6_Text>
+  <MouseDisaster_Story_N009Result6_Text>等你再问起那处地窖，已经找不到能带路的人。这条线索断了。</MouseDisaster_Story_N009Result6_Text>
   <MouseDisaster_Story_N007Return_Label>回来一趟</MouseDisaster_Story_N007Return_Label>
   <MouseDisaster_Story_N007Return_Text>门外又见到了一个熟面孔。上次离开时，鼠疫已经好了。\n\n这次只问能不能讨一顿饭，顺便说说近路。你可以接待，也可以让对方继续走。来客只等一天。</MouseDisaster_Story_N007Return_Text>
   <MouseDisaster_Story_N007ReturnReceived_Label>再走一程</MouseDisaster_Story_N007ReturnReceived_Label>
@@ -93,7 +109,7 @@
   <MouseDisaster_Story_E05_Label>记录中止</MouseDisaster_Story_E05_Label>
   <MouseDisaster_Story_E05_Text>这封信很短，署名写得十分清楚。\n\n“我不会继续为这里作保。已经发生的事，我会把记录交给受影响的人。”\n\n“有人问我，当初为什么相信这里。我得亲自去回答。”\n\n“留在你们身边的人，还需要吃饭、治病和睡觉。我不再捎来闲话，他们的日子仍要继续。必要的交接和结果记录会照常送来。”\n\n“穗音。”\n\n信里没有夹新的求援名单。她也没有要求殖民地作答。那些记录将由别的人继续读下去。</MouseDisaster_Story_E05_Text>
   <MouseDisaster_Story_PublicEnding_Label>灾鼠援助纪事</MouseDisaster_Story_PublicEnding_Label>
-  <MouseDisaster_Story_PublicEnding_Text>这一阶段已经达到一项灾鼠里程碑。\n\n已完成广义接济：{0} 次。\n成功广播：{1} 次。\n最近年度检查中，同一殖民地成年灾鼠最多：{2} 名。\n\n普通灾鼠事件仍会继续出现。</MouseDisaster_Story_PublicEnding_Text>
+  <MouseDisaster_Story_PublicEnding_Text>这段时间的援助已经汇成一份名册。有人在路上得到了食物，也有人在这里住了下来。\n\n接济 {0} 次，广播 {1} 次。上次清点时，一处聚落中已有 {2} 名成年灾鼠。</MouseDisaster_Story_PublicEnding_Text>
   <MouseDisaster_Story_IdentityEntry_Label>你一直没说的事</MouseDisaster_Story_IdentityEntry_Label>
   <MouseDisaster_Story_IdentityEntry_Text>“我知道一些旧仓号，也能联系上负责运输的人。\n\n这些事情以前没有说清楚。现在可以谈一谈。”</MouseDisaster_Story_IdentityEntry_Text>
   <MouseDisaster_Story_IdentityFull_Label>她的名字</MouseDisaster_Story_IdentityFull_Label>
@@ -109,37 +125,37 @@
   <MouseDisaster_Story_BridgeEnvoy_Label>找到了</MouseDisaster_Story_BridgeEnvoy_Label>
   <MouseDisaster_Story_BridgeEnvoy_Text>“他说的地方找到了。至少这一次，约好的线索有了下文。”</MouseDisaster_Story_BridgeEnvoy_Text>
   <MouseDisaster_Story_S12Paid_Label>路上交出的物资</MouseDisaster_Story_S12Paid_Label>
-  <MouseDisaster_Story_S12Paid_Text>远行队交出了对方要求的物资。这笔支出按沿途勒索记录，不计入殖民地承诺的接济。</MouseDisaster_Story_S12Paid_Text>
+  <MouseDisaster_Story_S12Paid_Text>物资交出去后，远行队获准继续赶路。接下来的路上，得把余粮算得更仔细些。</MouseDisaster_Story_S12Paid_Text>
   <MouseDisaster_Story_S12Fight_Label>远行队迎战</MouseDisaster_Story_S12Fight_Label>
-  <MouseDisaster_Story_S12Fight_Text>远行队拒绝交出物资，选择迎战。后面的损失仍以实际战斗结果为准，这个选择不计主动驱逐访客。</MouseDisaster_Story_S12Fight_Text>
+  <MouseDisaster_Story_S12Fight_Text>远行队没有交出物资。队员们放下行囊，拿起了武器。</MouseDisaster_Story_S12Fight_Text>
   <MouseDisaster_Story_S01_Label>送错的孩子</MouseDisaster_Story_S01_Label>
   <MouseDisaster_Story_S01_Text>最初的问题是送错了地方。舱门打开以后，还得有人处理孩子的去留。</MouseDisaster_Story_S01_Text>
   <MouseDisaster_Story_S02_Label>叫错的称呼</MouseDisaster_Story_S02_Label>
   <MouseDisaster_Story_S02_Text>认错的人已经来了。称呼可以纠正，去留还得另作决定。</MouseDisaster_Story_S02_Text>
   <MouseDisaster_Story_S03_Label>先出生再决定</MouseDisaster_Story_S03_Label>
-  <MouseDisaster_Story_S03_Text>孩子的出生没有等你把其他事情安排好。母亲和新生儿分别追踪，这次确认的去向列在下面。</MouseDisaster_Story_S03_Text>
+  <MouseDisaster_Story_S03_Text>路上多了一个孩子。母亲原本就不多的行李里，还得腾出一块裹布的位置。</MouseDisaster_Story_S03_Text>
   <MouseDisaster_Story_S04_Label>路过的人</MouseDisaster_Story_S04_Label>
   <MouseDisaster_Story_S04_Text>这一群人的去向有了下文。有些来客只会经过一次。</MouseDisaster_Story_S04_Text>
   <MouseDisaster_Story_S05_Label>拿走以后</MouseDisaster_Story_S05_Label>
-  <MouseDisaster_Story_S05_Text>少掉的食物已经少了。偷东西的人后来怎样，和食物有没有找回来，各有各的结果。</MouseDisaster_Story_S05_Text>
+  <MouseDisaster_Story_S05_Text>粮袋被翻动的痕迹还在。有人清点余粮，有人去问那几个来客的消息。</MouseDisaster_Story_S05_Text>
   <MouseDisaster_Story_S06_Label>门口的人群</MouseDisaster_Story_S06_Label>
   <MouseDisaster_Story_S06_Text>人多的时候，消息传来得很乱。这一次，至少有些去向已经确认。</MouseDisaster_Story_S06_Text>
   <MouseDisaster_Story_S07_Label>一张地图的价格</MouseDisaster_Story_S07_Label>
-  <MouseDisaster_Story_S07_Text>这批情报来客的去向已经确认。资源交付和地点探索另行处理，地图上的标记还不能算拿到手的东西。</MouseDisaster_Story_S07_Text>
+  <MouseDisaster_Story_S07_Text>来客口中的藏粮点，在地图上只有一个模糊的位置。路边的山势和水道，倒是描述得很清楚。</MouseDisaster_Story_S07_Text>
   <MouseDisaster_Story_S08_Label>商队的去向</MouseDisaster_Story_S08_Label>
-  <MouseDisaster_Story_S08_Text>商队的这段行程有了结果。普通买卖不自动算作接济，额外的安置另行记录。</MouseDisaster_Story_S08_Text>
+  <MouseDisaster_Story_S08_Text>商队留下了几笔买卖，也留下了一些人的消息。柜台旁的账簿又添了几行。</MouseDisaster_Story_S08_Text>
   <MouseDisaster_Story_S09_Label>围攻之后</MouseDisaster_Story_S09_Label>
-  <MouseDisaster_Story_S09_Text>这批来客的去向已经确认。对原有敌袭的抵抗不记作主动驱逐，主动改变中立关系则另记。</MouseDisaster_Story_S09_Text>
+  <MouseDisaster_Story_S09_Text>围墙边又安静下来。守卫开始换班，有人出去查看那些来客留下的痕迹。</MouseDisaster_Story_S09_Text>
   <MouseDisaster_Story_S10_Label>经过这里的灾荒</MouseDisaster_Story_S10_Label>
-  <MouseDisaster_Story_S10_Text>这一批人经过以后，地上的食物和活着的人都变了。眼下能确认的先记清楚。</MouseDisaster_Story_S10_Text>
+  <MouseDisaster_Story_S10_Text>这批人的消息陆续传了回来。穗音把散落的纸条收在一起，逐一核对名字。</MouseDisaster_Story_S10_Text>
   <MouseDisaster_Story_S11_Label>感染者的去向</MouseDisaster_Story_S11_Label>
   <MouseDisaster_Story_S11_Text>来的是感染者。报复的名义还不足以确认谁在指使；没有查到的名字先不填。</MouseDisaster_Story_S11_Text>
   <MouseDisaster_Story_S12_Label>远行队之外</MouseDisaster_Story_S12_Label>
-  <MouseDisaster_Story_S12_Text>这次发生在远行队的路上。交出物资和迎战分别记下，实际后果仍要继续面对。</MouseDisaster_Story_S12_Text>
+  <MouseDisaster_Story_S12_Text>消息从远行队那里传了回来。队员们说起拦路的人，也重新清点了剩下的物资。</MouseDisaster_Story_S12_Text>
   <MouseDisaster_Story_S13_Label>没有同行的人</MouseDisaster_Story_S13_Label>
-  <MouseDisaster_Story_S13_Text>没有同行的人能替他们作答。留下、离开和死亡，各自有各自的结果。</MouseDisaster_Story_S13_Text>
+  <MouseDisaster_Story_S13_Text>他们独自来到这里，身边连个能捎口信的同伴都没有。穗音几经打听，才拼出这段行程。</MouseDisaster_Story_S13_Text>
   <MouseDisaster_Story_S14_Label>送走以后</MouseDisaster_Story_S14_Label>
-  <MouseDisaster_Story_S14_Text>来客的去向已经确认。实际交付和后续安置都核对过，计数结果列在下面。</MouseDisaster_Story_S14_Text>
+  <MouseDisaster_Story_S14_Text>那几位求援者的消息传回来了。穗音认出了名单上的名字，那是之前托人来问过路的一群人。</MouseDisaster_Story_S14_Text>
   <MouseDisaster_Story_N007Counts>已记录康复：{0}；死亡：{1}；离场：{2}；已转由其他方式处理或失联：{3}。康复与离场可能为同一人。</MouseDisaster_Story_N007Counts>
   <MouseDisaster_Story_ControlSection>新增剧情、总结与结局</MouseDisaster_Story_ControlSection>
   <MouseDisaster_Story_EnableNarrative>启用新增剧情自然触发</MouseDisaster_Story_EnableNarrative>

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
+  <MouseDisaster_Story_WaitGrowth>Waiting for the children to grow</MouseDisaster_Story_WaitGrowth>
+  <MouseDisaster_Story_ClosedCounts>Closed visits: {0}; successful aid: {1}.</MouseDisaster_Story_ClosedCounts>
+  <MouseDisaster_Story_ChildAge>Child's age: {0} years</MouseDisaster_Story_ChildAge>
+  <MouseDisaster_Story_WaitMissing>Awaiting news</MouseDisaster_Story_WaitMissing>
+  <MouseDisaster_Story_WaitTransferred>In colony custody</MouseDisaster_Story_WaitTransferred>
+  <MouseDisaster_Story_WaitDeparture>Awaiting departure or settlement</MouseDisaster_Story_WaitDeparture>
+  <MouseDisaster_Story_WaitTreatment>Needs treatment or food</MouseDisaster_Story_WaitTreatment>
+  <MouseDisaster_Story_WaitDecision>Awaiting a decision</MouseDisaster_Story_WaitDecision>
+  <MouseDisaster_Story_WaitCare>Receiving care</MouseDisaster_Story_WaitCare>
+  <MouseDisaster_Story_CareDays>{0} / {1} days</MouseDisaster_Story_CareDays>
+  <MouseDisaster_Story_ObservationDays>Observation time left: {0} days</MouseDisaster_Story_ObservationDays>
+  <MouseDisaster_Story_EndLeft>Left</MouseDisaster_Story_EndLeft>
+  <MouseDisaster_Story_EndSettled>Settled</MouseDisaster_Story_EndSettled>
+  <MouseDisaster_Story_EndDead>Died</MouseDisaster_Story_EndDead>
+  <MouseDisaster_Story_EndDetained>Imprisoned or enslaved</MouseDisaster_Story_EndDetained>
+  <MouseDisaster_Story_EndMissing>Whereabouts or care uncertain</MouseDisaster_Story_EndMissing>
   <MouseDisaster_Story_ExchangeRejected>You refused the exchange. The trader is gathering the Ratkin young and preparing to leave.</MouseDisaster_Story_ExchangeRejected>
   <MouseDisaster_Story_ExchangeAccepted>The exchange is confirmed. The Ratkin young staying here become colony prisoners; the trader is taking away the babies you handed over.</MouseDisaster_Story_ExchangeAccepted>
   <MouseDisaster_Story_ExchangeTimedOut>The waiting period has ended. The trader is gathering the Ratkin young and preparing to leave.</MouseDisaster_Story_ExchangeTimedOut>
@@ -33,8 +49,8 @@
   <MouseDisaster_Story_RelicChoice5>Destroy the records</MouseDisaster_Story_RelicChoice5>
   <MouseDisaster_Story_RelicCost>Silver received: {0}. Taking or sharing the records lets you keep a copy. Destroying them gives no reward and reduces trust by 2. This choice cannot be changed afterward.</MouseDisaster_Story_RelicCost>
   <MouseDisaster_Story_VisitCounts>Confirmed departures: {0}; settled: {1}; dead: {2}; detained: {3}; whereabouts or care uncertain: {4}.</MouseDisaster_Story_VisitCounts>
-  <MouseDisaster_Story_AidCounted>This visit counts toward your aid total.</MouseDisaster_Story_AidCounted>
-  <MouseDisaster_Story_AidNotCounted>This visit does not count as a safe departure or sustained care.</MouseDisaster_Story_AidNotCounted>
+  <MouseDisaster_Story_AidCounted>Successful aid +1.</MouseDisaster_Story_AidCounted>
+  <MouseDisaster_Story_AidNotCounted>This visit is closed. No successful aid was added.</MouseDisaster_Story_AidNotCounted>
   <MouseDisaster_Story_N005Care_Label>Give the child a name</MouseDisaster_Story_N005Care_Label>
   <MouseDisaster_Story_N005Care_Text>These past few days, someone has always had to put down their work to care for the children. At least now, every cry no longer starts with asking whom to call.\n\nTheir old names remain. Whether to change them is up to you.</MouseDisaster_Story_N005Care_Text>
   <MouseDisaster_Story_N005Dead_Label>An empty place</MouseDisaster_Story_N005Dead_Label>
@@ -42,42 +58,42 @@
   <MouseDisaster_Story_N005Left_Label>No longer here</MouseDisaster_Story_N005Left_Label>
   <MouseDisaster_Story_N005Left_Text>The children have left your care. How they will be looked after elsewhere is not yet known.</MouseDisaster_Story_N005Left_Text>
   <MouseDisaster_Story_N005Missing_Label>Still unsettled</MouseDisaster_Story_N005Missing_Label>
-  <MouseDisaster_Story_N005Missing_Text>Some time has passed since the handover, but the children's care remains uncertain. This letter does not count them as safely settled.</MouseDisaster_Story_N005Missing_Text>
+  <MouseDisaster_Story_N005Missing_Text>Some time has passed since the handover, with no news that the children have settled in. Suin has written to ask how they are doing.</MouseDisaster_Story_N005Missing_Text>
   <MouseDisaster_Story_BroadcastEcho_Label>The broadcast continues</MouseDisaster_Story_BroadcastEcho_Label>
   <MouseDisaster_Story_BroadcastEcho_Text>"The broadcast is still going out. Those who hear it will not know why the gate is closed today."</MouseDisaster_Story_BroadcastEcho_Text>
   <MouseDisaster_Story_N008Entry_Label>Someone asking the way</MouseDisaster_Story_N008Entry_Label>
-  <MouseDisaster_Story_N008Entry_Text>"I came on behalf of those of us who are still alive."\n\n{0} tries the words again.\n\n"We need food, and we need to know which roads are still open. Give me six simple meals, and I will leave you the location of an old store. You can check my story first if you wish."\n\nThe visitor will wait up to three days. If a relic site already exists, they offer that lead. If that search has ended, they offer an ordinary lead instead.</MouseDisaster_Story_N008Entry_Text>
+  <MouseDisaster_Story_N008Entry_Text>"I came to ask for those of us still alive."\n\n{0} grips the hem of their clothes and pauses before continuing.\n\n"We need food. I know an old store. Give me six simple meals and I will tell you where it is. You can check my story first. I can wait here for three days."</MouseDisaster_Story_N008Entry_Text>
   <MouseDisaster_Story_N008Verified_Label>The story checks out</MouseDisaster_Story_N008Verified_Label>
   <MouseDisaster_Story_N008Verified_Text>"That part matches. I cannot promise the rest, and you need not believe me yet."\n\nThe visitor's account matches something in your records. The offer still stands.</MouseDisaster_Story_N008Verified_Text>
   <MouseDisaster_Story_N008Unverified_Label>The wrong place</MouseDisaster_Story_N008Unverified_Label>
   <MouseDisaster_Story_N008Unverified_Text>There is no past event here to match the account.\n\n"Perhaps I came to the wrong place." The visitor does not insist.</MouseDisaster_Story_N008Unverified_Text>
   <MouseDisaster_Story_N008Traded_Label>Supplies for the way back</MouseDisaster_Story_N008Traded_Label>
-  <MouseDisaster_Story_N008Traded_Text>"Enough. Don't bring any more. I cannot carry it all alone."\n\nThe visitor handed over the promised location and checked the route home once more. The delivery counts as aid once they leave safely.</MouseDisaster_Story_N008Traded_Text>
+  <MouseDisaster_Story_N008Traded_Text>"Enough. Don't bring any more. I cannot carry it all alone."\n\nThe visitor handed over the promised location and checked the route home once more.</MouseDisaster_Story_N008Traded_Text>
   <MouseDisaster_Story_N008Rejected_Label>Keep moving</MouseDisaster_Story_N008Rejected_Label>
   <MouseDisaster_Story_N008Rejected_Text>"Then never mind. I still have to get out before dark."\n\nThe visitor gathers their things and prepares to leave.</MouseDisaster_Story_N008Rejected_Text>
   <MouseDisaster_Story_N008Dead_Label>The message ends here</MouseDisaster_Story_N008Dead_Label>
-  <MouseDisaster_Story_N008Dead_Text>The envoy has died. This meeting cannot continue, and no supplies will be taken for the unfinished exchange.</MouseDisaster_Story_N008Dead_Text>
+  <MouseDisaster_Story_N008Dead_Text>The envoy has died, leaving the message unfinished.</MouseDisaster_Story_N008Dead_Text>
   <MouseDisaster_Story_N008Missing_Label>Contact lost</MouseDisaster_Story_N008Missing_Label>
-  <MouseDisaster_Story_N008Missing_Text>The envoy or meeting place can no longer be located. The unfinished exchange ends here. Their whereabouts remain unknown.</MouseDisaster_Story_N008Missing_Text>
+  <MouseDisaster_Story_N008Missing_Text>The envoy can no longer be found at the meeting place. The unfinished exchange has fallen through.</MouseDisaster_Story_N008Missing_Text>
   <MouseDisaster_Story_N008Left_Label>A broken meeting</MouseDisaster_Story_N008Left_Label>
-  <MouseDisaster_Story_N008Left_Text>The envoy has left the meeting place or is no longer a visitor. The original terms no longer apply.</MouseDisaster_Story_N008Left_Text>
+  <MouseDisaster_Story_N008Left_Text>The envoy has left the meeting. The offer has been withdrawn.</MouseDisaster_Story_N008Left_Text>
   <MouseDisaster_Story_N008Timeout_Label>The wait is over</MouseDisaster_Story_N008Timeout_Label>
   <MouseDisaster_Story_N008Timeout_Text>Three days have passed. The envoy has stopped waiting. Supplies not yet handed over remain in the colony.</MouseDisaster_Story_N008Timeout_Text>
-  <MouseDisaster_Story_N008ExtraSite>The relic lead has already ended. The visitor offered an ordinary lead instead. You must still visit the location to see what is there.</MouseDisaster_Story_N008ExtraSite>
+  <MouseDisaster_Story_N008ExtraSite>The visitor marked another place on the map. What remains there is anyone's guess.</MouseDisaster_Story_N008ExtraSite>
   <MouseDisaster_Story_N009Entry_Label>An old store</MouseDisaster_Story_N009Entry_Label>
-  <MouseDisaster_Story_N009Entry_Text>Someone has left the location of an old store. It may still hold lists of people who once passed through.\n\nThe lead is valid for fifteen days. Visit the site and examine the record chest before deciding whether to take it, leave it or hand it over.</MouseDisaster_Story_N009Entry_Text>
+  <MouseDisaster_Story_N009Entry_Text>The visitor pointed out an old store on the map, said to hold lists left during the migration.\n\n"Someone is coming to clear the place out. If you mean to go, get there within fifteen days."</MouseDisaster_Story_N009Entry_Text>
   <MouseDisaster_Story_N009Result1_Label>Bring it back</MouseDisaster_Story_N009Result1_Label>
   <MouseDisaster_Story_N009Result1_Text>Everything that can be carried has been packed. A few pages are stuck together. Do not pull them apart yet.\n\nThe records and silver are beside the chest. Remember to collect them.</MouseDisaster_Story_N009Result1_Text>
   <MouseDisaster_Story_N009Result2_Label>Leave it for those who follow</MouseDisaster_Story_N009Result2_Label>
   <MouseDisaster_Story_N009Result2_Text>You did not take the chest. The location has been noted, but what the next visitors do with it is no longer yours to decide.</MouseDisaster_Story_N009Result2_Text>
   <MouseDisaster_Story_N009Result3_Label>Pass it on</MouseDisaster_Story_N009Result3_Label>
-  <MouseDisaster_Story_N009Result3_Text>You gave custody to the people contacted earlier. The agreed silver remains at the site. The records are no longer yours to claim.</MouseDisaster_Story_N009Result3_Text>
+  <MouseDisaster_Story_N009Result3_Text>You handed the records to the people contacted earlier. They left the agreed silver and carefully wrapped the old papers.</MouseDisaster_Story_N009Result3_Text>
   <MouseDisaster_Story_N009Result4_Label>A copy each</MouseDisaster_Story_N009Result4_Label>
   <MouseDisaster_Story_N009Result4_Text>"Leave us a copy. Once you take it away, don't make us ask you again."\n\nThe arrangement is settled. Your copy is at the site. There is no silver payment this time.</MouseDisaster_Story_N009Result4_Text>
   <MouseDisaster_Story_N009Result5_Label>A ruined list</MouseDisaster_Story_N009Result5_Label>
   <MouseDisaster_Story_N009Result5_Text>The paper and wooden chest are beyond use. There is no other copy here to check the names against.</MouseDisaster_Story_N009Result5_Text>
   <MouseDisaster_Story_N009Result6_Label>An empty cellar</MouseDisaster_Story_N009Result6_Label>
-  <MouseDisaster_Story_N009Result6_Text>The location or its deadline is no longer available. Nothing more can be claimed here. This lead has ended.</MouseDisaster_Story_N009Result6_Text>
+  <MouseDisaster_Story_N009Result6_Text>When you asked about the cellar again, nobody could be found to lead the way. The trail has gone cold.</MouseDisaster_Story_N009Result6_Text>
   <MouseDisaster_Story_N007Return_Label>Back for a visit</MouseDisaster_Story_N007Return_Label>
   <MouseDisaster_Story_N007Return_Text>A familiar face is at the gate again. The Ratkin plague had cleared before they left last time.\n\nThis time, they ask only for a meal and a chance to share news of a shorter route. You can welcome them or let them continue. They will wait one day.</MouseDisaster_Story_N007Return_Text>
   <MouseDisaster_Story_N007ReturnReceived_Label>Another stretch of road</MouseDisaster_Story_N007ReturnReceived_Label>
@@ -93,7 +109,7 @@
   <MouseDisaster_Story_E05_Label>The Record Ends</MouseDisaster_Story_E05_Label>
   <MouseDisaster_Story_E05_Text>The letter is short, with a clear signature.\n\n"I will no longer vouch for this place. I will give the records of what happened to those affected."\n\n"Someone asked why I trusted you in the first place. I must answer them in person."\n\n"Those who remain with you still need food, treatment and sleep. I will send no more idle news, but their lives go on. Necessary handovers and reports will still reach you."\n\n"Suin."\n\nNo new pleas for help are enclosed. She asks for no reply. Others will continue reading those records.</MouseDisaster_Story_E05_Text>
   <MouseDisaster_Story_PublicEnding_Label>A chronicle of Ratkin aid</MouseDisaster_Story_PublicEnding_Label>
-  <MouseDisaster_Story_PublicEnding_Text>A milestone has been reached.\n\nAid completed: {0}.\nSuccessful broadcasts: {1}.\nLargest adult famine Ratkin population in one colony at the last annual count: {2}.\n\nOrdinary Ratkin incidents will continue.</MouseDisaster_Story_PublicEnding_Text>
+  <MouseDisaster_Story_PublicEnding_Text>The aid given over these months now fills a register. Some found food along the road; others made a home here.\n\nAid given: {0}. Broadcasts sent: {1}. At the last count, one settlement was home to {2} adult famine Ratkin.</MouseDisaster_Story_PublicEnding_Text>
   <MouseDisaster_Story_IdentityEntry_Label>What you never told us</MouseDisaster_Story_IdentityEntry_Label>
   <MouseDisaster_Story_IdentityEntry_Text>"I know some old storehouse numbers, and I can reach people who arrange transport.\n\nI have not explained that properly before. We can talk about it now."</MouseDisaster_Story_IdentityEntry_Text>
   <MouseDisaster_Story_IdentityFull_Label>Her Name</MouseDisaster_Story_IdentityFull_Label>
@@ -109,37 +125,37 @@
   <MouseDisaster_Story_BridgeEnvoy_Label>Found it</MouseDisaster_Story_BridgeEnvoy_Label>
   <MouseDisaster_Story_BridgeEnvoy_Text>"The place they spoke of has been found. This time, at least, the promised lead went somewhere."</MouseDisaster_Story_BridgeEnvoy_Text>
   <MouseDisaster_Story_S12Paid_Label>Supplies surrendered on the road</MouseDisaster_Story_S12Paid_Label>
-  <MouseDisaster_Story_S12Paid_Text>The caravan handed over the demanded supplies. This is recorded as extortion, not as aid promised by the colony.</MouseDisaster_Story_S12Paid_Text>
+  <MouseDisaster_Story_S12Paid_Text>After handing over the supplies, the caravan was allowed to continue. The remaining food will need to stretch further.</MouseDisaster_Story_S12Paid_Text>
   <MouseDisaster_Story_S12Fight_Label>The caravan fights</MouseDisaster_Story_S12Fight_Label>
-  <MouseDisaster_Story_S12Fight_Text>The caravan refused the demand and chose to fight. Losses depend on the battle itself. This choice does not count as forcibly expelling visitors.</MouseDisaster_Story_S12Fight_Text>
+  <MouseDisaster_Story_S12Fight_Text>The caravan refused to surrender its supplies. Its members set down their packs and took up their weapons.</MouseDisaster_Story_S12Fight_Text>
   <MouseDisaster_Story_S01_Label>Children sent to the wrong place</MouseDisaster_Story_S01_Label>
   <MouseDisaster_Story_S01_Text>At first, it was a mistaken destination. Once the pod opened, someone still had to decide where the children would go.</MouseDisaster_Story_S01_Text>
   <MouseDisaster_Story_S02_Label>The wrong name</MouseDisaster_Story_S02_Label>
   <MouseDisaster_Story_S02_Text>The visitor who mistook you for someone else is already here. The mistake can be corrected. Their future needs a separate answer.</MouseDisaster_Story_S02_Text>
   <MouseDisaster_Story_S03_Label>Born before the decision</MouseDisaster_Story_S03_Label>
-  <MouseDisaster_Story_S03_Text>The children were born before you could settle everything else. The mothers and newborns each have their own outcomes, recorded below.</MouseDisaster_Story_S03_Text>
+  <MouseDisaster_Story_S03_Text>There is another child on the road. Among the mother's few belongings, room must be found for a swaddling cloth.</MouseDisaster_Story_S03_Text>
   <MouseDisaster_Story_S04_Label>Those passing through</MouseDisaster_Story_S04_Label>
   <MouseDisaster_Story_S04_Text>There is news of where this group went. Some visitors pass through only once.</MouseDisaster_Story_S04_Text>
   <MouseDisaster_Story_S05_Label>After the theft</MouseDisaster_Story_S05_Label>
-  <MouseDisaster_Story_S05_Text>The missing food is gone. What happened to the thieves and whether the food was recovered are separate matters.</MouseDisaster_Story_S05_Text>
+  <MouseDisaster_Story_S05_Text>The grain sacks still bear signs of being searched. Some count what remains; others ask after the visitors.</MouseDisaster_Story_S05_Text>
   <MouseDisaster_Story_S06_Label>A crowd at the gate</MouseDisaster_Story_S06_Label>
   <MouseDisaster_Story_S06_Text>News becomes confused when there are so many people. This time, at least some of their fates are known.</MouseDisaster_Story_S06_Text>
   <MouseDisaster_Story_S07_Label>The price of a map</MouseDisaster_Story_S07_Label>
-  <MouseDisaster_Story_S07_Text>These visitors' whereabouts are now known. Payment and exploration are separate matters. A mark on a map is not yet something in your hands.</MouseDisaster_Story_S07_Text>
+  <MouseDisaster_Story_S07_Text>The visitors' account placed a food cache only roughly on the map. Their description of the hills and waterways was much more precise.</MouseDisaster_Story_S07_Text>
   <MouseDisaster_Story_S08_Label>The caravan's road</MouseDisaster_Story_S08_Label>
-  <MouseDisaster_Story_S08_Text>This part of the traders' journey has ended. Ordinary trade does not count as aid. Any care beyond the deal is recorded separately.</MouseDisaster_Story_S08_Text>
+  <MouseDisaster_Story_S08_Text>The caravan left behind a few trades and news of some of its people. A few more lines fill the ledger by the counter.</MouseDisaster_Story_S08_Text>
   <MouseDisaster_Story_S09_Label>After the siege</MouseDisaster_Story_S09_Label>
-  <MouseDisaster_Story_S09_Text>The visitors' outcomes have been confirmed. Defending against an existing attack is not counted as expulsion. Turning on a neutral group is recorded separately.</MouseDisaster_Story_S09_Text>
+  <MouseDisaster_Story_S09_Text>The wall is quiet again. The guards change shifts while someone goes out to inspect the traces left by the visitors.</MouseDisaster_Story_S09_Text>
   <MouseDisaster_Story_S10_Label>The famine that passed through</MouseDisaster_Story_S10_Label>
-  <MouseDisaster_Story_S10_Text>After this group passed, both the food on the ground and the people still alive had changed. Record what can be confirmed first.</MouseDisaster_Story_S10_Text>
+  <MouseDisaster_Story_S10_Text>News of the group has come back in fragments. Suin gathers the scraps and checks the names one by one.</MouseDisaster_Story_S10_Text>
   <MouseDisaster_Story_S11_Label>Where the infected went</MouseDisaster_Story_S11_Label>
   <MouseDisaster_Story_S11_Text>The visitors were infected. A claim of revenge is not proof of who sent them. Names not yet found remain blank.</MouseDisaster_Story_S11_Text>
   <MouseDisaster_Story_S12_Label>Beyond the caravan</MouseDisaster_Story_S12_Label>
-  <MouseDisaster_Story_S12_Text>This happened on the caravan's road. Giving up supplies and choosing to fight are recorded separately. The consequences remain to be faced.</MouseDisaster_Story_S12_Text>
+  <MouseDisaster_Story_S12_Text>News has arrived from the caravan. Its members spoke of the people who blocked the road and counted their remaining supplies.</MouseDisaster_Story_S12_Text>
   <MouseDisaster_Story_S13_Label>With no one beside them</MouseDisaster_Story_S13_Label>
-  <MouseDisaster_Story_S13_Text>Nobody traveling with them could answer on their behalf. Staying, leaving and dying each have their own outcome.</MouseDisaster_Story_S13_Text>
+  <MouseDisaster_Story_S13_Text>They arrived alone, without even a companion to carry a message. It took Suin several inquiries to piece together their journey.</MouseDisaster_Story_S13_Text>
   <MouseDisaster_Story_S14_Label>After they leave</MouseDisaster_Story_S14_Label>
-  <MouseDisaster_Story_S14_Text>The visitors' outcomes are known. The supplies delivered and any later care have been checked; the result is listed below.</MouseDisaster_Story_S14_Text>
+  <MouseDisaster_Story_S14_Text>News of the visitors seeking help has arrived. Suin recognized the names: this was the group that had sent someone to ask the way.</MouseDisaster_Story_S14_Text>
   <MouseDisaster_Story_N007Counts>Recorded recoveries: {0}; deaths: {1}; departures: {2}; other arrangements or contact lost: {3}. Someone may count as both recovered and departed.</MouseDisaster_Story_N007Counts>
   <MouseDisaster_Story_ControlSection>Stories, reports and endings</MouseDisaster_Story_ControlSection>
   <MouseDisaster_Story_EnableNarrative>Allow new stories to begin</MouseDisaster_Story_EnableNarrative>

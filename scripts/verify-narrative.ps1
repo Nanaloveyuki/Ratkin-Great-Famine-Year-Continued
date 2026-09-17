@@ -30,8 +30,10 @@ foreach ($id in @('N005Care','N005Dead','N005Left','N005Missing','BroadcastEcho'
 }
 foreach ($id in 'Trade','Verify','Reject','Drive','Receive','Ask','Quiet') { $required += "MouseDisaster_Story_Choice$id" }
 foreach ($id in 1..5) { $required += "MouseDisaster_Story_RelicChoice$id" }
+foreach ($state in 'Left','Settled','Dead','Detained','Missing') { $required += "MouseDisaster_Story_End$state" }
+foreach ($state in 'Missing','Transferred','Departure','Treatment','Decision','Care','Growth') { $required += "MouseDisaster_Story_Wait$state" }
 foreach ($key in $required | Sort-Object -Unique) {
-    if ($key -in 'MouseDisaster_Story_Choice','MouseDisaster_Story_RelicChoice','MouseDisaster_Story_Debug','MouseDisaster_Story_Toggle') { continue }
+    if ($key -in 'MouseDisaster_Story_Choice','MouseDisaster_Story_RelicChoice','MouseDisaster_Story_Debug','MouseDisaster_Story_Toggle','MouseDisaster_Story_End','MouseDisaster_Story_Wait') { continue }
     Assert-Narrative ($keys.ContainsKey($key)) "Missing key: $key"
 }
 foreach ($key in $keys.Keys | Where-Object { $_ -like 'MouseDisaster_Story_*' -or $_ -like 'MouseDisaster_N005_*' -or $_ -like 'MouseDisaster_N006_*' -or $_ -like 'MouseDisaster_N007_*' -or $_ -like 'MouseDisaster_Narrative_*' }) {

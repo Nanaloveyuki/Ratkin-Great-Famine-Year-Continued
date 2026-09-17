@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using RimWorld;
 using Verse;
 
@@ -60,7 +61,7 @@ namespace MouseDisaster
                 n007Records.Count(r => r.phase != MouseDisasterN007Phase.Resolved),
                 envoyPhase > 0 && envoyPhase < 4 ? 1 : 0, relicStarted && relicOutcome == 0 ? 1 : 0);
             options.Add(new FloatMenuOption("MouseDisaster_Story_Progress".Translate(),
-                () => Find.WindowStack.Add(new Dialog_MessageBox(progress))));
+                    () => Find.WindowStack.Add(new Dialog_MessageBox(progress + BuildNarrativeProgressDetails()))));
             foreach (var record in n004Records.Where(r => r.outcome == MouseDisasterN004Outcome.Pending))
                 AddNarrativeTarget(options, "N004", record.mother);
             foreach (var record in n005Records.Where(r => r.outcome == MouseDisasterN005Outcome.Accepted && !r.careResolved))
@@ -86,6 +87,81 @@ namespace MouseDisaster
                         "Close".Translate(), null, captured.label))));
             }
             Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        private string BuildNarrativeProgressDetails()
+        {
+            var text = new StringBuilder();
+            text.Append("\n\n").Append("MouseDisaster_Story_ClosedCounts".Translate(narrativeVisitSummaries.Count, aidCompleted));
+            foreach (var visit in narrativeVisits.Where(v => v.showLetter && !v.resolved))
+            {
+                text.Append("\n\n").Append(("MouseDisaster_Story_" + visit.scene + "_Label").Translate());
+                AppendCareProgress(text, visit.people, visit.created);
+            }
+            foreach (var record in n005Records.Where(r => r.outcome == MouseDisasterN005Outcome.Accepted && !r.careResolved))
+            {
+                text.Append("\n\n").Append("MouseDisaster_Story_ToggleN005".Translate());
+                AppendCareProgress(text, record.care, record.createdTick, allowCaptiveCare: true);
+            }
+            foreach (var record in n004Records.Where(r => r.outcome == MouseDisasterN004Outcome.Pending))
+            {
+                text.Append("\n\n").Append("MouseDisaster_Story_ToggleN004".Translate());
+                bool growing = record.children.Any(p => p != null && !p.Dead && !IsChildAge(p) && IsN004InPlayerDomain(p));
+                bool missingReference = record.mother == null || record.children.Count == 0 ||
+                    record.mother.Destroyed && !record.mother.Dead || record.children.Any(p => p == null || p.Destroyed && !p.Dead);
+                text.Append("\n").Append((growing ? "MouseDisaster_Story_WaitGrowth" : "MouseDisaster_Story_WaitMissing").Translate());
+                if (!growing)
+                    text.Append("; ").Append("MouseDisaster_Story_ObservationDays".Translate(
+                        (System.Math.Max(0, (missingReference ? MouseDisasterNarrativePolicy.MissingGraceTicks : MouseDisasterNarrativePolicy.ObservationTicks) - (CurrentNarrativeTick - record.createdTick)) /
+                            (float)GenDate.TicksPerDay).ToString("0.0")));
+                foreach (var child in record.children.Where(p => p != null && !p.Dead))
+                    text.Append("\n").Append(child.LabelShortCap).Append(": ")
+                        .Append("MouseDisaster_Story_ChildAge".Translate(child.ageTracker?.AgeBiologicalYearsFloat.ToString("0.0") ?? "?"));
+            }
+            foreach (var record in n007Records.Where(r => r.phase != MouseDisasterN007Phase.Resolved))
+            {
+                text.Append("\n\n").Append("MouseDisaster_Story_ToggleN007".Translate());
+                foreach (var person in record.pawnRecords.Where(p => !p.handled && !p.died && !p.leftMap))
+                {
+                    string status = person.pawn == null ? "Missing" :
+                        MouseDisasterUtility.IsPlayerAffiliatedRatkin(person.pawn) ? "Transferred" :
+                        record.phase == MouseDisasterN007Phase.ReleasePending ? "Departure" :
+                        HasN007Plague(person.pawn) ? "Treatment" : "Decision";
+                    text.Append("\n").Append(person.pawn?.LabelShortCap.ToString() ?? "?").Append(": ")
+                        .Append(("MouseDisaster_Story_Wait" + status).Translate());
+                }
+            }
+            return text.ToString();
+        }
+
+        private void AppendCareProgress(StringBuilder text, IEnumerable<NarrativePawnObservation> people, int created, bool allowCaptiveCare = false)
+        {
+            foreach (var person in people)
+            {
+                text.Append("\n").Append(person.pawn?.LabelShortCap.ToString() ?? "?").Append(": ");
+                if (person.end != NarrativePawnEnd.Pending)
+                {
+                    text.Append(("MouseDisaster_Story_End" + person.end).Translate());
+                    continue;
+                }
+                if (!allowCaptiveCare && person.pawn != null && (person.pawn.IsPrisoner || person.pawn.IsSlave))
+                {
+                    text.Append("MouseDisaster_Story_EndDetained".Translate());
+                    continue;
+                }
+                string reason = person.pawn == null ? "Missing" :
+                    NarrativeInCare(person.pawn, allowCaptiveCare) ? (NarrativeCareHealthy(person.pawn) ? "Care" : "Treatment") : "Departure";
+                text.Append(("MouseDisaster_Story_Wait" + reason).Translate());
+                if (reason == "Care")
+                    text.Append(" ").Append("MouseDisaster_Story_CareDays".Translate(
+                        (person.careTicks / (float)GenDate.TicksPerDay).ToString("0.0"),
+                        (MouseDisasterNarrativePolicy.CareTicks / (float)GenDate.TicksPerDay).ToString("0.0")));
+                int remaining = person.pawn == null && person.missingSince >= 0
+                    ? MouseDisasterNarrativePolicy.MissingGraceTicks - (CurrentNarrativeTick - person.missingSince)
+                    : MouseDisasterNarrativePolicy.ObservationTicks - (CurrentNarrativeTick - created);
+                text.Append("; ").Append("MouseDisaster_Story_ObservationDays".Translate(
+                    (System.Math.Max(0, remaining) / (float)GenDate.TicksPerDay).ToString("0.0")));
+            }
         }
 
         private static void AddNarrativeTarget(List<FloatMenuOption> options, string id, Thing target)

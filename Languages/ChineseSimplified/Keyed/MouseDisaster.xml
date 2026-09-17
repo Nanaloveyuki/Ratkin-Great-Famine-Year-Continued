@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
+  <MouseDisaster_N004_7_Label>穗音：分开的家人</MouseDisaster_N004_7_Label>
+  <MouseDisaster_N004_7_Text>这个家庭已经分开。留下的人有了各自的去处，离开的人还在路上。穗音在信里问起了他们的近况。</MouseDisaster_N004_7_Text>
+  <MouseDisaster_N004_8_Label>穗音：断了的消息</MouseDisaster_N004_8_Label>
+  <MouseDisaster_N004_8_Text>已经许久没有这个家庭的确切消息。穗音托来客四处打听，带回的仍只是些零碎传闻。</MouseDisaster_N004_8_Text>
   <MouseDisaster_ModName>鼠灾-大荒年</MouseDisaster_ModName>
   <MouseDisaster_Settings_Section_General>基础开关</MouseDisaster_Settings_Section_General>
   <MouseDisaster_Settings_Section_Environment>环境自适应</MouseDisaster_Settings_Section_Environment>
@@ -65,10 +69,10 @@
   <MouseDisaster_N004_4_Label>穗音：没有留下来的人</MouseDisaster_N004_4_Label>
   <MouseDisaster_N004_4_Text>鼠妈和孩子都没有活下来。穗音的记录停在了这里。</MouseDisaster_N004_4_Text>
   <MouseDisaster_N004_5_Label>穗音：各自离开</MouseDisaster_N004_5_Label>
-  <MouseDisaster_N004_5_Text>鼠妈和孩子都活着离开了地图。她们没有再回来，穗音也没有找到后续消息。</MouseDisaster_N004_5_Text>
+  <MouseDisaster_N004_5_Text>鼠妈和孩子都离开了这里。穗音还在向路上的人打听她们的消息。</MouseDisaster_N004_5_Text>
   <MouseDisaster_N004_6_Label>穗音：没能救下来的孩子</MouseDisaster_N004_6_Label>
   <MouseDisaster_N004_6_Text>鼠妈活了下来，但有孩子没有撑过去。她还在走，像是不知道该把孩子带到哪里。</MouseDisaster_N004_6_Text>
-  <MouseDisaster_N004_4_Message>这只是个故事，不是吗？一切都是固定好的剧本。</MouseDisaster_N004_4_Message>
+  <MouseDisaster_N004_4_Message>鼠妈和孩子都没能活下来。</MouseDisaster_N004_4_Message>
   <MouseDisaster_N004_Revisit_Label>穗音：又见面了</MouseDisaster_N004_Revisit_Label>
   <MouseDisaster_N004_Revisit_Text>远征队在路上遇到了 {0}。它们没有立刻靠近，也没有逃跑，只是等着你再次决定这一次要怎么处理。</MouseDisaster_N004_Revisit_Text>
   <MouseDisaster_N004_Revisit_Ignore>忽视它们</MouseDisaster_N004_Revisit_Ignore>
@@ -244,7 +248,7 @@
   <MouseDisaster_FoodGive_Fail>当前无法为这些鼠灾单位安排食物给予。</MouseDisaster_FoodGive_Fail>
   <MouseDisaster_Letter_Ignore>先不管，别再提醒</MouseDisaster_Letter_Ignore>
   <MouseDisaster_N007_EntryLabel>封锁线</MouseDisaster_N007_EntryLabel>
-  <MouseDisaster_N007_EntryText>来客中有人得了鼠疫。他们还在这里，去留却不能再按普通访客处理。\n\n可以先让他们留下观察，也可以放他们走。病不会因为作了决定就停下来。</MouseDisaster_N007_EntryText>
+  <MouseDisaster_N007_EntryText>来客中有人得了鼠疫。队伍停在附近，病人们需要治疗和一处歇脚的地方。</MouseDisaster_N007_EntryText>
   <MouseDisaster_N007_RecoveryLabel>封锁线后的去向</MouseDisaster_N007_RecoveryLabel>
   <MouseDisaster_N007_RecoveryText>还留在这里的病人已经没有鼠疫症状。现在可以谈谈以后了。\n\n可以让他们离开，也可以接纳当前已经康复的访客。</MouseDisaster_N007_RecoveryText>
   <MouseDisaster_N007_Quarantine>隔离观察</MouseDisaster_N007_Quarantine>
@@ -255,7 +259,7 @@
   <MouseDisaster_N007_ActionFailed>来客状态已经变化，当前无法执行这项处理。</MouseDisaster_N007_ActionFailed>
   <MouseDisaster_N007_VisitorControlBlocked>这些来客正在检疫流程中，请先处理检疫信件。</MouseDisaster_N007_VisitorControlBlocked>
   <MouseDisaster_N007_Quarantine_Message>病人暂时留下了，共 {0} 名。这里还需要照料，不能只靠留守安排。</MouseDisaster_N007_Quarantine_Message>
-  <MouseDisaster_N007_Release_Message>已安排 {0} 名病人离开。不能行走的人仍需等待，实际离场后才结算。</MouseDisaster_N007_Release_Message>
+  <MouseDisaster_N007_Release_Message>已安排 {0} 名病人离开，行动困难的人还在等候。</MouseDisaster_N007_Release_Message>
   <MouseDisaster_N007_Defer_Message>暂不干预，继续记录感染来客的状况。</MouseDisaster_N007_Defer_Message>
   <MouseDisaster_N007_Recovered_Message>康复者已经不在原地，检疫记录已结算。</MouseDisaster_N007_Recovered_Message>
   <MouseDisaster_N007_RecoveredRelease_Message>已安排 {0} 名康复者离开。</MouseDisaster_N007_RecoveredRelease_Message>
@@ -271,5 +275,5 @@
   <MouseDisaster_N007_Died_Label>未能走出封锁线</MouseDisaster_N007_Died_Label>
   <MouseDisaster_N007_Died_Text>这批病人没有活下来的人。留守安排已经结束。</MouseDisaster_N007_Died_Text>
   <MouseDisaster_N007_Handled_Label>中止的检疫记录</MouseDisaster_N007_Handled_Label>
-  <MouseDisaster_N007_Handled_Text>感染来客已经脱离原有的访客管理，或无法继续确认去向。这次检疫结束，去向不明保留为去向不明。</MouseDisaster_N007_Handled_Text>
+  <MouseDisaster_N007_Handled_Text>这批病人已经各有去向。有些人的消息还能打听到，有些至今没有回音。穗音收起了那张旧名单。</MouseDisaster_N007_Handled_Text>
 </LanguageData>

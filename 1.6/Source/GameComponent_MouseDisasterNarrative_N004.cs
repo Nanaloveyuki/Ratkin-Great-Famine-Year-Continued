@@ -23,7 +23,9 @@ namespace MouseDisaster
         ChildEnslaved,
         FamilyDied,
         FamilySeparated,
-        ChildDied
+        ChildDied,
+        FamilyChanged,
+        Unknown
     }
 
     public enum MouseDisasterN004RevisitDecision
@@ -233,10 +235,20 @@ namespace MouseDisaster
             List<Pawn> children = record.children?.Where(child => child != null).ToList() ?? new List<Pawn>();
             if (children.Count == 0)
             {
+                if (CurrentNarrativeTick - record.createdTick >= MouseDisasterNarrativePolicy.MissingGraceTicks)
+                    ResolveN004(record, MouseDisasterN004Outcome.Unknown);
                 return;
             }
 
-            bool motherDead = record.mother == null || record.mother.Dead;
+            // A lost reference is not evidence of death.
+            if (record.mother == null || record.mother.Destroyed && !record.mother.Dead ||
+                children.Any(child => child.Destroyed && !child.Dead))
+            {
+                if (CurrentNarrativeTick - record.createdTick >= MouseDisasterNarrativePolicy.MissingGraceTicks)
+                    ResolveN004(record, MouseDisasterN004Outcome.Unknown);
+                return;
+            }
+            bool motherDead = record.mother.Dead;
             List<Pawn> aliveChildren = children.Where(child => !child.Dead).ToList();
             bool allChildrenDead = aliveChildren.Count == 0;
 
@@ -249,8 +261,26 @@ namespace MouseDisaster
                 }
 
                 List<Pawn> childAgeChildren = aliveChildren.Where(IsChildAge).ToList();
-                if (childAgeChildren.Count == 0)
+                if (aliveChildren.All(child => !IsN004Present(child)))
                 {
+                    ResolveN004(record, MouseDisasterN004Outcome.FamilyChanged);
+                    return;
+                }
+                if (aliveChildren.Any(child => !IsN004Present(child)) ||
+                    aliveChildren.Any(child => child.IsPrisonerOfColony || child.IsSlaveOfColony) &&
+                    aliveChildren.Any(IsPlayerCare))
+                {
+                    ResolveN004(record, MouseDisasterN004Outcome.FamilyChanged);
+                    return;
+                }
+                if (aliveChildren.All(child => child.IsPrisonerOfColony || child.IsSlaveOfColony))
+                {
+                    ResolveN004(record, MouseDisasterN004Outcome.ChildEnslaved);
+                    return;
+                }
+                if (childAgeChildren.Count != aliveChildren.Count)
+                {
+                    TryExpireN004Observation(record, aliveChildren);
                     return;
                 }
 
@@ -258,11 +288,12 @@ namespace MouseDisaster
                 {
                     ResolveN004(record, MouseDisasterN004Outcome.ChildEnslaved);
                 }
-                else if (childAgeChildren.Any(IsPlayerCare))
+                else if (childAgeChildren.All(IsPlayerCare))
                 {
                     ResolveN004(record, MouseDisasterN004Outcome.ChildSurvived);
                 }
 
+                TryExpireN004Observation(record, aliveChildren);
                 return;
             }
 
@@ -280,14 +311,31 @@ namespace MouseDisaster
                 {
                     ResolveN004(record, MouseDisasterN004Outcome.FamilySeparated);
                 }
+                else
+                {
+                    ResolveN004(record, MouseDisasterN004Outcome.FamilyChanged);
+                }
 
                 return;
             }
 
-            if (aliveChildren.Any(child => IsChildAge(child) && IsN004Together(record.mother, child)))
+            if (aliveChildren.Any(child => !IsN004Present(child)))
+            {
+                ResolveN004(record, MouseDisasterN004Outcome.FamilyChanged);
+                return;
+            }
+            if (aliveChildren.All(child => IsChildAge(child) && IsN004Together(record.mother, child)))
             {
                 ResolveN004(record, MouseDisasterN004Outcome.FamilySurvived);
             }
+            TryExpireN004Observation(record, aliveChildren);
+        }
+
+        private void TryExpireN004Observation(MouseDisasterN004Record record, List<Pawn> aliveChildren)
+        {
+            bool growingInCare = aliveChildren.Any(child => !IsChildAge(child) && IsN004InPlayerDomain(child));
+            if (!growingInCare && CurrentNarrativeTick - record.createdTick >= MouseDisasterNarrativePolicy.ObservationTicks)
+                ResolveN004(record, MouseDisasterN004Outcome.Unknown);
         }
 
         private void ResolveN004(MouseDisasterN004Record record, MouseDisasterN004Outcome outcome)
