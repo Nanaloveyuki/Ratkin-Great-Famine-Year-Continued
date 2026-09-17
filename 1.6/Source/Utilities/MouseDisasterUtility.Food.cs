@@ -143,27 +143,35 @@ namespace MouseDisaster
             return map?.GetComponent<MapComponent_MouseDisasterFoodTargets>()?.HasAnyFood() == true;
         }
 
-        public static Job TryCreateReliefFoodJob(Pawn pawn, bool allowInventorySearch)
+        public static Job TryCreateReliefFoodJob(Pawn pawn, bool allowInventorySearch) =>
+            TryCreateReliefFoodJob(pawn, allowInventorySearch, reliefOnly: true);
+
+        private static Job TryCreateReliefFoodJob(Pawn pawn, bool allowInventorySearch, bool reliefOnly)
         {
             if (pawn?.needs?.food == null || MouseDisasterFeeding.IsSeekingSuppressed(pawn) || !ShouldPrioritizeReliefAreaFood(pawn))
             {
                 return null;
             }
 
-            if (!TryFindBestReliefFoodSourceFor(
+            Thing foodSource;
+            ThingDef foodDef;
+            bool found = reliefOnly ? TryFindBestReliefFoodSourceFor(
                     pawn,
                     pawn,
                     pawn.needs.food.CurCategory == HungerCategory.Starving,
                     allowHarvest: true,
-                    out Thing foodSource,
-                    out ThingDef foodDef,
+                    out foodSource,
+                    out foodDef,
                     allowForbidden: false,
                     allowCorpse: true,
                     allowSociallyImproper: true,
                     ignoreReservations: false,
                     calculateWantedStackCount: false,
                     allowVenerated: false,
-                    FoodPreferability.Undefined))
+                    FoodPreferability.Undefined) : FoodUtility.TryFindBestFoodSourceFor(pawn, pawn,
+                        pawn.needs.food.CurCategory == HungerCategory.Starving, out foodSource, out foodDef,
+                        canUseInventory: true, allowCorpse: true, allowSociallyImproper: true, allowHarvest: true, forceScanWholeMap: true);
+            if (!found)
             {
                 return null;
             }
@@ -286,7 +294,7 @@ namespace MouseDisaster
                 return null;
             }
 
-            Job reliefFoodJob = TryCreateReliefFoodJob(pawn, allowInventorySearch);
+            Job reliefFoodJob = TryCreateReliefFoodJob(pawn, allowInventorySearch, reliefOnly: false);
             if (reliefFoodJob != null)
             {
                 return reliefFoodJob;

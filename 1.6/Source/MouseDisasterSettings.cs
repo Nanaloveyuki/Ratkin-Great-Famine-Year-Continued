@@ -69,6 +69,9 @@ namespace MouseDisaster
         public int wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
         public bool leaveAfterFed = true;
         public int maxEventPawns = 30;
+        public float minGeneratedAge = 0f;
+        public float maxGeneratedAge = 50f;
+        public float reliefFoodScoreBonus = 0.1f;
         public float fedWanderDays = 0.5f;
         public bool waitWhenNoFood = true;
         public float noFoodWaitDays = 0.5f;
@@ -178,6 +181,9 @@ namespace MouseDisaster
             wildPredatorSearchIntervalTicks = DefaultWildPredatorSearchIntervalTicks;
             leaveAfterFed = countWithoutSuin = endingsWithoutSuin = true;
             maxEventPawns = 30;
+            minGeneratedAge = 0f;
+            maxGeneratedAge = 50f;
+            reliefFoodScoreBonus = 0.1f;
             fedWanderDays = noFoodWaitDays = 0.5f;
             waitWhenNoFood = true;
             allowMouseDisasterFactionToLeaveWhenIdle = false;
@@ -297,6 +303,9 @@ namespace MouseDisaster
                 MinHiredWorkerDurationDays, MaxHiredWorkerDurationDays);
             NormalizeRatkinXenotypeSpawnWeights();
             maxEventPawns = Mathf.Clamp(maxEventPawns, 1, 100);
+            minGeneratedAge = float.IsNaN(minGeneratedAge) ? 0f : Mathf.Clamp(minGeneratedAge, 0f, 100f);
+            maxGeneratedAge = float.IsNaN(maxGeneratedAge) ? 50f : Mathf.Clamp(maxGeneratedAge, minGeneratedAge, 100f);
+            reliefFoodScoreBonus = float.IsNaN(reliefFoodScoreBonus) ? 0.1f : Mathf.Clamp01(reliefFoodScoreBonus);
             fedWanderDays = float.IsNaN(fedWanderDays) ? 0.5f : Mathf.Clamp(fedWanderDays, 0f, 5f);
             noFoodWaitDays = float.IsNaN(noFoodWaitDays) ? 0.5f : Mathf.Clamp(noFoodWaitDays, 0f, 5f);
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
@@ -531,6 +540,9 @@ namespace MouseDisaster
             Scribe_Values.Look(ref wildPredatorSearchIntervalTicks, "wildPredatorSearchIntervalTicks", DefaultWildPredatorSearchIntervalTicks);
             Scribe_Values.Look(ref leaveAfterFed, "leaveAfterFed", true);
             Scribe_Values.Look(ref maxEventPawns, "maxEventPawns", 30);
+            Scribe_Values.Look(ref minGeneratedAge, "minGeneratedAge", 0f);
+            Scribe_Values.Look(ref maxGeneratedAge, "maxGeneratedAge", 50f);
+            Scribe_Values.Look(ref reliefFoodScoreBonus, "reliefFoodScoreBonus", 0.1f);
             Scribe_Values.Look(ref fedWanderDays, "fedWanderDays", 0.5f);
             Scribe_Values.Look(ref waitWhenNoFood, "waitWhenNoFood", true);
             Scribe_Values.Look(ref noFoodWaitDays, "noFoodWaitDays", 0.5f);

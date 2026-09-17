@@ -25,9 +25,9 @@ namespace MouseDisaster
 
         public static Lord SendFamilyAway(Map map, Pawn carrier, IEnumerable<Pawn> pawns, IEnumerable<Pawn> children)
         {
-            if (map == null || carrier == null || !carrier.Spawned || carrier.Map != map || carrier.Dead) return null;
+            if (map == null || carrier == null || !carrier.Spawned || carrier.Map != map || carrier.Dead || MouseDisasterUtility.IsPlayerAffiliatedRatkin(carrier)) return null;
             var group = (pawns ?? Enumerable.Empty<Pawn>()).Append(carrier)
-                .Where(p => p != null && p.Spawned && !p.Dead && p.Map == map).Distinct().ToList();
+                .Where(p => p != null && p.Spawned && !p.Dead && p.Map == map && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p)).Distinct().ToList();
             foreach (Pawn pawn in group)
             {
                 pawn.GetLord()?.RemovePawn(pawn);

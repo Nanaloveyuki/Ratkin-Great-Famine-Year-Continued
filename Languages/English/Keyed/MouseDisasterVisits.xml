@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
+  <MouseDisaster_Settings_GeneratedAgeRange>Generated age range: {0}-{1} years</MouseDisaster_Settings_GeneratedAgeRange>
+  <MouseDisaster_Settings_GeneratedAgeRange_Tooltip>Age limits for ordinary event pawns (0-100 years, default 0-50). Required developmental stages take precedence when the range cannot accommodate them. Ratkin young, fixed-age pawns and fixed roles such as mothers keep their original ages. Without Toddlers, event infants bypass age-only immobility, not injury or consciousness restrictions.</MouseDisaster_Settings_GeneratedAgeRange_Tooltip>
+  <MouseDisaster_Settings_MinGeneratedAge>Minimum age</MouseDisaster_Settings_MinGeneratedAge>
+  <MouseDisaster_Settings_MaxGeneratedAge>Maximum age</MouseDisaster_Settings_MaxGeneratedAge>
+  <MouseDisaster_Settings_ReliefFoodScoreBonus>Relief-area food score bonus: {0}</MouseDisaster_Settings_ReliefFoodScoreBonus>
+  <MouseDisaster_Settings_ReliefFoodScoreBonus_Tooltip>Increase relief-area food scores by this percentage (0-100%, default 10%). Negative scores improve toward zero. This is a score bonus, not a selection probability; distance and food suitability still matter.</MouseDisaster_Settings_ReliefFoodScoreBonus_Tooltip>
   <MouseDisaster_Settings_MaxEventPawns>Baseline event pawn limit: {0}</MouseDisaster_Settings_MaxEventPawns>
   <MouseDisaster_Settings_MaxEventPawns_Tooltip>Baseline maximum pawns generated per event (1-100, default 30), including adults, children, Ratkin young and animals. Each event retains its minimum required population; a limit below that minimum is ignored. Fixed groups such as mothers with children are exempt.</MouseDisaster_Settings_MaxEventPawns_Tooltip>
   <MouseDisaster_Settings_FedWanderDays>Average stay after eating: {0} days</MouseDisaster_Settings_FedWanderDays>

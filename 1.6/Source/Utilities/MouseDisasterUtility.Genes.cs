@@ -236,7 +236,7 @@ namespace MouseDisaster
 
         private static void StripNonMouseDisasterGenes(Pawn pawn)
         {
-            if (!ModsConfig.BiotechActive || pawn?.genes == null)
+            if (!ModsConfig.BiotechActive || pawn?.genes == null || IsPlayerAffiliatedRatkin(pawn))
             {
                 return;
             }
@@ -251,6 +251,7 @@ namespace MouseDisaster
                 .Where(gene => gene != null &&
                                gene.def != null &&
                                pawn.genes.IsXenogene(gene) &&
+                               pawn.genes.Xenotype?.genes?.Contains(gene.def) != true &&
                                !pool.Contains(gene.def))
                 .ToList();
 

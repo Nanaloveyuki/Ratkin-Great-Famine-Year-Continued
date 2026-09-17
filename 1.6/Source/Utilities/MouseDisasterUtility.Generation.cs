@@ -118,7 +118,7 @@ namespace MouseDisaster
                     return null;
                 }
 
-                if (!TryPrepareRatkinPawn(generated, generationKindDef, stage, fixedAgeYears, requestedXenotype))
+                if (!TryPrepareRatkinPawn(generated, generationKindDef, stage, fixedAgeYears, requestedXenotype, fixedGender.HasValue))
                 {
                     generated.Destroy(DestroyMode.Vanish);
                     return null;
@@ -142,7 +142,8 @@ namespace MouseDisaster
             PawnKindDef generationKindDef,
             DevelopmentalStage stage,
             float? fixedAgeYears,
-            XenotypeDef requestedXenotype)
+            XenotypeDef requestedXenotype,
+            bool preserveRoleAge)
         {
             if (!IsRatkin(pawn))
             {
@@ -188,6 +189,15 @@ namespace MouseDisaster
             }
 
             MouseDisasterPawnHistoryCatalog.TryApply(pawn, stage);
+            if (!hasFixedAge && !preserveRoleAge && stage != DevelopmentalStage.Baby)
+            {
+                float lower = Mathf.Max(stage.Adult() ? RatkinAdultMinAgeYears : RatkinYoungChildMinAgeYears,
+                    MouseDisasterMod.Settings?.minGeneratedAge ?? 0f);
+                float upper = Mathf.Min(stage.Adult() ? 100f : RatkinYoungChildMaxAgeYears,
+                    MouseDisasterMod.Settings?.maxGeneratedAge ?? 50f);
+                if (lower <= upper && (pawn.ageTracker.AgeBiologicalYearsFloat < lower || pawn.ageTracker.AgeBiologicalYearsFloat > upper))
+                    SetBiologicalAgeYears(pawn, Rand.Range(lower, upper));
+            }
             RefreshRatkinDevelopmentalPresentation(pawn);
 
             return true;
@@ -817,6 +827,11 @@ namespace MouseDisaster
             if (pawn.ageTracker.AgeBiologicalYearsFloat < RatEggMinAgeYears)
             {
                 SetBiologicalAgeYears(pawn, RandomRatEggAgeYears());
+            }
+            if (MouseDisasterInfantMobilityPatch.UsesFallback(pawn) && pawn.Downed)
+            {
+                pawn.health.capacities.Notify_CapacityLevelsDirty();
+                pawn.health.Notify_HediffChanged(null);
             }
         }
     }

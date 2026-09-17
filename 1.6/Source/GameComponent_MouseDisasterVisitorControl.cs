@@ -692,6 +692,7 @@ namespace MouseDisaster
                 return;
             }
 
+            MouseDisasterUtility.TryReleaseLeadYourPetTradePawn(pawn);
             ReleaseGuestState(pawn);
             MouseDisasterUtility.UnmarkTradableChattel(pawn);
             MouseDisasterUtility.ConsumeForcedPrisonerOnPurchase(pawn);
@@ -717,6 +718,7 @@ namespace MouseDisaster
             }
 
             MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+            MouseDisasterUtility.RemoveChildExchangeTrackingForPurchasedPawn(pawn);
         }
 
         private static bool TrySetVisitorCaptiveStatus(Pawn pawn, GuestStatus status)
@@ -737,6 +739,7 @@ namespace MouseDisaster
                 return false;
             }
 
+            MouseDisasterUtility.TryReleaseLeadYourPetTradePawn(pawn);
             ReleaseGuestState(pawn);
             MouseDisasterUtility.UnmarkTradableChattel(pawn);
             MouseDisasterUtility.ConsumeForcedPrisonerOnPurchase(pawn);
@@ -772,6 +775,7 @@ namespace MouseDisaster
             }
 
             MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+            MouseDisasterUtility.RemoveChildExchangeTrackingForPurchasedPawn(pawn);
             return status == GuestStatus.Slave ? pawn.IsSlaveOfColony : pawn.IsPrisonerOfColony;
         }
 
@@ -797,6 +801,7 @@ namespace MouseDisaster
                 }
             }
 
+            MouseDisasterUtility.TryReleaseLeadYourPetTradePawn(pawn);
             ReleaseGuestState(pawn);
             MouseDisasterUtility.UnmarkTradableChattel(pawn);
             MouseDisasterUtility.ConsumeForcedPrisonerOnPurchase(pawn);
@@ -811,6 +816,7 @@ namespace MouseDisaster
             }
 
             pawn.jobs?.StopAll();
+            pawn.GetLord()?.RemovePawn(pawn);
             PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, actAsIfSpawned: true);
             if (pawn.guest == null)
             {
@@ -836,6 +842,7 @@ namespace MouseDisaster
             }
 
             MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+            MouseDisasterUtility.RemoveChildExchangeTrackingForPurchasedPawn(pawn);
             return pawn.IsPrisonerOfColony;
         }
 

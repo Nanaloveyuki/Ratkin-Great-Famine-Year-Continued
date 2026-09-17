@@ -110,6 +110,12 @@ namespace MouseDisaster
                 return;
             }
 
+            if (MouseDisasterInfantMobilityPatch.UsesFallback(pawn) && pawn.Downed)
+            {
+                pawn.health.capacities.Notify_CapacityLevelsDirty();
+                pawn.health.Notify_HediffChanged(null);
+            }
+
             bool hostileIncidentVisitor = MouseDisasterGeneRestorePolicy.ShouldSkipVisitorNormalizationWhileTurningHostile(
                 isIncidentVisitor: IsMouseDisasterIncidentVisitor(pawn),
                 factionHostileToPlayer: pawn.Faction != null && Faction.OfPlayer != null && pawn.Faction.HostileTo(Faction.OfPlayer));
@@ -181,7 +187,7 @@ namespace MouseDisaster
 
         private static void NormalizeMouseDisasterPawnGenes(Pawn pawn)
         {
-            if (!ModsConfig.BiotechActive || pawn?.genes == null)
+            if (!ModsConfig.BiotechActive || pawn?.genes == null || IsPlayerAffiliatedRatkin(pawn))
             {
                 return;
             }
@@ -411,6 +417,10 @@ namespace MouseDisaster
 
                 if (infantAge)
                 {
+                    RemoveHediffIfPresent(pawn, toddlersLearningToWalkDef);
+                    RemoveHediffIfPresent(pawn, toddlersLearningManipulationDef);
+                    RemoveHediffIfPresent(pawn, toddlersLonelyDef);
+                    RemoveHediffIfPresent(pawn, rimTalkToddlerLanguageLearningDef);
                     EnsureHediffPresentIfMissing(pawn, rimTalkBabyBabblingDef, 1f);
                     return;
                 }

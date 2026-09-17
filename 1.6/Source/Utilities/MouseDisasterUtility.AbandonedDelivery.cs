@@ -141,6 +141,7 @@ namespace MouseDisaster
                         !state.deliveredChildIds.Contains(child.thingIDNumber))
                     {
                         state.deliveredChildIds.Add(child.thingIDNumber);
+                        TryReleaseLeadYourPetTradePawn(child);
                         child.jobs?.StopAll();
                     }
                 bool allChildrenArrived = ReusablePawnList.All(child => state.deliveredChildIds.Contains(child.thingIDNumber));
@@ -274,6 +275,18 @@ namespace MouseDisaster
                 state != null && state.childPawnIds.Contains(pawn.thingIDNumber));
         }
 
+        internal static void NotifyAbandonedChildDropped(Pawn child)
+        {
+            if (child?.Spawned != true || child.Dead || IsPlayerAffiliatedRatkin(child)) return;
+            foreach (AbandonedDeliveryState state in ActiveAbandonedDeliveryByAdultId.Values)
+            {
+                if (state == null || state.mapId != child.Map.uniqueID || !state.childPawnIds.Contains(child.thingIDNumber) ||
+                    state.deliveredChildIds.Contains(child.thingIDNumber) || !child.Position.InHorDistOf(state.foodCell, 3f)) continue;
+                state.deliveredChildIds.Add(child.thingIDNumber);
+                TryReleaseLeadYourPetTradePawn(child);
+            }
+        }
+
         private static bool TryStartAbandonedDeliveryCarryJob(Pawn adult, IReadOnlyList<Pawn> children, IntVec3 foodCell)
         {
             if (adult == null || adult.Dead || !adult.Spawned || children == null || !foodCell.IsValid)
@@ -357,6 +370,22 @@ namespace MouseDisaster
         public static bool HasActiveAbandonedDeliveryState()
         {
             return ActiveAbandonedDeliveryByAdultId.Count > 0;
+        }
+    }
+
+    [HarmonyPatch]
+    internal static class MouseDisasterAbandonedChildDropPatch
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(Pawn_CarryTracker), nameof(Pawn_CarryTracker.TryDropCarriedThing),
+                new[] { typeof(IntVec3), typeof(ThingPlaceMode), typeof(Thing).MakeByRefType(), typeof(Action<Thing, int>) });
+            yield return AccessTools.Method(typeof(Pawn_CarryTracker), nameof(Pawn_CarryTracker.TryDropCarriedThing),
+                new[] { typeof(IntVec3), typeof(int), typeof(ThingPlaceMode), typeof(Thing).MakeByRefType(), typeof(Action<Thing, int>) });
+        }
+        public static void Postfix(bool __result, Thing resultingThing)
+        {
+            if (__result && resultingThing is Pawn child) MouseDisasterUtility.NotifyAbandonedChildDropped(child);
         }
     }
 }

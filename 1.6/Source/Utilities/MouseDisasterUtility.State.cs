@@ -299,6 +299,8 @@ namespace MouseDisaster
         private static MethodInfo leadYourPetGetLinksForMasterMethod;
         private static MethodInfo leadYourPetAnchorLeashedPetsToCellMethod;
         private static MethodInfo leadYourPetEndLeashForPetMethod;
+        private static MethodInfo leadYourPetClearMouseEggPetStateMethod;
+        private static MethodInfo leadYourPetClearTravelStockMethod;
         private static MethodInfo gameGetComponentMethod;
         private sealed class ChildExchangeState : IExposable
         {

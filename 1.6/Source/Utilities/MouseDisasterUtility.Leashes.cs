@@ -78,7 +78,7 @@ namespace MouseDisaster
             }
 
             List<Pawn> pawnList = pawns
-                .Where(pawn => pawn != null && !pawn.Dead && pawn.Spawned)
+                .Where(pawn => pawn != null && !pawn.Dead && pawn.Spawned && !IsPlayerAffiliatedRatkin(pawn))
                 .Distinct()
                 .ToList();
             List<Pawn> adults = pawnList
@@ -269,7 +269,24 @@ namespace MouseDisaster
 
         public static void TryReleaseLeadYourPetTradePawn(Pawn pawn)
         {
-            TryEndLeadYourPetLeashForPet(pawn);
+            if (pawn == null || !IsLeadYourPetEnabled || Current.Game == null) return;
+            List<Pawn> linked = GetLeadYourPetLinkedPawns(pawn);
+            ClearLeadYourPetOwnershipState(pawn);
+            foreach (Pawn pet in linked) ClearLeadYourPetOwnershipState(pet);
+        }
+
+        private static void ClearLeadYourPetOwnershipState(Pawn pawn)
+        {
+            EnsureLeadYourPetReflection();
+            if (leadYourPetComponentType == null || gameGetComponentMethod == null) return;
+            object component = TryGetLeadYourPetComponent();
+            if (component == null) return;
+            if (leadYourPetEndLeashForPetMethod != null)
+                InvokeLeadYourPet(leadYourPetEndLeashForPetMethod, component, new object[] { pawn, false });
+            if (leadYourPetClearMouseEggPetStateMethod != null)
+                InvokeLeadYourPet(leadYourPetClearMouseEggPetStateMethod, component, new object[] { pawn });
+            if (leadYourPetClearTravelStockMethod != null)
+                InvokeLeadYourPet(leadYourPetClearTravelStockMethod, component, new object[] { pawn });
         }
 
         private static object TryGetLeadYourPetComponent()
@@ -350,6 +367,11 @@ namespace MouseDisaster
             {
                 gameGetComponentMethod = typeof(Game).GetMethods(BindingFlags.Instance | BindingFlags.Public)
                     .FirstOrDefault(method => method.Name == "GetComponent" && method.IsGenericMethod && method.GetParameters().Length == 0);
+            }
+            if (leadYourPetComponentType != null)
+            {
+                leadYourPetClearMouseEggPetStateMethod ??= AccessTools.Method(leadYourPetComponentType, "ClearMouseEggPetState", new[] { typeof(Pawn) });
+                leadYourPetClearTravelStockMethod ??= AccessTools.Method(leadYourPetComponentType, "ClearTravelStock", new[] { typeof(Pawn) });
             }
         }
     }

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
+  <MouseDisaster_Settings_GeneratedAgeRange>生成年龄范围：{0}～{1} 岁</MouseDisaster_Settings_GeneratedAgeRange>
+  <MouseDisaster_Settings_GeneratedAgeRange_Tooltip>普通事件角色的生成年龄限制（0～100 岁，默认 0～50 岁）。设置范围无法满足事件必要的成长阶段时，保留事件要求。鼠蛋、固定年龄和母亲等固定角色保留原年龄。未启用 Toddlers 时，事件婴儿仅绕过年龄导致的无法移动，伤残和意识限制仍然生效。</MouseDisaster_Settings_GeneratedAgeRange_Tooltip>
+  <MouseDisaster_Settings_MinGeneratedAge>最低年龄</MouseDisaster_Settings_MinGeneratedAge>
+  <MouseDisaster_Settings_MaxGeneratedAge>最高年龄</MouseDisaster_Settings_MaxGeneratedAge>
+  <MouseDisaster_Settings_ReliefFoodScoreBonus>赈灾区食物评分加成：{0}</MouseDisaster_Settings_ReliefFoodScoreBonus>
+  <MouseDisaster_Settings_ReliefFoodScoreBonus_Tooltip>赈灾区食物评分额外提高此百分比（0～100%，默认 10%）。负分向零方向提高。这是评分加成而非选择概率，距离和食物适宜性仍参与选食。</MouseDisaster_Settings_ReliefFoodScoreBonus_Tooltip>
   <MouseDisaster_Settings_MaxEventPawns>事件基准人数上限：{0}</MouseDisaster_Settings_MaxEventPawns>
   <MouseDisaster_Settings_MaxEventPawns_Tooltip>单次事件生成的 Pawn 基准最大数量（1～100，默认 30），包含成人、儿童、鼠蛋和动物。保留事件原有最低人数；上限低于该事件最低人数时忽略此限制。母子等固定组合事件不受此限制影响。</MouseDisaster_Settings_MaxEventPawns_Tooltip>
   <MouseDisaster_Settings_FedWanderDays>吃饱后平均停留：{0} 天</MouseDisaster_Settings_FedWanderDays>

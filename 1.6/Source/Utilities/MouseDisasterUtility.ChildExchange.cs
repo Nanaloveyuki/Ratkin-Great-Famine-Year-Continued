@@ -259,11 +259,20 @@ namespace MouseDisaster
             foreach (KeyValuePair<int, ChildExchangeState> pair in ActiveChildExchangeByTraderId)
             {
                 ChildExchangeState state = pair.Value;
-                if (state?.childPawnIds == null || !state.childPawnIds.Remove(pawn.thingIDNumber))
+                if (state == null) continue;
+                if (state.trader == pawn)
+                {
+                    ReusableIntList.Add(pair.Key);
+                    continue;
+                }
+                state.escortPawnIds?.Remove(pawn.thingIDNumber);
+                state.escortPawns?.Remove(pawn);
+                if (state.childPawnIds == null || !state.childPawnIds.Remove(pawn.thingIDNumber))
                 {
                     continue;
                 }
 
+                state.childPawns?.Remove(pawn);
                 if (state.childPawnIds.Count == 0)
                 {
                     ReusableIntList.Add(pair.Key);
@@ -296,14 +305,14 @@ namespace MouseDisaster
                 }
 
                 ReusablePawnList.Clear();
-                if (trader != null && trader.Spawned && !trader.Dead)
+                if (trader != null && trader.Spawned && !trader.Dead && !IsPlayerAffiliatedRatkin(trader))
                 {
                     ReusablePawnList.Add(trader);
                 }
 
                 if (state.escortPawns != null)
                 {
-                    ReusablePawnList.AddRange(state.escortPawns.Where(escort => escort != null && escort.Spawned && !escort.Dead && !ReusablePawnList.Contains(escort)));
+                    ReusablePawnList.AddRange(state.escortPawns.Where(escort => escort != null && escort.Spawned && !escort.Dead && !IsPlayerAffiliatedRatkin(escort) && !ReusablePawnList.Contains(escort)));
                 }
 
                 if (ReusablePawnList.Count > 0)
@@ -467,6 +476,10 @@ namespace MouseDisaster
             for (int i = 0; i < exchangeChildren.Count; i++)
             {
                 Pawn child = exchangeChildren[i];
+                TryReleaseLeadYourPetTradePawn(child);
+                UnmarkTradableChattel(child);
+                ConsumeForcedPrisonerOnPurchase(child);
+                MouseDisasterVisitorUtility.RemoveVisitorRecord(child);
                 child.GetLord()?.RemovePawn(child);
                 child.jobs?.StopAll();
                 if (child.Faction == Faction.OfPlayer)
@@ -475,6 +488,7 @@ namespace MouseDisaster
                 }
 
                 child.guest?.SetGuestStatus(Faction.OfPlayer, GuestStatus.Prisoner);
+                NotifyMouseDisasterPawnIdentityOrLifeStageChanged(child);
             }
 
             Current.Game?.GetComponent<GameComponent_MouseDisasterNarrative>()?.RecordN005Outcome(
@@ -505,6 +519,9 @@ namespace MouseDisaster
                 return false;
             }
 
+            TryReleaseLeadYourPetTradePawn(offeredBaby);
+            MouseDisasterVisitorUtility.RemoveVisitorRecord(offeredBaby);
+            offeredBaby.GetLord()?.RemovePawn(offeredBaby);
             if (offeredBaby.Faction != trader.Faction)
             {
                 offeredBaby.SetFaction(trader.Faction);

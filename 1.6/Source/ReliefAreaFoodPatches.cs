@@ -5,6 +5,24 @@ using Verse;
 
 namespace MouseDisaster
 {
+    [HarmonyPatch(typeof(FoodUtility), nameof(FoodUtility.FoodOptimality))]
+    public static class MouseDisasterReliefFoodScorePatch
+    {
+        public static void Postfix(Pawn eater, Thing foodSource, ref float __result)
+        {
+            if (foodSource?.Spawned != true || MouseDisasterUtility.IsPlayerAffiliatedRatkin(eater) ||
+                !MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(eater) ||
+                MouseDisasterUtility.GetReliefArea(foodSource.Map)?[foodSource.Position] != true) return;
+            __result = BoostScore(__result, MouseDisasterMod.Settings?.reliefFoodScoreBonus ?? 0.1f);
+        }
+
+        internal static float BoostScore(float score, float bonus)
+        {
+            if (float.IsNaN(score) || float.IsInfinity(score) || score <= -9999999f) return score;
+            return score + System.Math.Abs(score) * bonus;
+        }
+    }
+
     [HarmonyPatch(typeof(FoodUtility), nameof(FoodUtility.WillEat), new[] { typeof(Pawn), typeof(Thing), typeof(Pawn), typeof(bool), typeof(bool) })]
     public static class MouseDisasterReliefAreaWillEatPatch
     {
@@ -122,10 +140,15 @@ namespace MouseDisaster
                     allowVenerated,
                     minPrefOverride))
             {
-                foodSource = reliefFoodSource;
-                foodDef = reliefFoodDef;
-                __result = true;
-                return;
+                if (!__result || foodSource == null ||
+                    FoodUtility.FoodOptimality(eater, reliefFoodSource, reliefFoodDef, (getter.Position - reliefFoodSource.PositionHeld).LengthManhattan) >
+                    FoodUtility.FoodOptimality(eater, foodSource, foodDef, foodSource.Spawned ? (getter.Position - foodSource.PositionHeld).LengthManhattan : 0f))
+                {
+                    foodSource = reliefFoodSource;
+                    foodDef = reliefFoodDef;
+                    __result = true;
+                    return;
+                }
             }
 
             if (__result &&

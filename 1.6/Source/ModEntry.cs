@@ -68,6 +68,13 @@ namespace MouseDisaster
             listing.CheckboxLabeled("MouseDisaster_Settings_LeaveAfterFed".Translate(), ref Settings.leaveAfterFed);
             listing.Label("MouseDisaster_Settings_MaxEventPawns".Translate(Settings.maxEventPawns), tooltip: "MouseDisaster_Settings_MaxEventPawns_Tooltip".Translate());
             Settings.maxEventPawns = Mathf.RoundToInt(listing.Slider(Settings.maxEventPawns, 1, 100));
+            listing.Label("MouseDisaster_Settings_GeneratedAgeRange".Translate(Settings.minGeneratedAge.ToString("0.0"), Settings.maxGeneratedAge.ToString("0.0")), tooltip: "MouseDisaster_Settings_GeneratedAgeRange_Tooltip".Translate());
+            listing.Label("MouseDisaster_Settings_MinGeneratedAge".Translate());
+            Settings.minGeneratedAge = Mathf.Round(listing.Slider(Settings.minGeneratedAge, 0f, 100f) * 10f) / 10f;
+            listing.Label("MouseDisaster_Settings_MaxGeneratedAge".Translate());
+            Settings.maxGeneratedAge = Mathf.Round(listing.Slider(Settings.maxGeneratedAge, Settings.minGeneratedAge, 100f) * 10f) / 10f;
+            listing.Label("MouseDisaster_Settings_ReliefFoodScoreBonus".Translate(Settings.reliefFoodScoreBonus.ToString("P0")), tooltip: "MouseDisaster_Settings_ReliefFoodScoreBonus_Tooltip".Translate());
+            Settings.reliefFoodScoreBonus = Mathf.Round(listing.Slider(Settings.reliefFoodScoreBonus, 0f, 1f) * 100f) / 100f;
             listing.Label("MouseDisaster_Settings_FedWanderDays".Translate(Settings.fedWanderDays.ToString("0.00")), tooltip: "MouseDisaster_Settings_FedWanderDays_Tooltip".Translate());
             Settings.fedWanderDays = Mathf.Round(listing.Slider(Settings.fedWanderDays, 0f, 5f) * 100f) / 100f;
             DrawCheckbox(listing, "MouseDisaster_Settings_WaitWhenNoFood", ref Settings.waitWhenNoFood, "MouseDisaster_Settings_WaitWhenNoFood_Tooltip");

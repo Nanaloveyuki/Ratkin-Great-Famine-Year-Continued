@@ -120,6 +120,7 @@ public static class LordMaker {
 }
 public static class RCellFinder { public static bool TryFindBestExitSpot(Pawn pawn,out IntVec3 exit) { exit=new IntVec3(); return true; } }
 public class Settings {
+    public float reliefFoodScoreBonus=0.1f;
     public float fedWanderDays=0.5f;
     public MouseDisasterEventAttitude attitude;
     public Dictionary<string,MouseDisasterEventAttitude> eventAttitudes=new Dictionary<string,MouseDisasterEventAttitude>();

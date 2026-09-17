@@ -25,6 +25,7 @@ namespace MouseDisaster
             public int foodSources;
             public int inventoryCount;
             public int reliefCells;
+            public float reliefBonus;
         }
 
         private readonly Dictionary<Pawn, Dictionary<int, Entry>> targets = new Dictionary<Pawn, Dictionary<int, Entry>>();
@@ -68,6 +69,7 @@ namespace MouseDisaster
             Entry entry = null;
             if (targets.TryGetValue(pawn, out var requests)) requests.TryGetValue(key, out entry);
             if (entry == null && !sharedTargets.TryGetValue(key, out entry)) return false;
+            if (entry.reliefBonus != (MouseDisasterMod.Settings?.reliefFoodScoreBonus ?? 0.1f)) return false;
             if (entry.reliefCells != (MouseDisasterUtility.GetReliefArea(map)?.TrueCount ?? 0)) return false;
             if (entry.food == null) return entry.foodSources == FoodCount && entry.inventoryCount == (pawn.inventory?.innerContainer.Count ?? 0) &&
                 Find.TickManager.TicksGame < entry.retryAt;
@@ -104,7 +106,8 @@ namespace MouseDisaster
                 food = found ? food : null, def = def, position = food?.PositionHeld ?? IntVec3.Invalid,
                 retryAt = Find.TickManager.TicksGame + EmptySearchRetryTicks + pawn.thingIDNumber % 60,
                 foodSources = FoodCount, inventoryCount = pawn.inventory?.innerContainer.Count ?? 0,
-                reliefCells = MouseDisasterUtility.GetReliefArea(map)?.TrueCount ?? 0
+                reliefCells = MouseDisasterUtility.GetReliefArea(map)?.TrueCount ?? 0,
+                reliefBonus = MouseDisasterMod.Settings?.reliefFoodScoreBonus ?? 0.1f
             };
             requests[key] = entry;
             if (found && food.Spawned) sharedTargets[key] = entry;
