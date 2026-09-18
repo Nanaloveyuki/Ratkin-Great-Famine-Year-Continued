@@ -137,6 +137,7 @@
     <Compile Include="MouseDisasterBirthPolicy.cs" />
     <Compile Include="MouseDisasterAdaptiveXenotypeUtility.cs" />
     <Compile Include="MouseDisasterReliefAreaPolicy.cs" />
+    <Compile Include="MouseDisasterEventFoodPolicy.cs" />
     <Compile Include="MouseDisasterRuntime.cs" />
     <Compile Include="MouseDisasterGeneRestorePolicy.cs" />
     <Compile Include="MouseDisasterIncidentCatalog.cs" />

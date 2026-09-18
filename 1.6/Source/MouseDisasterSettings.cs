@@ -53,6 +53,9 @@ namespace MouseDisaster
         public const float DefaultRatkinXenotypeSpawnWeight = 15f;
         public const float MinPawnTraitWeight = 0f;
         public const float MaxPawnTraitWeight = 100f;
+        public const float DefaultEventFoodWeight = MouseDisasterEventFoodPolicy.DefaultWeight;
+        public const float MinEventFoodWeight = MouseDisasterEventFoodPolicy.MinWeight;
+        public const float MaxEventFoodWeight = MouseDisasterEventFoodPolicy.MaxWeight;
         public const float DefaultExternalRatkinXenotypeSpawnWeight = 5f;
         public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
         public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
@@ -74,6 +77,10 @@ namespace MouseDisaster
         public float minGeneratedAge = 0f;
         public float maxGeneratedAge = 50f;
         public float reliefFoodScoreBonus = 0.1f;
+        public bool allowEventPawnsEatOutsideReliefArea = false;
+        public List<string> disabledEventFoodDefNames = new List<string>();
+        public Dictionary<string, float> eventFoodWeights = new Dictionary<string, float>();
+        public int EventFoodSettingsStamp { get; private set; }
         public float fedWanderDays = 0.5f;
         public bool waitWhenNoFood = true;
         public float noFoodWaitDays = 0.5f;
@@ -189,6 +196,10 @@ namespace MouseDisaster
             minGeneratedAge = 0f;
             maxGeneratedAge = 50f;
             reliefFoodScoreBonus = 0.1f;
+            allowEventPawnsEatOutsideReliefArea = false;
+            disabledEventFoodDefNames = new List<string>();
+            eventFoodWeights = new Dictionary<string, float>();
+            TouchEventFoodSettings();
             fedWanderDays = noFoodWaitDays = 0.5f;
             waitWhenNoFood = true;
             allowMouseDisasterFactionToLeaveWhenIdle = false;
@@ -314,6 +325,7 @@ namespace MouseDisaster
             minGeneratedAge = float.IsNaN(minGeneratedAge) ? 0f : Mathf.Clamp(minGeneratedAge, 0f, 100f);
             maxGeneratedAge = float.IsNaN(maxGeneratedAge) ? 50f : Mathf.Clamp(maxGeneratedAge, minGeneratedAge, 100f);
             reliefFoodScoreBonus = float.IsNaN(reliefFoodScoreBonus) ? 0.1f : Mathf.Clamp01(reliefFoodScoreBonus);
+            NormalizeEventFoodSettings();
             fedWanderDays = float.IsNaN(fedWanderDays) ? 0.5f : Mathf.Clamp(fedWanderDays, 0f, 5f);
             noFoodWaitDays = float.IsNaN(noFoodWaitDays) ? 0.5f : Mathf.Clamp(noFoodWaitDays, 0f, 5f);
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
@@ -513,6 +525,65 @@ namespace MouseDisaster
             NormalizePawnTraitSettings();
         }
 
+        public bool AllowsEventPawnsEatOutsideReliefArea => allowEventPawnsEatOutsideReliefArea;
+
+        public bool IsEventFoodEnabled(string defName)
+        {
+            return MouseDisasterEventFoodPolicy.IsFoodAllowed(defName, disabledEventFoodDefNames);
+        }
+
+        public void SetEventFoodEnabled(string defName, bool enabled)
+        {
+            if (string.IsNullOrWhiteSpace(defName)) return;
+            disabledEventFoodDefNames ??= new List<string>();
+            disabledEventFoodDefNames.RemoveAll(entry =>
+                string.Equals(entry, defName, System.StringComparison.OrdinalIgnoreCase));
+            if (!enabled) disabledEventFoodDefNames.Add(defName.Trim());
+            NormalizeEventFoodSettings();
+            TouchEventFoodSettings();
+        }
+
+        public void SetAllEventFoodsEnabled(bool enabled)
+        {
+            if (enabled)
+            {
+                disabledEventFoodDefNames = new List<string>();
+            }
+            else
+            {
+                disabledEventFoodDefNames = MouseDisasterEventFoodPolicy.AllFoodDefs()
+                    .Select(def => def.defName)
+                    .ToList();
+            }
+            NormalizeEventFoodSettings();
+            TouchEventFoodSettings();
+        }
+
+        public float GetEventFoodWeight(string defName)
+        {
+            return MouseDisasterEventFoodPolicy.ResolveWeight(defName, eventFoodWeights);
+        }
+
+        public void SetEventFoodWeight(string defName, float value)
+        {
+            if (string.IsNullOrWhiteSpace(defName)) return;
+            eventFoodWeights ??= new Dictionary<string, float>();
+            eventFoodWeights[defName.Trim()] = MouseDisasterEventFoodPolicy.NormalizeWeight(value);
+            NormalizeEventFoodSettings();
+            TouchEventFoodSettings();
+        }
+
+        public void ResetEventFoodWeights()
+        {
+            eventFoodWeights = new Dictionary<string, float>();
+            TouchEventFoodSettings();
+        }
+
+        internal void TouchEventFoodSettings()
+        {
+            EventFoodSettingsStamp++;
+        }
+
         public float GetTemperatureApparelInsulation(string defName, float fallback)
         {
             if (temperatureApparelInsulation != null && temperatureApparelInsulation.TryGetValue(defName, out float value) &&
@@ -602,6 +673,11 @@ namespace MouseDisaster
             Scribe_Values.Look(ref minGeneratedAge, "minGeneratedAge", 0f);
             Scribe_Values.Look(ref maxGeneratedAge, "maxGeneratedAge", 50f);
             Scribe_Values.Look(ref reliefFoodScoreBonus, "reliefFoodScoreBonus", 0.1f);
+            Scribe_Values.Look(ref allowEventPawnsEatOutsideReliefArea, "allowEventPawnsEatOutsideReliefArea", false);
+            Scribe_Collections.Look(ref disabledEventFoodDefNames, "disabledEventFoodDefNames", LookMode.Value);
+            Scribe_Collections.Look(ref eventFoodWeights, "eventFoodWeights", LookMode.Value, LookMode.Value);
+            disabledEventFoodDefNames ??= new List<string>();
+            eventFoodWeights ??= new Dictionary<string, float>();
             Scribe_Values.Look(ref fedWanderDays, "fedWanderDays", 0.5f);
             Scribe_Values.Look(ref waitWhenNoFood, "waitWhenNoFood", true);
             Scribe_Values.Look(ref noFoodWaitDays, "noFoodWaitDays", 0.5f);
@@ -723,6 +799,29 @@ namespace MouseDisaster
                 .Where(MouseDisasterIncidentCatalog.IsKnownIncident)
                 .OrderBy(defName => defName)
                 .ToList();
+        }
+
+        private void NormalizeEventFoodSettings()
+        {
+            disabledEventFoodDefNames = (disabledEventFoodDefNames ?? new List<string>())
+                .Where(defName => !string.IsNullOrWhiteSpace(defName))
+                .Select(defName => defName.Trim())
+                .Distinct(System.StringComparer.OrdinalIgnoreCase)
+                .OrderBy(defName => defName)
+                .ToList();
+            var normalizedWeights = new Dictionary<string, float>(System.StringComparer.OrdinalIgnoreCase);
+            if (eventFoodWeights != null)
+            {
+                foreach (KeyValuePair<string, float> entry in eventFoodWeights)
+                {
+                    if (string.IsNullOrWhiteSpace(entry.Key)) continue;
+                    float weight = MouseDisasterEventFoodPolicy.NormalizeWeight(entry.Value);
+                    if (System.Math.Abs(weight - DefaultEventFoodWeight) < 0.0001f) continue;
+                    normalizedWeights[entry.Key.Trim()] = weight;
+                }
+            }
+
+            eventFoodWeights = normalizedWeights;
         }
 
         private void NormalizePawnHistorySettings()

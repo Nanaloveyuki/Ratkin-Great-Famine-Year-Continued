@@ -1,5 +1,4 @@
 using RimWorld;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -30,8 +29,11 @@ namespace MouseDisaster
             if (MouseDisasterFeeding.ShouldLeaveAfterFed(pawn))
                 return mustStayOnMap ? null : MouseDisasterUtility.ExitMapJob(pawn);
             if (MouseDisasterFeeding.HasSatisfied(pawn) || MouseDisasterFeeding.HasTemporarySatiety(pawn)) return null;
-            if (GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly))
-                return MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
+            Job reliefOnlyJob = MouseDisasterUtility.TryCreateReliefFoodJob(pawn, allowInventorySearch: false);
+            if (reliefOnlyJob != null) return reliefOnlyJob;
+            if (!MouseDisasterUtility.AllowsEventPawnOutsideReliefFood(pawn) &&
+                GameComponent_MouseDisasterEventBehavior.HasBehavior(pawn, MouseDisasterPawnBehavior.ReliefOnly))
+                return null;
 
             if (pawn.needs?.food == null)
             {
@@ -74,52 +76,7 @@ namespace MouseDisaster
 
         private Job TryCreateFoodJob(Pawn pawn)
         {
-            bool desperate = pawn.needs.food.CurCategory == HungerCategory.Starving;
-            Thing foodSource;
-            ThingDef foodDef;
-            if (!FoodUtility.TryFindBestFoodSourceFor(
-                    pawn,
-                    pawn,
-                    desperate,
-                    out foodSource,
-                    out foodDef,
-                    canRefillDispenser: true,
-                    canUseInventory: true,
-                    canUsePackAnimalInventory: false,
-                    allowForbidden: false,
-                    allowCorpse: false,
-                    allowSociallyImproper: true,
-                    allowHarvest: false,
-                    forceScanWholeMap: true,
-                    ignoreReservations: false,
-                    calculateWantedStackCount: false,
-                    allowVenerated: false))
-            {
-                return null;
-            }
-
-            if (foodSource is Building_NutrientPasteDispenser)
-            {
-                return null;
-            }
-
-            if (!Toils_Ingest.TryFindChairOrSpot(pawn, foodSource, out _))
-            {
-                return null;
-            }
-
-            float nutrition = FoodUtility.GetNutrition(pawn, foodSource, foodDef);
-            Pawn inventoryOwner = (foodSource.ParentHolder as Pawn_InventoryTracker)?.pawn;
-            if (inventoryOwner != null && inventoryOwner != pawn)
-            {
-                Job takeOtherInventory = JobMaker.MakeJob(JobDefOf.TakeFromOtherInventory, foodSource, inventoryOwner);
-                takeOtherInventory.count = FoodUtility.WillIngestStackCountOf(pawn, foodDef, nutrition);
-                return takeOtherInventory;
-            }
-
-            Job ingest = JobMaker.MakeJob(JobDefOf.Ingest, foodSource);
-            ingest.count = Mathf.Max(1, FoodUtility.WillIngestStackCountOf(pawn, foodDef, nutrition));
-            return ingest;
+            return MouseDisasterUtility.TryCreateImproperFoodJob(pawn, allowInventorySearch: false);
         }
 
         private Job TryCreateExtraFoodJob(Pawn pawn)

@@ -25,10 +25,17 @@ namespace MouseDisaster
             for (int i = 0; i < container.Count; i++)
             {
                 Thing thing = container[i];
-                if (thing != null && thing.def.IsNutritionGivingIngestible && thing.IngestibleNow)
+                if (thing == null || !thing.def.IsNutritionGivingIngestible || !thing.IngestibleNow)
                 {
-                    return true;
+                    continue;
                 }
+
+                if (ShouldPrioritizeReliefAreaFood(pawn) && !IsEventFoodSelectable(thing.def))
+                {
+                    continue;
+                }
+
+                return true;
             }
 
             return false;
@@ -70,7 +77,21 @@ namespace MouseDisaster
                                                 IsMouseDisasterTraderAdult(pawn) ||
                                                 IsMouseDisasterTraderEscort(pawn) ||
                                                 IsMouseEggOrChild(pawn));
-            return MouseDisasterReliefAreaPolicy.CanUseReliefFood(isMouseDisasterFoodConsumer, IsPlayerColonist(pawn));
+            return MouseDisasterEventFoodPolicy.AppliesEventFoodRestrictions(
+                MouseDisasterReliefAreaPolicy.CanUseReliefFood(isMouseDisasterFoodConsumer, false),
+                IsPlayerAffiliatedRatkin(pawn));
+        }
+
+        public static bool AllowsEventPawnOutsideReliefFood(Pawn pawn)
+        {
+            return ShouldPrioritizeReliefAreaFood(pawn) &&
+                   MouseDisasterMod.Settings?.allowEventPawnsEatOutsideReliefArea == true;
+        }
+
+        public static bool IsEventFoodSelectable(ThingDef foodDef)
+        {
+            return foodDef != null &&
+                   (MouseDisasterMod.Settings == null || MouseDisasterMod.Settings.IsEventFoodEnabled(foodDef.defName));
         }
 
         private static bool IsPlayerColonist(Pawn pawn)
@@ -129,10 +150,17 @@ namespace MouseDisaster
             for (int i = 0; i < container.Count; i++)
             {
                 Thing thing = container[i];
-                if (thing != null && thing.stackCount > 0 && thing.def.IsNutritionGivingIngestible && thing.IngestibleNow)
+                if (thing == null || thing.stackCount <= 0 || !thing.def.IsNutritionGivingIngestible || !thing.IngestibleNow)
                 {
-                    count += thing.stackCount;
+                    continue;
                 }
+
+                if (ShouldPrioritizeReliefAreaFood(pawn) && !IsEventFoodSelectable(thing.def))
+                {
+                    continue;
+                }
+
+                count += thing.stackCount;
             }
 
             return count;
@@ -153,12 +181,19 @@ namespace MouseDisaster
                 return null;
             }
 
+            Job inventoryJob = TryCreateInventoryFoodJob(pawn);
+            if (inventoryJob != null)
+            {
+                return inventoryJob;
+            }
+
             Thing foodSource;
             ThingDef foodDef;
-            bool found = reliefOnly ? TryFindBestReliefFoodSourceFor(
+            bool desperate = pawn.needs.food.CurCategory == HungerCategory.Starving;
+            bool found = TryFindBestReliefFoodSourceFor(
                     pawn,
                     pawn,
-                    pawn.needs.food.CurCategory == HungerCategory.Starving,
+                    desperate,
                     allowHarvest: true,
                     out foodSource,
                     out foodDef,
@@ -168,9 +203,24 @@ namespace MouseDisaster
                     ignoreReservations: false,
                     calculateWantedStackCount: false,
                     allowVenerated: false,
-                    FoodPreferability.Undefined) : FoodUtility.TryFindBestFoodSourceFor(pawn, pawn,
-                        pawn.needs.food.CurCategory == HungerCategory.Starving, out foodSource, out foodDef,
-                        canUseInventory: true, allowCorpse: true, allowSociallyImproper: true, allowHarvest: true, forceScanWholeMap: true);
+                    FoodPreferability.Undefined);
+            if (!found && !reliefOnly && AllowsEventPawnOutsideReliefFood(pawn))
+            {
+                found = TryFindBestNonReliefFoodSourceFor(
+                    pawn,
+                    pawn,
+                    desperate,
+                    allowHarvest: true,
+                    out foodSource,
+                    out foodDef,
+                    allowForbidden: false,
+                    allowCorpse: true,
+                    allowSociallyImproper: true,
+                    ignoreReservations: false,
+                    calculateWantedStackCount: false,
+                    allowVenerated: false,
+                    FoodPreferability.Undefined);
+            }
             if (!found)
             {
                 return null;
@@ -209,6 +259,30 @@ namespace MouseDisaster
             }
 
             Job ingest = JobMaker.MakeJob(JobDefOf.Ingest, foodSource);
+            ingest.count = Mathf.Max(1, FoodUtility.WillIngestStackCountOf(pawn, foodDef, nutrition));
+            return ingest;
+        }
+
+        private static Job TryCreateInventoryFoodJob(Pawn pawn)
+        {
+            Thing food = FoodUtility.BestFoodInInventory(
+                pawn,
+                pawn,
+                FoodPreferability.NeverForNutrition,
+                FoodPreferability.MealLavish);
+            if (food == null)
+            {
+                return null;
+            }
+
+            ThingDef foodDef = MouseDisasterEventFoodPolicy.ResolveIngestibleDef(food);
+            if (!IsEventFoodSelectable(foodDef))
+            {
+                return null;
+            }
+
+            float nutrition = FoodUtility.GetNutrition(pawn, food, foodDef);
+            Job ingest = JobMaker.MakeJob(JobDefOf.Ingest, food);
             ingest.count = Mathf.Max(1, FoodUtility.WillIngestStackCountOf(pawn, foodDef, nutrition));
             return ingest;
         }
@@ -300,6 +374,11 @@ namespace MouseDisaster
                 return reliefFoodJob;
             }
 
+            if (!AllowsEventPawnOutsideReliefFood(pawn))
+            {
+                return null;
+            }
+
             bool desperate = pawn.needs.food.CurCategory == HungerCategory.Starving;
             suppressReliefAreaPostfix = true;
             bool foodFound = false;
@@ -330,7 +409,7 @@ namespace MouseDisaster
                 suppressReliefAreaPostfix = false;
             }
 
-            if (!foodFound)
+            if (!foodFound || !IsEventFoodSelectable(foodDef ?? MouseDisasterEventFoodPolicy.ResolveIngestibleDef(foodSource)))
             {
                 return null;
             }
@@ -561,7 +640,7 @@ namespace MouseDisaster
             }
 
             Area_MouseDisasterRelief reliefArea = GetReliefArea(getter.Map);
-            if (reliefArea == null || (onlyReliefAreaFood && reliefArea.TrueCount == 0))
+            if (onlyReliefAreaFood && (reliefArea == null || reliefArea.TrueCount == 0))
             {
                 return false;
             }
@@ -590,7 +669,7 @@ namespace MouseDisaster
                     continue;
                 }
 
-                bool isReliefFood = reliefArea[candidate.PositionHeld];
+                bool isReliefFood = reliefArea != null && reliefArea[candidate.PositionHeld];
                 if (onlyReliefAreaFood != isReliefFood)
                 {
                     continue;
@@ -612,6 +691,11 @@ namespace MouseDisaster
                 }
 
                 ThingDef candidateFoodDef = isHarvestablePlant ? candidate.def.plant.harvestedThingDef : candidate.def;
+                if (candidateFoodDef?.ingestible == null || !IsEventFoodSelectable(candidateFoodDef))
+                {
+                    continue;
+                }
+
                 if ((int)candidateFoodDef.ingestible.preferability < (int)minPref)
                 {
                     continue;
@@ -659,7 +743,13 @@ namespace MouseDisaster
                 int wantedStackCount = calculateWantedStackCount
                     ? Mathf.Max(1, FoodUtility.WillIngestStackCountOf(eater, candidateFoodDef, nutrition))
                     : 1;
-                float score = FoodUtility.FoodOptimality(eater, candidate, candidateFoodDef, (getter.Position - candidate.PositionHeld).LengthManhattan);
+                float distance = (getter.Position - candidate.PositionHeld).LengthManhattan;
+                bool preferLowestValue = !onlyReliefAreaFood && AllowsEventPawnOutsideReliefFood(getter);
+                float score = MouseDisasterEventFoodPolicy.ScoreFood(
+                    MouseDisasterMod.Settings?.GetEventFoodWeight(candidateFoodDef.defName) ?? MouseDisasterEventFoodPolicy.DefaultWeight,
+                    distance,
+                    MouseDisasterEventFoodPolicy.GetMarketValue(candidate, candidateFoodDef),
+                    preferLowestValue);
                 if (score <= bestScore) continue;
                 if (!ignoreReservations && !getter.CanReserve(candidate, 10, wantedStackCount))
                 {

@@ -26,6 +26,8 @@ namespace MouseDisaster
             public int inventoryCount;
             public int reliefCells;
             public float reliefBonus;
+            public int foodSettingsStamp;
+            public bool allowOutsideRelief;
         }
 
         private readonly Dictionary<Pawn, Dictionary<int, Entry>> targets = new Dictionary<Pawn, Dictionary<int, Entry>>();
@@ -71,6 +73,8 @@ namespace MouseDisaster
             if (entry == null && !sharedTargets.TryGetValue(key, out entry)) return false;
             if (entry.reliefBonus != (MouseDisasterMod.Settings?.reliefFoodScoreBonus ?? 0.1f)) return false;
             if (entry.reliefCells != (MouseDisasterUtility.GetReliefArea(map)?.TrueCount ?? 0)) return false;
+            if (entry.foodSettingsStamp != (MouseDisasterMod.Settings?.EventFoodSettingsStamp ?? 0)) return false;
+            if (entry.allowOutsideRelief != (MouseDisasterMod.Settings?.allowEventPawnsEatOutsideReliefArea == true)) return false;
             if (entry.food == null) return entry.foodSources == FoodCount && entry.inventoryCount == (pawn.inventory?.innerContainer.Count ?? 0) &&
                 Find.TickManager.TicksGame < entry.retryAt;
             Thing candidate = entry.food;
@@ -107,7 +111,9 @@ namespace MouseDisaster
                 retryAt = Find.TickManager.TicksGame + EmptySearchRetryTicks + pawn.thingIDNumber % 60,
                 foodSources = FoodCount, inventoryCount = pawn.inventory?.innerContainer.Count ?? 0,
                 reliefCells = MouseDisasterUtility.GetReliefArea(map)?.TrueCount ?? 0,
-                reliefBonus = MouseDisasterMod.Settings?.reliefFoodScoreBonus ?? 0.1f
+                reliefBonus = MouseDisasterMod.Settings?.reliefFoodScoreBonus ?? 0.1f,
+                foodSettingsStamp = MouseDisasterMod.Settings?.EventFoodSettingsStamp ?? 0,
+                allowOutsideRelief = MouseDisasterMod.Settings?.allowEventPawnsEatOutsideReliefArea == true
             };
             requests[key] = entry;
             if (found && food.Spawned) sharedTargets[key] = entry;

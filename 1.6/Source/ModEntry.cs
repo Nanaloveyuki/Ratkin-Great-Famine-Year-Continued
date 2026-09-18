@@ -50,6 +50,7 @@ namespace MouseDisaster
             if (page == null || page == SettingsPage.General) DrawGeneralSettings(listing);
             if (page == null || page == SettingsPage.Environment) DrawEnvironmentSettings(listing);
             if (page == null || page == SettingsPage.PawnBehavior) DrawPawnSettings(listing);
+            if (page == null || page == SettingsPage.FoodWeights) DrawEventFoodWeightSettings(listing);
             if (page == null || page == SettingsPage.PawnHistory) DrawPawnHistorySettings(listing);
             if (page == null || page == SettingsPage.PawnTrait) DrawPawnTraitSettings(listing);
             if (page == null || page == SettingsPage.Predation) DrawPredationSettings(listing);
@@ -76,6 +77,9 @@ namespace MouseDisaster
             Settings.maxGeneratedAge = Mathf.Round(listing.Slider(Settings.maxGeneratedAge, Settings.minGeneratedAge, 100f) * 10f) / 10f;
             listing.Label("MouseDisaster_Settings_ReliefFoodScoreBonus".Translate(Settings.reliefFoodScoreBonus.ToString("P0")), tooltip: "MouseDisaster_Settings_ReliefFoodScoreBonus_Tooltip".Translate());
             Settings.reliefFoodScoreBonus = Mathf.Round(listing.Slider(Settings.reliefFoodScoreBonus, 0f, 1f) * 100f) / 100f;
+            DrawCheckbox(listing, "MouseDisaster_Settings_AllowEventPawnsEatOutsideReliefArea",
+                ref Settings.allowEventPawnsEatOutsideReliefArea,
+                "MouseDisaster_Settings_AllowEventPawnsEatOutsideReliefArea_Tooltip");
             listing.Label("MouseDisaster_Settings_FedWanderDays".Translate(Settings.fedWanderDays.ToString("0.00")), tooltip: "MouseDisaster_Settings_FedWanderDays_Tooltip".Translate());
             Settings.fedWanderDays = Mathf.Round(listing.Slider(Settings.fedWanderDays, 0f, 5f) * 100f) / 100f;
             DrawCheckbox(listing, "MouseDisaster_Settings_WaitWhenNoFood", ref Settings.waitWhenNoFood, "MouseDisaster_Settings_WaitWhenNoFood_Tooltip");
@@ -108,6 +112,53 @@ namespace MouseDisaster
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableGnawing", ref Settings.enableGnawing, "MouseDisaster_Settings_EnableGnawing_Tooltip");
             DrawCheckbox(listing, "MouseDisaster_Settings_EnableExperimentalTailBite", ref Settings.enableExperimentalTailBite, "MouseDisaster_Settings_EnableExperimentalTailBite_Tooltip");
             DrawBiologySettings(listing);
+        }
+
+        private static void DrawEventFoodWeightSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_IrisMenus_FoodWeights");
+            listing.Label("MouseDisaster_Settings_EventFoodWeights_Hint".Translate());
+            listing.Gap(2f);
+            if (listing.ButtonText("MouseDisaster_Settings_EventFood_EnableAll".Translate()))
+                Settings.SetAllEventFoodsEnabled(true);
+            if (listing.ButtonText("MouseDisaster_Settings_EventFood_DisableAll".Translate()))
+                Settings.SetAllEventFoodsEnabled(false);
+            if (listing.ButtonText("MouseDisaster_Settings_EventFood_ResetWeights".Translate()))
+                Settings.ResetEventFoodWeights();
+            listing.Gap(2f);
+
+            IReadOnlyList<ThingDef> foods = MouseDisasterEventFoodPolicy.AllFoodDefs();
+            if (foods.Count == 0)
+            {
+                listing.Label("MouseDisaster_Settings_EventFood_NotLoaded".Translate());
+                return;
+            }
+
+            for (int i = 0; i < foods.Count; i++)
+            {
+                ThingDef food = foods[i];
+                bool enabled = Settings.IsEventFoodEnabled(food.defName);
+                bool changed = enabled;
+                string label = food.LabelCap.ToString();
+                if (string.IsNullOrWhiteSpace(label)) label = food.defName;
+                listing.CheckboxLabeled(label, ref changed, "MouseDisaster_Settings_EventFood_Item_Tooltip".Translate(food.defName));
+                if (changed != enabled)
+                    Settings.SetEventFoodEnabled(food.defName, changed);
+
+                if (changed)
+                {
+                    float weight = Settings.GetEventFoodWeight(food.defName);
+                    listing.Label("MouseDisaster_Settings_EventFood_Weight".Translate(weight.ToString("P0")),
+                        -1f, new TipSignal("MouseDisaster_Settings_EventFood_Weight_Tooltip".Translate()));
+                    float updatedWeight = Mathf.Round(listing.Slider(weight,
+                        MouseDisasterSettings.MinEventFoodWeight,
+                        MouseDisasterSettings.MaxEventFoodWeight) * 100f) / 100f;
+                    if (Mathf.Abs(updatedWeight - weight) > 0.001f)
+                        Settings.SetEventFoodWeight(food.defName, updatedWeight);
+                }
+
+                listing.Gap(1f);
+            }
         }
 
         private static void DrawPawnHistorySettings(Listing_Standard listing)

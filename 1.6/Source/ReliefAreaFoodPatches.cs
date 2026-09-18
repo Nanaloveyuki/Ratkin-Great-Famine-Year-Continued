@@ -32,6 +32,15 @@ namespace MouseDisaster
             {
                 __result = false;
             }
+
+            if (__result && MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(p))
+            {
+                ThingDef ingestible = MouseDisasterEventFoodPolicy.ResolveIngestibleDef(food);
+                if (!MouseDisasterUtility.IsEventFoodSelectable(ingestible))
+                {
+                    __result = false;
+                }
+            }
         }
     }
 
@@ -77,7 +86,8 @@ namespace MouseDisaster
             int key = MapComponent_MouseDisasterFoodTargets.Key(desperate, canRefillDispenser, canUseInventory,
                 canUsePackAnimalInventory, allowForbidden, allowCorpse, allowSociallyImproper, allowHarvest,
                 forceScanWholeMap, ignoreReservations, calculateWantedStackCount, allowVenerated, minPrefOverride) |
-                (MouseDisasterUtility.IsReliefAreaPostfixSuppressed ? 16384 : 0);
+                (MouseDisasterUtility.IsReliefAreaPostfixSuppressed ? 16384 : 0) |
+                (MouseDisasterUtility.AllowsEventPawnOutsideReliefFood(getter) ? 32768 : 0);
             __state = new MouseDisasterFoodSearchState { cache = cache, key = key };
             if (!cache.TryRead(getter, key, out foodSource, out foodDef, out bool found)) return true;
             __state.hit = true;
@@ -114,18 +124,24 @@ namespace MouseDisaster
                 return;
             }
 
-            if (!MouseDisasterUtility.MapHasReliefArea(map))
-            {
-                return;
-            }
-
             if (MouseDisasterUtility.IsReliefAreaPostfixSuppressed)
             {
                 return;
             }
 
-            if (MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(getter) &&
-                MouseDisasterUtility.TryFindBestReliefFoodSourceFor(
+            if (MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(getter))
+            {
+                bool hasOwnInventoryFood = __result && foodSource != null && !foodSource.Spawned &&
+                    foodSource.ParentHolder == getter.inventory &&
+                    MouseDisasterUtility.IsEventFoodSelectable(foodDef ?? MouseDisasterEventFoodPolicy.ResolveIngestibleDef(foodSource));
+                if (hasOwnInventoryFood)
+                {
+                    return;
+                }
+
+                bool allowSociallyImproperForRelief = allowSociallyImproper ||
+                    GameComponent_MouseDisasterEventBehavior.HasBehavior(getter, MouseDisasterPawnBehavior.ReliefOnly);
+                bool hasReliefFood = MouseDisasterUtility.TryFindBestReliefFoodSourceFor(
                     getter,
                     eater,
                     desperate,
@@ -134,21 +150,59 @@ namespace MouseDisaster
                     out ThingDef reliefFoodDef,
                     allowForbidden,
                     allowCorpse,
-                    allowSociallyImproper || GameComponent_MouseDisasterEventBehavior.HasBehavior(getter, MouseDisasterPawnBehavior.ReliefOnly),
+                    allowSociallyImproperForRelief,
                     ignoreReservations,
                     calculateWantedStackCount,
                     allowVenerated,
-                    minPrefOverride))
-            {
-                if (!__result || foodSource == null ||
-                    FoodUtility.FoodOptimality(eater, reliefFoodSource, reliefFoodDef, (getter.Position - reliefFoodSource.PositionHeld).LengthManhattan) >
-                    FoodUtility.FoodOptimality(eater, foodSource, foodDef, foodSource.Spawned ? (getter.Position - foodSource.PositionHeld).LengthManhattan : 0f))
+                    minPrefOverride);
+                if (MouseDisasterReliefAreaPolicy.ShouldUseReliefAreaFoodFirst(
+                    true, hasReliefFood, __result && foodSource != null))
                 {
                     foodSource = reliefFoodSource;
                     foodDef = reliefFoodDef;
                     __result = true;
                     return;
                 }
+
+                if (!MouseDisasterEventFoodPolicy.AllowsOutsideReliefSearch(
+                    MouseDisasterUtility.AllowsEventPawnOutsideReliefFood(getter),
+                    hasReliefFood))
+                {
+                    foodSource = null;
+                    foodDef = null;
+                    __result = false;
+                    return;
+                }
+
+                if (MouseDisasterUtility.TryFindBestNonReliefFoodSourceFor(
+                    getter,
+                    eater,
+                    desperate,
+                    allowHarvest,
+                    out Thing outsideFoodSource,
+                    out ThingDef outsideFoodDef,
+                    allowForbidden,
+                    allowCorpse,
+                    allowSociallyImproperForRelief,
+                    ignoreReservations,
+                    calculateWantedStackCount,
+                    allowVenerated,
+                    minPrefOverride))
+                {
+                    foodSource = outsideFoodSource;
+                    foodDef = outsideFoodDef;
+                    __result = true;
+                    return;
+                }
+
+                if (__result && !MouseDisasterUtility.IsEventFoodSelectable(foodDef ?? MouseDisasterEventFoodPolicy.ResolveIngestibleDef(foodSource)))
+                {
+                    foodSource = null;
+                    foodDef = null;
+                    __result = false;
+                }
+
+                return;
             }
 
             if (__result &&
