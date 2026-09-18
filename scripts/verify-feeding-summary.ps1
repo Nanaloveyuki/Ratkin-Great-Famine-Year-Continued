@@ -91,6 +91,7 @@ public static class MouseDisasterUtility {
     public static bool IsPlayerAffiliatedRatkin(Pawn p) => p.player;
     public static bool IsThiefPawn(Pawn p) => p.thief;
     public static bool IsBeggarPawn(Pawn p) => p.beggar;
+    public static bool IsAbandonedDeliveryPawn(Pawn p) => false;
 }
 public static class FeedingHarness {
     static int checks;

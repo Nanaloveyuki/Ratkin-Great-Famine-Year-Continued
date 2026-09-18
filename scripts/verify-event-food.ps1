@@ -7,7 +7,7 @@ $methods = ''
 foreach ($name in @('AllowsOutsideReliefSearch','AppliesEventFoodRestrictions','IsFoodAllowed','ResolveWeight','ScoreFood','NormalizeWeight','TryGetWeight')) {
     $methods += Get-CSharpMethod $policy $name
 }
-foreach ($name in @('ShouldUseReliefAreaFoodFirst','ShouldFallbackToDefaultFoodSearch')) {
+foreach ($name in @('ShouldUseReliefAreaFoodFirst','ShouldFallbackToDefaultFoodSearch','CanUseReliefFood')) {
     $methods += Get-CSharpMethod $relief $name
 }
 $stub = @'
@@ -34,6 +34,9 @@ public static class EventFoodHarness {
         Check(!ShouldUseReliefAreaFoodFirst(true, false, true), "missing relief food still forced");
         Check(ShouldFallbackToDefaultFoodSearch(true, false), "no fallback without relief food");
         Check(!ShouldFallbackToDefaultFoodSearch(true, true), "fallback used while relief food exists");
+        Check(CanUseReliefFood(true, false), "ordinary visitor blocked from relief food");
+        Check(!CanUseReliefFood(true, true), "colonist still uses event relief food");
+        Check(!CanUseReliefFood(true, false, true), "abandoned delivery still seeks relief food");
         Check(IsFoodAllowed("MealSimple", null), "null disabled list rejected food");
         Check(IsFoodAllowed("MealSimple", new List<string>()), "empty disabled list rejected food");
         Check(IsFoodAllowed("ModdedStew", new List<string> { "MealLavish" }), "mod food not default-enabled");
@@ -67,8 +70,13 @@ Add-Type -TypeDefinition $stub.Replace('__METHODS__', $methods)
 "PASS: $([MouseDisaster.EventFoodHarness]::Run()) event-food policy assertions."
 $foodUtil = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.Food.cs') -Raw
 $patches = Get-Content (Join-Path $root '1.6/Source/ReliefAreaFoodPatches.cs') -Raw
+$beggar = Get-Content (Join-Path $root '1.6/Source/JobGiver_MouseDisasterBeggar.cs') -Raw
+$delivery = Get-Content (Join-Path $root '1.6/Source/Utilities/MouseDisasterUtility.AbandonedDelivery.cs') -Raw
 $settings = Get-Content (Join-Path $root '1.6/Source/MouseDisasterSettings.cs') -Raw
 if ($foodUtil -notmatch 'AppliesEventFoodRestrictions\(') { throw 'event food restrictions are not applied to affiliated pawns' }
+if ($foodUtil -notmatch 'IsAbandonedDeliveryPawn\(pawn\)') { throw 'abandoned delivery pawns still seek relief-area food' }
+if ($beggar -notmatch 'IsAbandonedDeliveryPawn\(pawn\)') { throw 'abandoned delivery mother still uses beggar relief jobs' }
+if ($delivery -notmatch 'JobGiver_GetFood') { throw 'abandoned delivery still uses vanilla GetFood' }
 if ($foodUtil -notmatch 'IsPlayerAffiliatedRatkin\(pawn\)') { throw 'prisoners and colonists remain in the event food search' }
 if ($foodUtil -notmatch 'BestFoodInInventory') { throw 'carried food is ignored when relief-only search is enabled' }
 if ($patches -notmatch 'AllowsOutsideReliefSearch\(') { throw 'outside relief search policy is unused' }

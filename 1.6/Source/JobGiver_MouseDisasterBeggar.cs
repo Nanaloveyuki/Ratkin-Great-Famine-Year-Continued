@@ -17,6 +17,7 @@ namespace MouseDisaster
 
         protected override Job TryGiveJob(Pawn pawn)
         {
+            if (MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn)) return null;
             if (GameComponent_MouseDisasterEventBehavior.Component?.TryVisitJob(pawn, out Job visitJob) == true) return visitJob;
             if (MouseDisasterUtility.IsPendingAbandonedChild(pawn)) return null;
             if (MouseDisasterUtility.IsPlayerAffiliatedRatkin(pawn) ||

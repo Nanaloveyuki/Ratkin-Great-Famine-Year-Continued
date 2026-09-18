@@ -53,6 +53,7 @@ namespace MouseDisaster
 
         public static bool ShouldBlockIdleDeparture(Pawn pawn)
         {
+            if (IsAbandonedDeliveryPawn(pawn)) return true;
             var state = GameComponent_MouseDisasterEventBehavior.Component;
             if (state?.ManagesFoodVisit(pawn) == true) return !state.IsDeparting(pawn);
             return pawn != null &&

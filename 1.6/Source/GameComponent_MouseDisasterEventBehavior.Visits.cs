@@ -137,6 +137,17 @@ namespace MouseDisaster
 
         private static void AssignVisitLord(IEnumerable<Pawn> pawns)
         {
+            foreach (Pawn protectedPawn in pawns.Where(p => p != null && !p.Dead && HasProtectedVisit(p)))
+            {
+                Lord visitLord = protectedPawn.GetLord();
+                if (visitLord?.LordJob is LordJob_MouseDisasterVisit)
+                {
+                    visitLord.RemovePawn(protectedPawn);
+                    if (protectedPawn.mindState?.duty?.def == MouseDisasterDefOf.MouseDisaster_ReliefVisit)
+                        protectedPawn.mindState.duty = null;
+                }
+            }
+
             foreach (Lord lord in pawns.Where(p => p != null && !p.Dead && !MouseDisasterUtility.IsPlayerAffiliatedRatkin(p))
                 .Select(p => p.GetLord()).Where(l => l?.LordJob is LordJob_TradeWithColony &&
                 l.LordJob is not LordJob_MouseDisasterTrade).Distinct().ToList())
@@ -230,6 +241,12 @@ namespace MouseDisaster
     {
         public static bool Prefix(Pawn pawn, ref Job __result)
         {
+            if (MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn))
+            {
+                __result = null;
+                return false;
+            }
+
             var state = GameComponent_MouseDisasterEventBehavior.Component;
             if (state?.ManagesFoodVisit(pawn) != true || state.IsDeparting(pawn)) return true;
             __result = null;

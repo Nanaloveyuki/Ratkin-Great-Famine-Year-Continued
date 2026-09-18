@@ -63,7 +63,7 @@ namespace MouseDisaster
             get
             {
                 TraitDef traitDef = DefDatabase<TraitDef>.GetNamedSilentFail(TraitDefName);
-                string label = traitDef?.DataAtDegree(0)?.label;
+                string label = MouseDisasterTraitCatalog.TryGetDegreeData(traitDef)?.label;
                 return Id + " " + (label.NullOrEmpty() ? TraitDefName : label);
             }
         }
@@ -83,7 +83,7 @@ namespace MouseDisaster
             {
                 List<string> lines = new List<string>();
                 TraitDef traitDef = DefDatabase<TraitDef>.GetNamedSilentFail(TraitDefName);
-                string description = traitDef?.DataAtDegree(0)?.description;
+                string description = MouseDisasterTraitCatalog.TryGetDegreeData(traitDef)?.description;
                 if (!description.NullOrEmpty())
                 {
                     lines.Add(description);
@@ -182,14 +182,57 @@ namespace MouseDisaster
                 : Mathf.Clamp(Mathf.Round(definition.Chance * 100f), 0f, 100f);
         }
 
-        public static Color GetLabelColor(TraitDef def)
+        // Vanilla TraitDef.DataAtDegree logs when the requested degree is missing.
+        // Spectrum traits such as SpeedOffset only define -1/1/2, so never call it from LabelCap.
+        public static TraitDegreeData TryGetDegreeData(TraitDef def, int? degree = null)
         {
-            if (def?.DataAtDegree(0) is MouseDisasterTraitDegreeData data && data.color.a > 0.01f)
+            if (def?.degreeDatas == null || def.degreeDatas.Count == 0)
             {
-                return data.color;
+                return null;
             }
 
-            return Color.white;
+            if (degree.HasValue)
+            {
+                for (int i = 0; i < def.degreeDatas.Count; i++)
+                {
+                    TraitDegreeData data = def.degreeDatas[i];
+                    if (data != null && data.degree == degree.Value)
+                    {
+                        return data;
+                    }
+                }
+            }
+
+            return def.degreeDatas[0];
+        }
+
+        public static Color GetLabelColor(TraitDef def, int? degree = null)
+        {
+            if (def?.degreeDatas == null)
+            {
+                return Color.white;
+            }
+
+            MouseDisasterTraitDegreeData fallback = null;
+            for (int i = 0; i < def.degreeDatas.Count; i++)
+            {
+                if (!(def.degreeDatas[i] is MouseDisasterTraitDegreeData data) || data.color.a <= 0.01f)
+                {
+                    continue;
+                }
+
+                if (degree.HasValue && data.degree == degree.Value)
+                {
+                    return data.color;
+                }
+
+                if (fallback == null)
+                {
+                    fallback = data;
+                }
+            }
+
+            return fallback != null ? fallback.color : Color.white;
         }
 
         public static void TryApply(Pawn pawn, DevelopmentalStage stage, MouseDisasterPawnHistoryDefinition history)
@@ -307,12 +350,16 @@ namespace MouseDisaster
     {
         private static void Postfix(Trait __instance, ref string __result)
         {
-            if (__instance?.Suppressed == true || __result.NullOrEmpty() || __result.IndexOf("<color", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (__instance?.def == null ||
+                __instance.Suppressed ||
+                __result.NullOrEmpty() ||
+                __result.IndexOf("<color", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                !MouseDisasterGenerationPolicy.IsOwnedTrait(__instance.def))
             {
                 return;
             }
 
-            Color color = MouseDisasterTraitCatalog.GetLabelColor(__instance.def);
+            Color color = MouseDisasterTraitCatalog.GetLabelColor(__instance.def, __instance.Degree);
             if (color.a <= 0.01f || color == Color.white)
             {
                 return;

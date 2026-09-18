@@ -141,6 +141,7 @@ public static class MouseDisasterUtility {
     public static void MakeFactionHostileToPlayer(Faction faction,bool explicitDriveAway) { faction.kind=1; }
     public static bool IsEventBehaviorFaction(Faction faction)=>true;
     public static bool ShouldPrioritizeReliefAreaFood(Pawn pawn)=>false;
+    public static bool IsAbandonedDeliveryPawn(Pawn pawn)=>false;
     public static void MakeTravelAndExitLord(Map map,List<Pawn> pawns,IntVec3 exit,bool includeBabiesInExit) { exits++; }
     public static ReliefArea GetReliefArea(Map map)=>map.area;
     public static bool IsAreaFoodSourceThing(Thing t,bool harvest)=>t!=null && t.Spawned && !t.Destroyed && t.IngestibleNow;

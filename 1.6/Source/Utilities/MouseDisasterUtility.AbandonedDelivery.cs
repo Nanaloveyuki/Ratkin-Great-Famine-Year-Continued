@@ -128,6 +128,20 @@ namespace MouseDisaster
                     }
                 }
 
+                if (adult != null && adult.Spawned && !adult.Dead)
+                {
+                    DetachFromReliefVisit(adult, IntVec3.Invalid);
+                }
+
+                for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
+                {
+                    Pawn child = ReusablePawnList[childIndex];
+                    if (child.Spawned)
+                    {
+                        DetachFromReliefVisit(child, state.foodCell);
+                    }
+                }
+
                 if (ReusablePawnList.Count == 0)
                 {
                     if (adult != null && adult.Spawned && !adult.Dead && !IsPlayerAffiliatedRatkin(adult))
@@ -222,6 +236,10 @@ namespace MouseDisaster
                                 state.adultHasLeft = true;
                                 Messages.Message("MouseDisaster_UI_AbandoningMotherTimedOut".Translate().Resolve(), adult, MessageTypeDefOf.NeutralEvent, historical: false);
                             }
+                            else
+                            {
+                                KeepAbandonedDeliveryPawnAtDropoff(adult, state.foodCell);
+                            }
 
                             continue;
                         }
@@ -273,6 +291,55 @@ namespace MouseDisaster
         {
             return pawn != null && ActiveAbandonedDeliveryByAdultId.Values.Any(state =>
                 state != null && state.childPawnIds.Contains(pawn.thingIDNumber));
+        }
+
+        public static bool IsAbandonedDeliveryPawn(Pawn pawn)
+        {
+            if (pawn == null || ActiveAbandonedDeliveryByAdultId == null || ActiveAbandonedDeliveryByAdultId.Count == 0)
+            {
+                return false;
+            }
+
+            return ActiveAbandonedDeliveryByAdultId.ContainsKey(pawn.thingIDNumber) || IsPendingAbandonedChild(pawn);
+        }
+
+        private static void DetachFromReliefVisit(Pawn pawn, IntVec3 restoreDropoff)
+        {
+            Lord lord = pawn?.GetLord();
+            bool wasVisit = lord?.LordJob is LordJob_MouseDisasterVisit;
+            bool hadReliefDuty = pawn?.mindState?.duty?.def == MouseDisasterDefOf.MouseDisaster_ReliefVisit;
+            if (wasVisit)
+            {
+                lord.RemovePawn(pawn);
+                pawn.jobs?.StopAll();
+            }
+
+            if (hadReliefDuty && pawn.mindState != null)
+            {
+                pawn.mindState.duty = null;
+            }
+
+            if (restoreDropoff.IsValid && (wasVisit || hadReliefDuty) && pawn != null && pawn.Spawned && !pawn.Dead)
+            {
+                MouseDisasterPawnGroupUtility.HoldForDropoff(pawn, restoreDropoff);
+            }
+        }
+
+        private static void KeepAbandonedDeliveryPawnAtDropoff(Pawn pawn, IntVec3 foodCell)
+        {
+            if (pawn == null || !pawn.Spawned || pawn.Dead || !foodCell.IsValid)
+            {
+                return;
+            }
+
+            if (pawn.CurJobDef == JobDefOf.Wait || pawn.CurJobDef == JobDefOf.Wait_MaintainPosture)
+            {
+                return;
+            }
+
+            Job waitJob = JobMaker.MakeJob(JobDefOf.Wait);
+            waitJob.expiryInterval = 250;
+            TryTakeAutoOrderedJob(pawn, waitJob, JobTag.Misc, requireStarving: false);
         }
 
         internal static void NotifyAbandonedChildDropped(Pawn child)
@@ -370,6 +437,21 @@ namespace MouseDisaster
         public static bool HasActiveAbandonedDeliveryState()
         {
             return ActiveAbandonedDeliveryByAdultId.Count > 0;
+        }
+    }
+
+    [HarmonyPatch(typeof(JobGiver_GetFood), "TryGiveJob")]
+    internal static class MouseDisasterAbandonedDeliveryGetFoodPatch
+    {
+        public static bool Prefix(Pawn pawn, ref Job __result)
+        {
+            if (!MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn))
+            {
+                return true;
+            }
+
+            __result = null;
+            return false;
         }
     }
 

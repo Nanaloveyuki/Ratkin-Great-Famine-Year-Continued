@@ -120,7 +120,9 @@ namespace MouseDisaster
         {
             byPawn[pawn] = group;
             profiles[pawn] = MouseDisasterEventPolicy.Compose(MouseDisasterUtility.IsThiefPawn(pawn), MouseDisasterUtility.IsBeggarPawn(pawn), group.attitude);
-            if (MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(pawn)) profiles[pawn] |= MouseDisasterPawnBehavior.SeekFood;
+            if (MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn))
+                profiles[pawn] &= ~(MouseDisasterPawnBehavior.SeekFood | MouseDisasterPawnBehavior.Beg | MouseDisasterPawnBehavior.Steal);
+            else if (MouseDisasterUtility.ShouldPrioritizeReliefAreaFood(pawn)) profiles[pawn] |= MouseDisasterPawnBehavior.SeekFood;
         }
 
         private void RebuildRuntimeIndexes()

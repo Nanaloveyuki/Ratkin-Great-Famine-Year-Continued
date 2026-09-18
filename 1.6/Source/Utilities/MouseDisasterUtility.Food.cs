@@ -78,7 +78,10 @@ namespace MouseDisaster
                                                 IsMouseDisasterTraderEscort(pawn) ||
                                                 IsMouseEggOrChild(pawn));
             return MouseDisasterEventFoodPolicy.AppliesEventFoodRestrictions(
-                MouseDisasterReliefAreaPolicy.CanUseReliefFood(isMouseDisasterFoodConsumer, false),
+                MouseDisasterReliefAreaPolicy.CanUseReliefFood(
+                    isMouseDisasterFoodConsumer,
+                    false,
+                    IsAbandonedDeliveryPawn(pawn)),
                 IsPlayerAffiliatedRatkin(pawn));
         }
 

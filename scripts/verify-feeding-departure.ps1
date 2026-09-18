@@ -36,6 +36,7 @@ public static class MouseDisasterFeeding {
 public static class MouseDisasterDefOf { public static string MouseDisaster_BegForFood="beg"; }
 public static class JobMaker { public static Job MakeJob(string name,Pawn target)=>new Job(name); }
 public static class MouseDisasterUtility {
+ public static bool IsAbandonedDeliveryPawn(Pawn p)=>false;
  public static bool IsPendingAbandonedChild(Pawn p)=>false;
  public static bool IsPlayerAffiliatedRatkin(Pawn p)=>false;
  public static bool IsBeggarPawn(Pawn p)=>true;
@@ -53,6 +54,7 @@ public static void ClearBeggarTargetHistory(Pawn p){}
 public static Job ExitMapJob(Pawn p)=>new Job("exit");
 public static Job TryCreateReliefFoodJob(Pawn p,bool allowInventorySearch)=>p.relief?new Job("relief"):null;
 public static Job TryCreateImproperFoodJob(Pawn p,bool siege)=>null;
+public static bool AllowsEventPawnOutsideReliefFood(Pawn p)=>false;
  public static bool IsHostileTo(Faction faction,Faction other)=>faction!=null && other!=null && faction.HostileTo(other);
 }
 public partial class Beggar : ThinkNode_JobGiver {

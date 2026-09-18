@@ -2,9 +2,9 @@ namespace MouseDisaster
 {
     public static class MouseDisasterReliefAreaPolicy
     {
-        public static bool CanUseReliefFood(bool isMouseDisasterFoodConsumer, bool isPlayerColonist)
+        public static bool CanUseReliefFood(bool isMouseDisasterFoodConsumer, bool isPlayerColonist, bool isScriptedDelivery = false)
         {
-            return isMouseDisasterFoodConsumer && !isPlayerColonist;
+            return isMouseDisasterFoodConsumer && !isPlayerColonist && !isScriptedDelivery;
         }
 
         public static bool ShouldAllowFoodTypeInReliefAreaSearch(
