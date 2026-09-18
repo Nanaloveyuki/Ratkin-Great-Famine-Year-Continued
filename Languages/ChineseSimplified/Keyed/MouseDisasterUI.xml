@@ -82,6 +82,8 @@
   <MouseDisaster_UI_AbandonedChildrenRemain>老鼠妈离开后，这些鼠蛋留在粮仓附近，变成了游荡的野生鼠族。</MouseDisaster_UI_AbandonedChildrenRemain>
   <MouseDisaster_UI_AbandoningMotherLeft>老鼠妈确认鼠蛋到位后，转身逃离了地图。</MouseDisaster_UI_AbandoningMotherLeft>
   <MouseDisaster_UI_AbandoningMotherTimedOut>老鼠妈在投放点附近反复卡住过久，放弃等待并离开了地图。</MouseDisaster_UI_AbandoningMotherTimedOut>
+  <MouseDisaster_UI_AbandoningMotherForceDismissed>开发者选项已强制遣散可移动的老鼠妈。鼠蛋留在地图上。</MouseDisaster_UI_AbandoningMotherForceDismissed>
+  <MouseDisaster_UI_ForceDismissedMobileNonInfants>已强制遣散 {0} 名可移动的非幼儿鼠灾角色。</MouseDisaster_UI_ForceDismissedMobileNonInfants>
   <MouseDisaster_UI_ExchangeBabyMissing>该类型无可用婴儿。</MouseDisaster_UI_ExchangeBabyMissing>
   <MouseDisaster_UI_ExchangeRejectionFailed>拒绝交易失败。</MouseDisaster_UI_ExchangeRejectionFailed>
   <MouseDisaster_UI_ExchangeTransferFailed>交易失败：婴儿移交失败。</MouseDisaster_UI_ExchangeTransferFailed>

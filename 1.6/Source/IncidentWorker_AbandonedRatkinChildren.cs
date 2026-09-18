@@ -46,7 +46,8 @@ namespace MouseDisaster
                 MouseDisasterUtility.StripRatEggInventory(child);
                 MouseDisasterUtility.PrepareNonCaravanBabyPawn(child, foodCell);
                 child.health.AddHediff(MouseDisasterDefOf.MouseDisaster_AbandonedEgg);
-                if (MouseDisasterUtility.IsLeadYourPetEnabled && !child.Downed && !child.Position.InHorDistOf(foodCell, 3f))
+                if (MouseDisasterUtility.IsLeadYourPetEnabled && !child.Downed &&
+                    !child.Position.InHorDistOf(foodCell, MouseDisasterAbandonedDeliveryPolicy.ChildDropoffRadius))
                 {
                     child.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
                 }
@@ -69,7 +70,6 @@ namespace MouseDisaster
 
             GenSpawn.Spawn(adult, entryCell, map);
             adult.health.AddHediff(MouseDisasterDefOf.MouseDisaster_AbandoningMother);
-            adult.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
             MouseDisasterUtility.LinkIncidentParentToChildren(adult, children);
             MouseDisasterUtility.TryStartLeadYourPetAbandonedDropoff(adult, children, foodCell);
             MouseDisasterUtility.RegisterAbandonedDelivery(adult, children, foodCell);

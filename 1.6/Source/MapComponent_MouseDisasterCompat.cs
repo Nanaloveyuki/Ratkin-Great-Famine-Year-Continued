@@ -38,6 +38,12 @@ namespace MouseDisaster
                 MouseDisasterUtility.ProcessAbandonedDeliveries(map);
             }
 
+            if (MouseDisasterMod.Settings?.forceDismissMobileNonInfantEventPawns == true &&
+                ShouldRun(AbandonedDeliveryUpdateIntervalTicks))
+            {
+                MouseDisasterUtility.ForceDismissMobileNonInfantEventPawns(map, onlyWaiting: true);
+            }
+
             if (MouseDisasterPhase2Utility.HasActiveAidRequestVisitors() && ShouldRun(AidRequestVisitorUpdateIntervalTicks))
             {
                 MouseDisasterPhase2Utility.ProcessAidRequestVisitors(map);

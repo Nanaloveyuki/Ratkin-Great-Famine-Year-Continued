@@ -82,6 +82,8 @@
   <MouseDisaster_UI_AbandonedChildrenRemain>After their mother left, the Ratkin young remained near the granary as wild wanderers.</MouseDisaster_UI_AbandonedChildrenRemain>
   <MouseDisaster_UI_AbandoningMotherLeft>Once her children had arrived, the mother turned and fled the map.</MouseDisaster_UI_AbandoningMotherLeft>
   <MouseDisaster_UI_AbandoningMotherTimedOut>Unable to reach the drop-off point, the mother gave up waiting and left.</MouseDisaster_UI_AbandoningMotherTimedOut>
+  <MouseDisaster_UI_AbandoningMotherForceDismissed>A developer option forced the mobile mother off the map. The Ratkin young stayed behind.</MouseDisaster_UI_AbandoningMotherForceDismissed>
+  <MouseDisaster_UI_ForceDismissedMobileNonInfants>Forced {0} mobile non-infant Mouse Disaster pawn(s) off the map.</MouseDisaster_UI_ForceDismissedMobileNonInfants>
   <MouseDisaster_UI_ExchangeBabyMissing>No baby of this group is available.</MouseDisaster_UI_ExchangeBabyMissing>
   <MouseDisaster_UI_ExchangeRejectionFailed>The exchange could not be refused.</MouseDisaster_UI_ExchangeRejectionFailed>
   <MouseDisaster_UI_ExchangeTransferFailed>The exchange failed: the baby could not be handed over.</MouseDisaster_UI_ExchangeTransferFailed>

@@ -66,6 +66,7 @@ namespace MouseDisaster {
         private class FakeSettings {
             public bool enablePrisonerScavengeDebugLog = false;
             public bool enableDetailedTraceLog = false;
+            public bool forceDismissMobileNonInfantEventPawns = false;
             public void ClampValues() { }
         }
         private static FakeSettings Settings = new FakeSettings();

@@ -352,6 +352,8 @@ namespace MouseDisaster
             public List<int> deliveredChildIds = new List<int>();
             public bool adultHasLeft;
             public int adultArrivedAtDropoffTick = -1;
+            public int startedTick = -1;
+            public bool loggedWaitStall;
 
             public void ExposeData()
             {
@@ -363,6 +365,7 @@ namespace MouseDisaster
                 Scribe_Collections.Look(ref deliveredChildIds, "deliveredChildIds", LookMode.Value);
                 Scribe_Values.Look(ref adultHasLeft, "adultHasLeft", false);
                 Scribe_Values.Look(ref adultArrivedAtDropoffTick, "adultArrivedAtDropoffTick", -1);
+                Scribe_Values.Look(ref startedTick, "startedTick", -1);
 
                 if (Scribe.mode == LoadSaveMode.PostLoadInit)
                 {

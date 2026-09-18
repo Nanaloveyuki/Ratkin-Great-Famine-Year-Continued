@@ -266,6 +266,7 @@ namespace MouseDisaster
             if (!Prefs.DevMode) { listing.Label("MouseDisaster_Developer_Disabled".Translate()); return; }
             DrawCheckbox(listing, "MouseDisaster_Developer_Logging", ref Settings.enablePrisonerScavengeDebugLog, "MouseDisaster_Developer_LoggingTip");
             DrawCheckbox(listing, "MouseDisaster_Developer_DetailedTraceLogging", ref Settings.enableDetailedTraceLog, "MouseDisaster_Developer_DetailedTraceLoggingTip");
+            DrawCheckbox(listing, "MouseDisaster_Developer_ForceDismissMobileNonInfants", ref Settings.forceDismissMobileNonInfantEventPawns, "MouseDisaster_Developer_ForceDismissMobileNonInfantsTip");
             if (Current.ProgramState != ProgramState.Playing || Current.Game == null)
             { listing.Label("MouseDisaster_Developer_NoGame".Translate()); return; }
             foreach (bool original in new[] { true, false })

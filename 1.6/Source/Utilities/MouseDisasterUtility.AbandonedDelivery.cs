@@ -45,7 +45,7 @@ namespace MouseDisaster
                 return;
             }
 
-            ActiveAbandonedDeliveryByAdultId[adult.thingIDNumber] = new AbandonedDeliveryState
+            AbandonedDeliveryState state = new AbandonedDeliveryState
             {
                 adult = adult,
                 childPawns = childPawns,
@@ -53,13 +53,25 @@ namespace MouseDisaster
                 foodCell = foodCell,
                 childPawnIds = childIds,
                 adultHasLeft = false,
-                adultArrivedAtDropoffTick = -1
+                adultArrivedAtDropoffTick = -1,
+                startedTick = Find.TickManager?.TicksGame ?? 0
             };
+            ActiveAbandonedDeliveryByAdultId[adult.thingIDNumber] = state;
 
-            bool allChildrenArrived = AreAllPawnsNearCell(childPawns, foodCell, 3f);
-            if (MouseDisasterAbandonedDeliveryPolicy.ShouldUseVanillaCarryDelivery(IsLeadYourPetEnabled, allChildrenArrived))
+            int spawnedChildCount = 0;
+            for (int i = 0; i < childPawns.Count; i++)
             {
-                TryStartAbandonedDeliveryCarryJob(adult, childPawns, foodCell);
+                if (childPawns[i] != null && childPawns[i].Spawned)
+                {
+                    spawnedChildCount++;
+                }
+            }
+
+            if (MouseDisasterAbandonedDeliveryPolicy.ShouldAdultLeaveWhenChildrenAreOnMap(
+                    adult.carryTracker?.CarriedThing is Pawn,
+                    spawnedChildCount))
+            {
+                StartAbandonedDeliveryAdultExit(adult, state, adult.Map, timedOut: false);
             }
         }
 
@@ -145,20 +157,35 @@ namespace MouseDisaster
                 if (ReusablePawnList.Count == 0)
                 {
                     if (adult != null && adult.Spawned && !adult.Dead && !IsPlayerAffiliatedRatkin(adult))
-                        MakeTravelAndExitLord(map, new[] { adult }, map.Center);
+                        StartAbandonedDeliveryAdultExit(adult, state, map, timedOut: false);
                     ActiveAbandonedDeliveryByAdultId.Remove(adultId);
                     continue;
                 }
 
+                int spawnedChildCount = 0;
+                bool adultCarryingChild = adult?.carryTracker?.CarriedThing is Pawn;
                 foreach (Pawn child in ReusablePawnList)
-                    if (child.Spawned && child.Position.InHorDistOf(state.foodCell, 3f) &&
-                        !state.deliveredChildIds.Contains(child.thingIDNumber))
+                {
+                    if (!child.Spawned || state.deliveredChildIds.Contains(child.thingIDNumber))
                     {
-                        state.deliveredChildIds.Add(child.thingIDNumber);
-                        TryReleaseLeadYourPetTradePawn(child);
-                        child.jobs?.StopAll();
+                        continue;
                     }
-                bool allChildrenArrived = ReusablePawnList.All(child => state.deliveredChildIds.Contains(child.thingIDNumber));
+
+                    state.deliveredChildIds.Add(child.thingIDNumber);
+                    TryReleaseLeadYourPetTradePawn(child);
+                }
+
+                for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
+                {
+                    if (ReusablePawnList[childIndex].Spawned)
+                    {
+                        spawnedChildCount++;
+                    }
+                }
+
+                bool allChildrenArrived = spawnedChildCount > 0 &&
+                                          ReusablePawnList.All(child => child.Spawned &&
+                                              state.deliveredChildIds.Contains(child.thingIDNumber));
                 for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
                 {
                     Pawn child = ReusablePawnList[childIndex];
@@ -172,7 +199,7 @@ namespace MouseDisaster
                         continue;
                     }
 
-                    if (MouseDisasterAbandonedDeliveryPolicy.ShouldUseVanillaCarryDelivery(IsLeadYourPetEnabled, allChildrenArrived))
+                    if (!MouseDisasterAbandonedDeliveryPolicy.ShouldGiveChildSelfGoto(allChildrenArrived, child.Downed))
                     {
                         continue;
                     }
@@ -180,7 +207,7 @@ namespace MouseDisaster
                     bool hasValidGoto = child.CurJobDef == JobDefOf.Goto &&
                                         child.CurJob != null &&
                                         child.CurJob.targetA.IsValid &&
-                                        child.CurJob.targetA.Cell.InHorDistOf(state.foodCell, 3f);
+                                        child.CurJob.targetA.Cell.InHorDistOf(state.foodCell, MouseDisasterAbandonedDeliveryPolicy.ChildDropoffRadius);
                     if (!hasValidGoto)
                     {
                         TryTakeAutoOrderedJob(child, CreateGotoJob(state.foodCell), JobTag.Misc, requireStarving: false);
@@ -195,51 +222,59 @@ namespace MouseDisaster
                     }
                     else
                     {
-                        if (MouseDisasterAbandonedDeliveryPolicy.ShouldUseVanillaCarryDelivery(IsLeadYourPetEnabled, allChildrenArrived) &&
-                            TryStartAbandonedDeliveryCarryJob(adult, ReusablePawnList.Where(child =>
-                                !state.deliveredChildIds.Contains(child.thingIDNumber)).ToList(), state.foodCell))
+                        if (state.startedTick < 0)
                         {
-                            continue;
+                            state.startedTick = nowTick;
                         }
 
-                        bool adultArrived = adult.Position.InHorDistOf(state.foodCell, 3f);
-                        if (!adultArrived)
+                        if (adultCarryingChild)
                         {
-                            TryTakeAutoOrderedJob(adult, CreateGotoJob(state.foodCell), JobTag.Misc, requireStarving: false);
-                            continue;
+                            TryDropCarriedAbandonedChild(adult);
                         }
 
-                        if (state.adultArrivedAtDropoffTick < 0)
+                        int spawnedAfterDrop = 0;
+                        for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
                         {
-                            state.adultArrivedAtDropoffTick = nowTick;
-                        }
-
-                        if (!allChildrenArrived)
-                        {
-                            int ticksWaitingSinceArrival = nowTick - state.adultArrivedAtDropoffTick;
-                            if (MouseDisasterAbandonedDeliveryPolicy.ShouldForceAdultLeaveAfterArrivalStall(
-                                adultArrivedAtDropoff: true,
-                                ticksWaitingSinceArrival))
+                            if (ReusablePawnList[childIndex].Spawned)
                             {
-                                StartAbandonedDeliveryAdultExit(adult, state, map, timedOut: true);
-                            }
-                            else
-                            {
-                                KeepAbandonedDeliveryPawnAtDropoff(adult, state.foodCell);
-                            }
-
-                            continue;
-                        }
-
-                        if (MouseDisasterAbandonedDeliveryPolicy.ShouldReleaseLeadYourPetDropoffLeashes(IsLeadYourPetEnabled, allChildrenArrived))
-                        {
-                            for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
-                            {
-                                TryEndLeadYourPetLeashForPet(ReusablePawnList[childIndex]);
+                                spawnedAfterDrop++;
                             }
                         }
 
-                        StartAbandonedDeliveryAdultExit(adult, state, map, timedOut: false);
+                        int ticksSinceStart = nowTick - state.startedTick;
+                        bool forceDismissAdult = MouseDisasterAbandonedDeliveryPolicy.ShouldForceDismissMobileNonInfant(
+                            MouseDisasterMod.Settings?.forceDismissMobileNonInfantEventPawns == true,
+                            CanForceDismissAsMobileNonInfant(adult),
+                            adult.ageTracker?.AgeBiologicalYearsFloat ?? 0f);
+                        bool approachTimeout = MouseDisasterAbandonedDeliveryPolicy.ShouldForceAdultLeaveAfterApproachStall(
+                            false,
+                            ticksSinceStart);
+                        bool childrenOnMap = MouseDisasterAbandonedDeliveryPolicy.ShouldAdultLeaveWhenChildrenAreOnMap(
+                            adult.carryTracker?.CarriedThing is Pawn,
+                            spawnedAfterDrop);
+
+                        if (childrenOnMap || forceDismissAdult || approachTimeout)
+                        {
+                            if (MouseDisasterAbandonedDeliveryPolicy.ShouldReleaseLeadYourPetDropoffLeashes(IsLeadYourPetEnabled, true))
+                            {
+                                for (int childIndex = 0; childIndex < ReusablePawnList.Count; childIndex++)
+                                {
+                                    TryEndLeadYourPetLeashForPet(ReusablePawnList[childIndex]);
+                                }
+                            }
+
+                            LogAbandonedDeliveryWait(adult, state, map, ticksSinceStart, leaving: true,
+                                forceDismissed: forceDismissAdult && !approachTimeout,
+                                reason: childrenOnMap ? "children-on-map" : approachTimeout ? "approach-timeout" : "force-dismiss");
+                            StartAbandonedDeliveryAdultExit(adult, state, map, timedOut: approachTimeout,
+                                forceDismissed: forceDismissAdult && !childrenOnMap && !approachTimeout);
+                        }
+                        else
+                        {
+                            LogAbandonedDeliveryWait(adult, state, map, ticksSinceStart, leaving: false,
+                                forceDismissed: false, reason: "waiting-to-place-children");
+                            continue;
+                        }
                     }
                 }
 
@@ -321,36 +356,76 @@ namespace MouseDisaster
             }
         }
 
-        private static void StartAbandonedDeliveryAdultExit(Pawn adult, AbandonedDeliveryState state, Map map, bool timedOut)
+        private static void StartAbandonedDeliveryAdultExit(Pawn adult, AbandonedDeliveryState state, Map map, bool timedOut, bool forceDismissed = false)
         {
             if (adult == null || state == null || map == null)
             {
                 return;
             }
 
-            if (!TryFindFarEdgeCell(map, state.foodCell.IsValid ? state.foodCell : adult.Position, out IntVec3 exitCell))
+            bool alreadyLeaving = state.adultHasLeft;
+            adult.GetLord()?.RemovePawn(adult);
+            adult.mindState?.mentalStateHandler?.Reset();
+            adult.jobs?.StopAll();
+            if (adult.mindState != null)
             {
-                exitCell = map.Center;
+                adult.mindState.duty = null;
+                adult.mindState.exitMapAfterTick = -1;
             }
 
-            if (adult.GetLord()?.LordJob is not LordJob_TravelAndExit)
+            if (adult.GetLord()?.LordJob is not LordJob_MouseDisasterDeparture &&
+                adult.GetLord()?.LordJob is not LordJob_TravelAndExit)
             {
-                adult.jobs?.StopAll();
-                MakeTravelAndExitLord(map, new[] { adult }, exitCell);
+                LordMaker.MakeNewLord(adult.Faction, new LordJob_MouseDisasterDeparture(), map, new[] { adult });
+            }
+
+            Job exitJob = ExitMapJob(adult, force: true);
+            if (exitJob != null && adult.jobs != null)
+            {
+                adult.jobs.StartJob(exitJob, JobCondition.InterruptForced);
             }
 
             state.adultHasLeft = true;
+            MouseDisasterTrace.Log("O-002 abandoning mother exit; timedOut=" + timedOut +
+                "; forceDismissed=" + forceDismissed + "; alreadyLeaving=" + alreadyLeaving + "; " +
+                MouseDisasterTrace.DescribePawn(adult) + "; " + MouseDisasterTrace.DescribeMap(map));
+            if (alreadyLeaving)
+            {
+                return;
+            }
+
+            string text = forceDismissed
+                ? "MouseDisaster_UI_AbandoningMotherForceDismissed".Translate().Resolve()
+                : timedOut
+                    ? "MouseDisaster_UI_AbandoningMotherTimedOut".Translate().Resolve()
+                    : "MouseDisaster_UI_AbandoningMotherLeft".Translate().Resolve();
             Messages.Message(
-                (timedOut ? "MouseDisaster_UI_AbandoningMotherTimedOut" : "MouseDisaster_UI_AbandoningMotherLeft").Translate().Resolve(),
+                text,
                 adult,
                 MessageTypeDefOf.NeutralEvent,
                 historical: false);
+        }
+
+        private static bool TryDropCarriedAbandonedChild(Pawn adult)
+        {
+            if (adult?.carryTracker?.CarriedThing is not Pawn || adult.Map == null)
+            {
+                return false;
+            }
+
+            return adult.carryTracker.TryDropCarriedThing(adult.Position, ThingPlaceMode.Near, out _);
         }
 
         private static void KeepAbandonedDeliveryPawnAtDropoff(Pawn pawn, IntVec3 foodCell)
         {
             if (pawn == null || !pawn.Spawned || pawn.Dead || !foodCell.IsValid || IsAbandonedDeliveryLeaving(pawn))
             {
+                return;
+            }
+
+            if (!pawn.Position.InHorDistOf(foodCell, MouseDisasterAbandonedDeliveryPolicy.AdultDropoffRadius))
+            {
+                TryTakeAutoOrderedJob(pawn, CreateGotoJob(foodCell), JobTag.Misc, requireStarving: false);
                 return;
             }
 
@@ -363,13 +438,144 @@ namespace MouseDisaster
             TryTakeAutoOrderedJob(pawn, waitJob, JobTag.Misc, requireStarving: false);
         }
 
+        private static bool IsAbandonedDeliveryDropoffSatisfied(Pawn pawn, IntVec3 foodCell, Map map, bool forAdult)
+        {
+            if (pawn?.Spawned != true || pawn.Dead || !foodCell.IsValid)
+            {
+                return false;
+            }
+
+            Map dropoffMap = map ?? pawn.Map;
+            Area_MouseDisasterRelief reliefArea = GetReliefArea(dropoffMap);
+            bool dropoffInReliefArea = dropoffMap != null && reliefArea != null && reliefArea.TrueCount > 0 &&
+                                       foodCell.InBounds(dropoffMap) && reliefArea[foodCell];
+            bool pawnInReliefArea = reliefArea != null && pawn.Position.IsValid && reliefArea[pawn.Position];
+            float radius = MouseDisasterAbandonedDeliveryPolicy.DropoffRadius(forAdult, dropoffInReliefArea, pawnInReliefArea);
+            return MouseDisasterAbandonedDeliveryPolicy.IsDropoffSatisfied(pawn.Position.InHorDistOf(foodCell, radius));
+        }
+
+        private static bool CanForceDismissAsMobileNonInfant(Pawn pawn)
+        {
+            return pawn != null &&
+                   !pawn.Dead &&
+                   pawn.Spawned &&
+                   !pawn.Downed &&
+                   pawn.health?.capacities?.CapableOf(PawnCapacityDefOf.Moving) == true;
+        }
+
+        private static void LogAbandonedDeliveryWait(Pawn adult, AbandonedDeliveryState state, Map map, int ticksWaiting, bool leaving, bool forceDismissed, string reason)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            string message = "O-002 abandoning mother; reason=" + (reason ?? "unknown") +
+                             "; " + MouseDisasterTrace.DescribePawn(adult) +
+                             "; foodCell=" + state.foodCell +
+                             "; reliefArea=" + MapHasReliefArea(map) +
+                             "; waitingTicks=" + ticksWaiting +
+                             "; delivered=" + (state.deliveredChildIds?.Count ?? 0) +
+                             "/" + (state.childPawnIds?.Count ?? 0) +
+                             "; leaving=" + leaving +
+                             "; forceDismissed=" + forceDismissed;
+            MouseDisasterTrace.Log(message);
+            if (!state.loggedWaitStall)
+            {
+                state.loggedWaitStall = true;
+                Log.Message("[MouseDisaster] " + message);
+            }
+        }
+
+        public static int ForceDismissMobileNonInfantEventPawns(Map map, bool onlyWaiting = false)
+        {
+            if (map?.mapPawns?.AllPawnsSpawned == null)
+            {
+                return 0;
+            }
+
+            int dismissed = 0;
+            List<Pawn> spawned = map.mapPawns.AllPawnsSpawned.ToList();
+            for (int i = 0; i < spawned.Count; i++)
+            {
+                Pawn pawn = spawned[i];
+                if (!ShouldForceDismissMobileNonInfantEventPawn(pawn))
+                {
+                    continue;
+                }
+
+                if (onlyWaiting &&
+                    pawn.CurJobDef != JobDefOf.Wait &&
+                    pawn.CurJobDef != JobDefOf.Wait_MaintainPosture)
+                {
+                    continue;
+                }
+
+                if (ActiveAbandonedDeliveryByAdultId.TryGetValue(pawn.thingIDNumber, out AbandonedDeliveryState state) &&
+                    state != null)
+                {
+                    StartAbandonedDeliveryAdultExit(pawn, state, map, timedOut: false, forceDismissed: true);
+                    dismissed++;
+                    continue;
+                }
+
+                pawn.GetLord()?.RemovePawn(pawn);
+                pawn.mindState?.mentalStateHandler?.Reset();
+                pawn.jobs?.StopAll();
+                if (pawn.mindState != null)
+                {
+                    pawn.mindState.duty = null;
+                    pawn.mindState.exitMapAfterTick = -1;
+                }
+
+                LordMaker.MakeNewLord(pawn.Faction, new LordJob_MouseDisasterDeparture(), map, new[] { pawn });
+                Job exitJob = ExitMapJob(pawn, force: true);
+                if (exitJob != null && pawn.jobs != null)
+                {
+                    pawn.jobs.StartJob(exitJob, JobCondition.InterruptForced);
+                }
+
+                GameComponent_MouseDisasterEventBehavior.Component?.RequestDeparture(pawn);
+                dismissed++;
+                MouseDisasterTrace.Log("force-dismissed mobile non-infant event pawn; " +
+                    MouseDisasterTrace.DescribePawn(pawn) + "; " + MouseDisasterTrace.DescribeMap(map));
+            }
+
+            return dismissed;
+        }
+
+        private static bool ShouldForceDismissMobileNonInfantEventPawn(Pawn pawn)
+        {
+            if (pawn == null || pawn.Dead || !pawn.Spawned || IsPlayerAffiliatedRatkin(pawn) || IsPendingAbandonedChild(pawn))
+            {
+                return false;
+            }
+
+            if (IsAbandonedDeliveryLeaving(pawn))
+            {
+                return false;
+            }
+
+            if (!MouseDisasterAbandonedDeliveryPolicy.ShouldForceDismissMobileNonInfant(
+                    true,
+                    CanForceDismissAsMobileNonInfant(pawn),
+                    pawn.ageTracker?.AgeBiologicalYearsFloat ?? 0f))
+            {
+                return false;
+            }
+
+            return IsAbandonedDeliveryPawn(pawn) ||
+                   GameComponent_MouseDisasterEventBehavior.Component?.TryGetGroup(pawn, out _) == true;
+        }
+
         internal static void NotifyAbandonedChildDropped(Pawn child)
         {
             if (child?.Spawned != true || child.Dead || IsPlayerAffiliatedRatkin(child)) return;
             foreach (AbandonedDeliveryState state in ActiveAbandonedDeliveryByAdultId.Values)
             {
                 if (state == null || state.mapId != child.Map.uniqueID || !state.childPawnIds.Contains(child.thingIDNumber) ||
-                    state.deliveredChildIds.Contains(child.thingIDNumber) || !child.Position.InHorDistOf(state.foodCell, 3f)) continue;
+                    state.deliveredChildIds.Contains(child.thingIDNumber) ||
+                    !child.Position.InHorDistOf(state.foodCell, 3f)) continue;
                 state.deliveredChildIds.Add(child.thingIDNumber);
                 TryReleaseLeadYourPetTradePawn(child);
             }
@@ -385,7 +591,7 @@ namespace MouseDisaster
             if (adult.CurJobDef == JobDefOf.DeliverToCell &&
                 adult.CurJob != null &&
                 adult.CurJob.targetB.IsValid &&
-                adult.CurJob.targetB.Cell.InHorDistOf(foodCell, 3f))
+                adult.CurJob.targetB.Cell.InHorDistOf(foodCell, MouseDisasterAbandonedDeliveryPolicy.AdultDropoffRadius))
             {
                 return true;
             }
@@ -394,7 +600,9 @@ namespace MouseDisaster
                 .Where(child => child != null &&
                                 !child.Dead &&
                                 child.Spawned &&
-                                !child.Position.InHorDistOf(foodCell, 3f) &&
+                                MouseDisasterAbandonedDeliveryPolicy.ShouldCarryUndeliveredChild(
+                                    IsLeadYourPetEnabled, false, child.Downed) &&
+                                !IsAbandonedDeliveryDropoffSatisfied(child, foodCell, adult.Map, forAdult: false) &&
                                 adult.CanReserveAndReach(child, PathEndMode.OnCell, Danger.Deadly))
                 .OrderBy(child => adult.Position.DistanceToSquared(child.Position))
                 .FirstOrDefault();
@@ -405,6 +613,7 @@ namespace MouseDisaster
 
             Job deliverJob = JobMaker.MakeJob(JobDefOf.DeliverToCell, targetChild, foodCell);
             deliverJob.locomotionUrgency = LocomotionUrgency.Jog;
+            deliverJob.count = 1;
             return TryTakeAutoOrderedJob(adult, deliverJob, JobTag.Misc, requireStarving: false);
         }
 

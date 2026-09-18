@@ -19,7 +19,7 @@ namespace MouseDisaster
             {
                 child.mindState.canFleeIndividual = false;
                 child.mindState.exitMapAfterTick = -1;
-                child.mindState.duty = new PawnDuty(DutyDefOf.Defend, anchor, 3f);
+                child.mindState.duty = new PawnDuty(DutyDefOf.Defend, anchor, MouseDisasterAbandonedDeliveryPolicy.ChildDropoffRadius);
             }
         }
 

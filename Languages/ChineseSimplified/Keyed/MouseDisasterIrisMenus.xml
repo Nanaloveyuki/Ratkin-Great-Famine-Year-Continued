@@ -18,4 +18,6 @@
   <MouseDisaster_Developer_LoggingTip>将这些行为的详细信息写入游戏日志。</MouseDisaster_Developer_LoggingTip>
   <MouseDisaster_Developer_DetailedTraceLogging>启用详细 Trace 日志</MouseDisaster_Developer_DetailedTraceLogging>
   <MouseDisaster_Developer_DetailedTraceLoggingTip>开启后，将鼠灾事件、鼠灾鼠生成和温度装备选择的关键决策写入游戏日志，并统一使用 [MouseDisaster Trace] 前缀。默认关闭。</MouseDisaster_Developer_DetailedTraceLoggingTip>
+  <MouseDisaster_Developer_ForceDismissMobileNonInfants>强制遣散可移动的非幼儿</MouseDisaster_Developer_ForceDismissMobileNonInfants>
+  <MouseDisaster_Developer_ForceDismissMobileNonInfantsTip>开启后，鼠灾事件中能自己走路、且年龄不小于 3 岁的角色会被立即遣送离场。3 岁以下的鼠蛋会留下。默认关闭，仅开发者模式可见。</MouseDisaster_Developer_ForceDismissMobileNonInfantsTip>
 </LanguageData>

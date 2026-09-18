@@ -20,6 +20,23 @@ namespace MouseDisaster
             return CreateCategoryNode(MouseDisasterIncidentCategory.Plague);
         }
 
+        [DebugAction("鼠灾事件", "强制遣散可移动非幼儿", false, false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        private static void MouseDisaster_ForceDismissMobileNonInfants()
+        {
+            Map map = Find.CurrentMap;
+            if (map == null)
+            {
+                Messages.Message("MouseDisaster_UI_NoCurrentMap".Translate().Resolve(), MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            int dismissed = MouseDisasterUtility.ForceDismissMobileNonInfantEventPawns(map);
+            Messages.Message(
+                "MouseDisaster_UI_ForceDismissedMobileNonInfants".Translate(dismissed).Resolve(),
+                MessageTypeDefOf.NeutralEvent,
+                historical: false);
+        }
+
         private static DebugActionNode CreateCategoryNode(MouseDisasterIncidentCategory category)
         {
             DebugActionNode root = new DebugActionNode();

@@ -83,7 +83,8 @@ namespace MouseDisaster
                 MouseDisasterUtility.SetBiologicalAgeYears(baby, 15f / 60f);
                 GenSpawn.Spawn(baby, CellFinder.RandomClosewalkCellNear(entryCell, map, 4), map);
                 MouseDisasterUtility.PrepareNonCaravanBabyPawn(baby, foodCell);
-                if (MouseDisasterUtility.IsLeadYourPetEnabled && !baby.Downed && !baby.Position.InHorDistOf(foodCell, 3f))
+                if (MouseDisasterUtility.IsLeadYourPetEnabled && !baby.Downed &&
+                    !baby.Position.InHorDistOf(foodCell, MouseDisasterAbandonedDeliveryPolicy.ChildDropoffRadius))
                 {
                     baby.jobs.StartJob(MouseDisasterUtility.CreateGotoJob(foodCell), JobCondition.InterruptForced);
                 }

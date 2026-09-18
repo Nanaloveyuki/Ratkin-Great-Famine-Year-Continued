@@ -18,4 +18,6 @@
   <MouseDisaster_Developer_LoggingTip>Write details of these actions to the game log.</MouseDisaster_Developer_LoggingTip>
   <MouseDisaster_Developer_DetailedTraceLogging>Enable detailed Trace logging</MouseDisaster_Developer_DetailedTraceLogging>
   <MouseDisaster_Developer_DetailedTraceLoggingTip>When enabled, write key Mouse Disaster incident, Pawn generation and temperature adaptation decisions to the game log with a [MouseDisaster Trace] prefix. Off by default.</MouseDisaster_Developer_DetailedTraceLoggingTip>
+  <MouseDisaster_Developer_ForceDismissMobileNonInfants>Force-dismiss mobile non-infants</MouseDisaster_Developer_ForceDismissMobileNonInfants>
+  <MouseDisaster_Developer_ForceDismissMobileNonInfantsTip>When enabled, Mouse Disaster event pawns who can walk and are at least 3 years old are sent off the map immediately. Ratkin younger than 3 stay. Off by default; developer mode only.</MouseDisaster_Developer_ForceDismissMobileNonInfantsTip>
 </LanguageData>

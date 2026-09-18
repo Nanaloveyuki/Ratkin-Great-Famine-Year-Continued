@@ -242,7 +242,7 @@ Assert-Narrative (!$allCode.Contains('baby.Destroy();')) 'Baby aid still destroy
 Assert-Narrative ($utility.Contains('forceGenerateNewPawn: true')) 'Generation may rewrite existing world pawns'
 Assert-Narrative ($utility.Contains('prohibitedTraits: MouseDisasterGenerationPolicy.ProhibitedTraits')) 'Generation trait gate missing'
 Assert-Narrative ($utility.Contains('Scribe_Collections.Look(ref deliveredChildIds')) 'Dropoff completion is not saved'
-Assert-Narrative ($utility.Contains('!state.deliveredChildIds.Contains(child.thingIDNumber)).ToList(), state.foodCell)')) 'Delivered children may be collected repeatedly'
+Assert-Narrative ($utility.Contains('ShouldAdultLeaveWhenChildrenAreOnMap')) 'Mother still waits for a dropoff cell'
 Assert-Narrative ($utility.Contains('if (!allChildrenArrived && !state.adultHasLeft)')) 'Orphaned delivery cannot settle'
 $group = Get-Content (Join-Path $root '1.6/Source/MouseDisasterPawnGroupUtility.cs') -Raw
 Assert-Narrative ($group.Contains('child.jobs?.StopAll();')) 'Loaded dropoff leaves old exit job running'
