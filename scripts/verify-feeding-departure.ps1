@@ -42,17 +42,18 @@ public static class MouseDisasterUtility {
  public static bool IsThiefPawn(Pawn p)=>true;
  public static bool IsInBeggarMentalState(Pawn p)=>true;
  public static bool IsInThiefMentalState(Pawn p)=>true;
- public static bool MustStayForAirDropError(Pawn p)=>p.stay;
- public static bool CanBegAgain(Pawn p)=>true;
- public static bool IsSiegeBeggar(Pawn p)=>false;
- public static bool HasSiegeBeggarLeaveCondition(Pawn p)=>false;
- public static bool HasBeggarSucceeded(Pawn p)=>p.success;
- public static bool IsThiefChildPawn(Pawn p)=>false;
- public static int GetBegAttempts(Pawn p)=>0;
- public static void ClearBeggarTargetHistory(Pawn p){}
- public static Job ExitMapJob(Pawn p)=>new Job("exit");
- public static Job TryCreateReliefFoodJob(Pawn p,bool allowInventorySearch)=>p.relief?new Job("relief"):null;
- public static Job TryCreateImproperFoodJob(Pawn p,bool siege)=>null;
+public static bool MustStayForAirDropError(Pawn p)=>p.stay;
+public static bool CanBegAgain(Pawn p)=>true;
+public static bool IsSiegeBeggar(Pawn p)=>false;
+public static bool HasSiegeBeggarLeaveCondition(Pawn p)=>false;
+public static bool HasBeggarSucceeded(Pawn p)=>p.success;
+public static bool IsThiefChildPawn(Pawn p)=>false;
+public static int GetBegAttempts(Pawn p)=>0;
+public static void ClearBeggarTargetHistory(Pawn p){}
+public static Job ExitMapJob(Pawn p)=>new Job("exit");
+public static Job TryCreateReliefFoodJob(Pawn p,bool allowInventorySearch)=>p.relief?new Job("relief"):null;
+public static Job TryCreateImproperFoodJob(Pawn p,bool siege)=>null;
+ public static bool IsHostileTo(Faction faction,Faction other)=>faction!=null && other!=null && faction.HostileTo(other);
 }
 public partial class Beggar : ThinkNode_JobGiver {
  private static Pawn FindClosestReachableColonist(Pawn p,bool preferUnbegged)=>null;

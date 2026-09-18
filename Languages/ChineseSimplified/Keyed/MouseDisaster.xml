@@ -170,6 +170,21 @@
   <MouseDisaster_Settings_PawnHistory_EventCategory_Theft>偷窃</MouseDisaster_Settings_PawnHistory_EventCategory_Theft>
   <MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>冲突</MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>
   <MouseDisaster_Settings_PawnHistory_EventCategory_Siege>围攻</MouseDisaster_Settings_PawnHistory_EventCategory_Siege>
+  <MouseDisaster_Settings_Section_PawnTrait>人物特质</MouseDisaster_Settings_Section_PawnTrait>
+  <MouseDisaster_Settings_EnablePawnTraits>为事件生成的鼠族启用特质</MouseDisaster_Settings_EnablePawnTraits>
+  <MouseDisaster_Settings_EnablePawnTraits_Tooltip>开启后，符合条件的事件生成鼠族会从已勾选的特质中获得一项。权重越高越容易出现，权重为 0 时不会被抽中。默认开启。</MouseDisaster_Settings_EnablePawnTraits_Tooltip>
+  <MouseDisaster_Settings_PawnTrait_EnableAll>启用全部特质</MouseDisaster_Settings_PawnTrait_EnableAll>
+  <MouseDisaster_Settings_PawnTrait_DisableAll>停用全部特质</MouseDisaster_Settings_PawnTrait_DisableAll>
+  <MouseDisaster_Settings_PawnTrait_SelectionHint>选择可能被分配的特质并调整权重；上方总开关也必须开启。</MouseDisaster_Settings_PawnTrait_SelectionHint>
+  <MouseDisaster_Settings_PawnTrait_Weight>权重：{0}</MouseDisaster_Settings_PawnTrait_Weight>
+  <MouseDisaster_Settings_PawnTrait_Weight_Tooltip>权重越高越容易被抽中；0 表示不会被分配。</MouseDisaster_Settings_PawnTrait_Weight_Tooltip>
+  <MouseDisaster_Settings_PawnTrait_Slot>年龄：{0}</MouseDisaster_Settings_PawnTrait_Slot>
+  <MouseDisaster_Settings_PawnTrait_Slot_Any>不限</MouseDisaster_Settings_PawnTrait_Slot_Any>
+  <MouseDisaster_Settings_PawnTrait_Slot_Young>幼年</MouseDisaster_Settings_PawnTrait_Slot_Young>
+  <MouseDisaster_Settings_PawnTrait_Slot_Adult>成年</MouseDisaster_Settings_PawnTrait_Slot_Adult>
+  <MouseDisaster_Settings_PawnTrait_Event>事件：{0}</MouseDisaster_Settings_PawnTrait_Event>
+  <MouseDisaster_Settings_PawnTrait_SpecificEvents>特定事件</MouseDisaster_Settings_PawnTrait_SpecificEvents>
+  <MouseDisaster_Settings_PawnTrait_History>可能随对应人物经历出现</MouseDisaster_Settings_PawnTrait_History>
   <MouseDisaster_Settings_ResetDefaults>恢复默认设置</MouseDisaster_Settings_ResetDefaults>
   <MouseDisaster_Settings_ImplNote>按你的喜好调整鼠族的到访、行为与殖民地故事。</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>窝趴趴舔灰灰，肚肚咕咕叫，脏脏也系饭饭。</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>

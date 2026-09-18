@@ -364,7 +364,7 @@ namespace MouseDisaster
                 return false;
             }
 
-            if (pawn.Faction != null && Faction.OfPlayer != null && pawn.Faction.HostileTo(Faction.OfPlayer))
+            if (IsHostileTo(pawn.Faction, Faction.OfPlayer))
             {
                 return true;
             }

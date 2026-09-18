@@ -32,13 +32,17 @@ namespace MouseDisaster
 
         public static bool Prefix(Faction __instance, Faction other, bool allowNull, ref FactionRelation __result)
         {
-            if (Current.CreatingWorld != null || allowNull || repairingRelation || __instance == null || other == null || __instance == other)
-            {
-                return true;
-            }
-
-            FactionDef hiddenDef = MouseDisasterDefOf.MouseDisaster_HiddenFaction;
-            if (hiddenDef == null || (__instance.def != hiddenDef && other.def != hiddenDef))
+            bool involvesManagedFaction =
+                MouseDisasterUtility.IsMouseDisasterManagedFaction(__instance) ||
+                MouseDisasterUtility.IsMouseDisasterManagedFaction(other);
+            if (!MouseDisasterFactionRelationPolicy.ShouldInterceptRelationLookup(
+                    creatingWorld: Current.CreatingWorld != null,
+                    allowNull: allowNull,
+                    repairingRelation: repairingRelation,
+                    ownerMissing: __instance == null,
+                    otherMissing: other == null,
+                    sameFaction: __instance == other,
+                    involvesManagedFaction: involvesManagedFaction))
             {
                 return true;
             }
@@ -46,38 +50,12 @@ namespace MouseDisaster
             try
             {
                 repairingRelation = true;
-                FactionRelation existing = __instance.RelationWith(other, allowNull: true);
-                if (existing != null && existing.other == other)
+                if (!MouseDisasterUtility.TryGetOrRepairManagedFactionRelation(__instance, other, out __result) ||
+                    __result == null)
                 {
-                    __result = existing;
-                    return false;
+                    return true;
                 }
 
-                __instance.SetRelation(new FactionRelation
-                {
-                    other = other,
-                    kind = FactionRelationKind.Neutral,
-                    baseGoodwill = other == Faction.OfPlayer ? 20 : 0
-                });
-
-                FactionRelation relationToOther = __instance.RelationWith(other, allowNull: true);
-                if (relationToOther != null)
-                {
-                    relationToOther.baseGoodwill = other == Faction.OfPlayer ? 20 : 0;
-                }
-
-                FactionRelation relationToSelf = other.RelationWith(__instance, allowNull: true);
-                if (relationToSelf != null)
-                {
-                    relationToSelf.baseGoodwill = __instance == Faction.OfPlayer ? 20 : 0;
-                }
-
-                __result = relationToOther ?? new FactionRelation
-                {
-                    other = other,
-                    kind = FactionRelationKind.Neutral,
-                    baseGoodwill = other == Faction.OfPlayer ? 20 : 0
-                };
                 return false;
             }
             finally

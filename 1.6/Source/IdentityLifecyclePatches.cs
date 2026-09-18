@@ -98,7 +98,11 @@ namespace MouseDisaster
                 return;
             }
 
-            MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+            if (!MouseDisasterUtility.ShouldSkipIdentityNormalizationDuringFactionTeardown(pawn))
+            {
+                MouseDisasterUtility.NotifyMouseDisasterPawnIdentityOrLifeStageChanged(pawn);
+            }
+
             MouseDisasterUtility.ConfigureNoRescueJoinForIncidentVisitor(pawn);
             MouseDisasterUtility.TryRecoverIncidentVisitorFromPlayerGuest(pawn);
         }

@@ -51,6 +51,7 @@ namespace MouseDisaster
             if (page == null || page == SettingsPage.Environment) DrawEnvironmentSettings(listing);
             if (page == null || page == SettingsPage.PawnBehavior) DrawPawnSettings(listing);
             if (page == null || page == SettingsPage.PawnHistory) DrawPawnHistorySettings(listing);
+            if (page == null || page == SettingsPage.PawnTrait) DrawPawnTraitSettings(listing);
             if (page == null || page == SettingsPage.Predation) DrawPredationSettings(listing);
             if (page == null) DrawIncidentSection(listing);
             else if (page == SettingsPage.OriginalEvents || page == SettingsPage.ContinuedEvents)
@@ -129,6 +130,47 @@ namespace MouseDisaster
                 listing.CheckboxLabeled(history.DisplayLabel, ref changed, history.Tooltip);
                 if (changed != selected)
                     Settings.SetPawnHistoryEnabled(history.Id, changed);
+                listing.Gap(1f);
+            }
+        }
+
+        private static void DrawPawnTraitSettings(Listing_Standard listing)
+        {
+            DrawSectionTitle(listing, "MouseDisaster_Settings_Section_PawnTrait");
+            DrawCheckbox(listing, "MouseDisaster_Settings_EnablePawnTraits",
+                ref Settings.enablePawnTraits, "MouseDisaster_Settings_EnablePawnTraits_Tooltip");
+
+            if (listing.ButtonText("MouseDisaster_Settings_PawnTrait_EnableAll".Translate()))
+                Settings.SetAllPawnTraitsEnabled(true);
+            if (listing.ButtonText("MouseDisaster_Settings_PawnTrait_DisableAll".Translate()))
+                Settings.SetAllPawnTraitsEnabled(false);
+
+            listing.Label("MouseDisaster_Settings_PawnTrait_SelectionHint".Translate());
+            listing.Gap(2f);
+            foreach (MouseDisasterTraitDefinition trait in MouseDisasterTraitCatalog.All)
+            {
+                bool selected = Settings.IsPawnTraitSelected(trait.Id);
+                bool changed = selected;
+                string label = trait.DisplayLabel;
+                Color color = trait.LabelColor;
+                if (color.a > 0.01f && color != Color.white)
+                    label = label.Colorize(color);
+                listing.CheckboxLabeled(label, ref changed, trait.Tooltip);
+                if (changed != selected)
+                    Settings.SetPawnTraitEnabled(trait.Id, changed);
+
+                if (changed)
+                {
+                    float weight = Settings.GetPawnTraitWeight(trait.Id);
+                    listing.Label("MouseDisaster_Settings_PawnTrait_Weight".Translate(weight.ToString("0")),
+                        -1f, new TipSignal("MouseDisaster_Settings_PawnTrait_Weight_Tooltip".Translate()));
+                    float updatedWeight = Mathf.Round(listing.Slider(weight,
+                        MouseDisasterSettings.MinPawnTraitWeight,
+                        MouseDisasterSettings.MaxPawnTraitWeight));
+                    if (Mathf.Abs(updatedWeight - weight) > 0.001f)
+                        Settings.SetPawnTraitWeight(trait.Id, updatedWeight);
+                }
+
                 listing.Gap(1f);
             }
         }

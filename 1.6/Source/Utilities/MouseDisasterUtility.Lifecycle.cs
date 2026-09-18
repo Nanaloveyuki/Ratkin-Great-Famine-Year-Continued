@@ -118,7 +118,7 @@ namespace MouseDisaster
 
             bool hostileIncidentVisitor = MouseDisasterGeneRestorePolicy.ShouldSkipVisitorNormalizationWhileTurningHostile(
                 isIncidentVisitor: IsMouseDisasterIncidentVisitor(pawn),
-                factionHostileToPlayer: pawn.Faction != null && Faction.OfPlayer != null && pawn.Faction.HostileTo(Faction.OfPlayer));
+                factionHostileToPlayer: IsHostileTo(pawn.Faction, Faction.OfPlayer));
             if (hostileIncidentVisitor)
             {
                 TryEnsureToddlerCompatibilityHediffs(pawn);
@@ -534,7 +534,7 @@ namespace MouseDisaster
                 return true;
             }
 
-            if (pawn.Faction != null && Faction.OfPlayer != null && pawn.Faction.HostileTo(Faction.OfPlayer))
+            if (IsHostileTo(pawn.Faction, Faction.OfPlayer))
             {
                 identity = ChaosPregnancyIdentity.Enemy;
                 return true;

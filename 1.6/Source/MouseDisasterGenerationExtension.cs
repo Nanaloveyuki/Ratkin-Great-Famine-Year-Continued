@@ -1,5 +1,6 @@
 using Verse;
 using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,13 +15,30 @@ namespace MouseDisaster
 
     public static class MouseDisasterGenerationPolicy
     {
+        public const string OwnedTraitPrefix = "MouseDisaster_Trait_";
+
         private static List<TraitDef> prohibitedTraits;
-        public static IEnumerable<TraitDef> ProhibitedTraits => prohibitedTraits ??=
-            DefDatabase<TraitDef>.AllDefsListForReading.Where(def => !AllowsTrait(def)).ToList();
+        public static IEnumerable<TraitDef> ProhibitedTraits
+        {
+            get
+            {
+                if (prohibitedTraits == null)
+                {
+                    prohibitedTraits = DefDatabase<TraitDef>.AllDefsListForReading.Where(def => !AllowsTrait(def)).ToList();
+                }
+
+                return prohibitedTraits;
+            }
+        }
+
+        public static bool IsOwnedTrait(TraitDef def)
+        {
+            return def?.defName != null && def.defName.StartsWith(OwnedTraitPrefix, StringComparison.Ordinal);
+        }
 
         public static bool AllowsTrait(TraitDef def)
         {
-            return def != null && (def.modContentPack?.IsOfficialMod == true ||
+            return def != null && (IsOwnedTrait(def) || def.modContentPack?.IsOfficialMod == true ||
                 def.GetModExtension<MouseDisasterGenerationExtension>()?.allowTrait == true);
         }
 

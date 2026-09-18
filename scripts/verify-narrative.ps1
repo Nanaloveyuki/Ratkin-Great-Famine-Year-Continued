@@ -16,7 +16,7 @@ foreach ($file in $xmlFiles) {
 }
 $keys = @{}
 foreach ($file in Get-ChildItem (Join-Path $root 'Languages/ChineseSimplified/Keyed') -Filter *.xml) {
-    [xml]$doc = Get-Content $file.FullName -Raw
+    [xml]$doc = Get-Content $file.FullName -Raw -Encoding UTF8
     foreach ($node in $doc.LanguageData.ChildNodes | Where-Object NodeType -eq Element) {
         Assert-Narrative (!$keys.ContainsKey($node.Name)) "Duplicate key: $($node.Name)"
         $keys[$node.Name] = $node.InnerText
@@ -255,6 +255,34 @@ Assert-Narrative ($debug.Contains('childGetter = () => IncidentDebugEntries')) '
 $catalog = Get-Content (Join-Path $root '1.6/Source/MouseDisasterIncidentCatalog.cs') -Raw
 $eventIds = @([regex]::Matches($catalog, 'new MouseDisasterIncidentEntry\("[ON]-\d{3}", "([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
 Assert-Narrative ($eventIds.Count -eq 51 -and @($eventIds | Sort-Object -Unique).Count -eq 51) 'Incident catalog membership changed'
+
+[xml]$traitDoc = Get-Content (Join-Path $root 'Defs/TraitDefs/Traits_MouseDisaster.xml') -Raw
+$xmlTraitNames = @($traitDoc.Defs.TraitDef | ForEach-Object { $_.defName })
+Assert-Narrative ($xmlTraitNames.Count -eq 50) 'Owned TraitDef count changed'
+Assert-Narrative (@($xmlTraitNames | Sort-Object -Unique).Count -eq 50) 'Owned TraitDef names are not unique'
+Assert-Narrative (@($xmlTraitNames | Where-Object { $_ -notlike 'MouseDisaster_Trait_*' }).Count -eq 0) 'Owned TraitDef prefix changed'
+Assert-Narrative (@($traitDoc.Defs.TraitDef | Where-Object { $_.commonality -ne '0' }).Count -eq 0) 'Owned traits must not roll in vanilla generation'
+Assert-Narrative (@($traitDoc.Defs.TraitDef | Where-Object { $_.modExtensions.li.allowTrait -ne 'true' }).Count -eq 0) 'Owned traits missing generation opt-in'
+$degreeClasses = @($traitDoc.Defs.TraitDef | ForEach-Object { $_.degreeDatas.li.GetAttribute('Class') })
+Assert-Narrative (@($degreeClasses | Where-Object { $_ -ne 'MouseDisaster.MouseDisasterTraitDegreeData' }).Count -eq 0) 'Owned traits missing ColorLibrary degree data'
+Assert-Narrative (@($traitDoc.Defs.TraitDef | Where-Object { [string]::IsNullOrWhiteSpace($_.degreeDatas.li.color) }).Count -eq 0) 'Owned traits missing ColorLibrary color'
+[xml]$thoughtDoc = Get-Content (Join-Path $root 'Defs/ThoughtDefs/Thoughts_MouseDisaster_Traits.xml') -Raw
+$thoughtNames = @($thoughtDoc.Defs.ThoughtDef | ForEach-Object { $_.defName })
+Assert-Narrative ($thoughtNames.Count -gt 0) 'Owned trait thoughts are missing'
+Assert-Narrative (@($thoughtNames | Where-Object { $_ -notlike 'MouseDisaster_Thought_*' }).Count -eq 0) 'Owned trait thought prefix changed'
+$traitData = Get-Content (Join-Path $root '1.6/Source/MouseDisasterTraitData.cs') -Raw
+$catalogTraitNames = @([regex]::Matches($traitData, '"MouseDisaster_Trait_[A-Za-z]+"') | ForEach-Object { $_.Value.Trim('"') })
+Assert-Narrative ($catalogTraitNames.Count -eq 50) 'Trait catalog membership changed'
+Assert-Narrative (-not (Compare-Object ($xmlTraitNames | Sort-Object) ($catalogTraitNames | Sort-Object))) 'Trait XML and catalog defNames diverged'
+Assert-Narrative ($allCode.Contains('MouseDisasterPawnHistoryDefinition history = MouseDisasterPawnHistoryCatalog.TryApply(pawn, stage);')) 'History apply no longer returns the selected definition'
+Assert-Narrative ($allCode.Contains('MouseDisasterTraitCatalog.TryApply(pawn, stage, history);')) 'Owned traits are not applied after pawn history'
+Assert-Narrative ($allCode.Contains('class MouseDisasterTraitDegreeData : TraitDegreeData')) 'Owned trait colors are not backed by TraitDegreeData'
+Assert-Narrative ($allCode.Contains('[HarmonyPatch(typeof(Trait), nameof(Trait.LabelCap), MethodType.Getter)]')) 'Owned trait label color is not patched'
+$historyData = Get-Content (Join-Path $root '1.6/Source/MouseDisasterPawnHistoryData.cs') -Raw
+$historyIds = [System.Collections.Generic.HashSet[string]]@([regex]::Matches($historyData, '"(?:A|Y)\d{3}"') | ForEach-Object { $_.Value.Trim('"') })
+foreach ($id in @([regex]::Matches($traitData, '"(?:A|Y)\d{3}"') | ForEach-Object { $_.Value.Trim('"') } | Sort-Object -Unique)) {
+    Assert-Narrative ($historyIds.Contains($id)) "Trait catalog references unknown history $id"
+}
 
 
 if ($Build) {

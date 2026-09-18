@@ -144,7 +144,7 @@ namespace MouseDisaster
                 for (int j = i + 1; j < factions.Count; j++)
                 {
                     Faction second = factions[j];
-                    if (second == null || (!IsMouseDisasterHiddenFaction(first) && !IsMouseDisasterHiddenFaction(second)))
+                    if (second == null || (!IsMouseDisasterManagedFaction(first) && !IsMouseDisasterManagedFaction(second)))
                     {
                         continue;
                     }
@@ -169,7 +169,17 @@ namespace MouseDisaster
 
         public static void MakeFactionHostileToPlayer(Faction faction, bool explicitDriveAway = false)
         {
-            if (faction == null || Faction.OfPlayer == null || faction.HostileTo(Faction.OfPlayer))
+            if (faction == null || Faction.OfPlayer == null)
+            {
+                return;
+            }
+
+            if (IsMouseDisasterManagedFaction(faction) && !IsFactionListed(faction))
+            {
+                return;
+            }
+
+            if (IsHostileTo(faction, Faction.OfPlayer))
             {
                 return;
             }
@@ -292,9 +302,7 @@ namespace MouseDisaster
 
         private static bool IsMouseDisasterHiddenFaction(Faction faction)
         {
-            return faction != null &&
-                   MouseDisasterDefOf.MouseDisaster_HiddenFaction != null &&
-                   faction.def == MouseDisasterDefOf.MouseDisaster_HiddenFaction;
+            return ClassifyManagedFaction(faction) == MouseDisasterManagedFactionKind.Hidden;
         }
 
         private static bool IsHiddenFactionExplicitHostilityActive()
@@ -336,7 +344,7 @@ namespace MouseDisaster
                         pawn.Faction != null &&
                         IsMouseDisasterHiddenFaction(pawn.Faction) &&
                         Faction.OfPlayer != null &&
-                        pawn.Faction.HostileTo(Faction.OfPlayer))
+                        IsHostileTo(pawn.Faction, Faction.OfPlayer))
                     {
                         cachedHostilePawnExists = true;
                         return true;
@@ -404,13 +412,149 @@ namespace MouseDisaster
                 return false;
             }
 
+            ResolveManagedFactionRelation(owner, other, out FactionRelationKind kind, out int goodwill);
             owner.SetRelation(new FactionRelation
             {
                 other = other,
-                kind = FactionRelationKind.Neutral,
-                baseGoodwill = other == Faction.OfPlayer ? 20 : 0
+                kind = kind,
+                baseGoodwill = goodwill
             });
             return true;
+        }
+
+        internal static MouseDisasterManagedFactionKind ClassifyManagedFaction(Faction faction)
+        {
+            if (faction?.def == null)
+            {
+                return MouseDisasterManagedFactionKind.None;
+            }
+
+            if (MouseDisasterDefOf.MouseDisaster_HiddenFaction != null &&
+                faction.def == MouseDisasterDefOf.MouseDisaster_HiddenFaction)
+            {
+                return MouseDisasterManagedFactionKind.Hidden;
+            }
+
+            if (MouseDisasterDefOf.MouseDisaster_NeutralVisitors != null &&
+                faction.def == MouseDisasterDefOf.MouseDisaster_NeutralVisitors)
+            {
+                return MouseDisasterManagedFactionKind.NeutralVisitors;
+            }
+
+            if (MouseDisasterDefOf.MouseDisaster_HostileVisitors != null &&
+                faction.def == MouseDisasterDefOf.MouseDisaster_HostileVisitors)
+            {
+                return MouseDisasterManagedFactionKind.HostileVisitors;
+            }
+
+            if (MouseDisasterDefOf.MouseDisaster_FriendlyVisitors != null &&
+                faction.def == MouseDisasterDefOf.MouseDisaster_FriendlyVisitors)
+            {
+                return MouseDisasterManagedFactionKind.FriendlyVisitors;
+            }
+
+            return MouseDisasterManagedFactionKind.None;
+        }
+
+        internal static bool IsMouseDisasterManagedFaction(Faction faction)
+        {
+            return ClassifyManagedFaction(faction) != MouseDisasterManagedFactionKind.None;
+        }
+
+        public static bool IsHostileTo(Faction faction, Faction other)
+        {
+            if (faction == null || other == null || faction == other)
+            {
+                return false;
+            }
+
+            if (IsMouseDisasterManagedFaction(faction) || IsMouseDisasterManagedFaction(other))
+            {
+                return TryGetOrRepairManagedFactionRelation(faction, other, out FactionRelation relation) &&
+                       relation != null &&
+                       relation.kind == FactionRelationKind.Hostile;
+            }
+
+            return faction.HostileTo(other);
+        }
+
+        internal static bool ShouldSkipIdentityNormalizationDuringFactionTeardown(Pawn pawn)
+        {
+            Faction faction = pawn?.Faction;
+            return MouseDisasterFactionRelationPolicy.ShouldSkipIdentityNormalizationDuringFactionTeardown(
+                IsMouseDisasterManagedFaction(faction),
+                IsFactionListed(faction));
+        }
+
+        internal static bool TryGetOrRepairManagedFactionRelation(Faction owner, Faction other, out FactionRelation relation)
+        {
+            relation = null;
+            if (owner == null || other == null || owner == other)
+            {
+                return false;
+            }
+
+            relation = owner.RelationWith(other, allowNull: true);
+            if (relation != null)
+            {
+                return true;
+            }
+
+            ResolveManagedFactionRelation(owner, other, out FactionRelationKind kind, out int goodwill);
+            if (MouseDisasterFactionRelationPolicy.ShouldPersistRepairedRelation(IsFactionListed(owner), IsFactionListed(other)))
+            {
+                EnsureFactionRelationPair(owner, other, kind, goodwill);
+                relation = owner.RelationWith(other, allowNull: true);
+                if (relation != null)
+                {
+                    return true;
+                }
+            }
+
+            relation = new FactionRelation
+            {
+                other = other,
+                kind = kind,
+                baseGoodwill = goodwill
+            };
+            return true;
+        }
+
+        private static bool IsFactionListed(Faction faction)
+        {
+            if (faction == null || Find.FactionManager == null)
+            {
+                return false;
+            }
+
+            List<Faction> factions = Find.FactionManager.AllFactionsListForReading;
+            if (factions == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < factions.Count; i++)
+            {
+                if (factions[i] == faction)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void ResolveManagedFactionRelation(Faction first, Faction second, out FactionRelationKind kind, out int goodwill)
+        {
+            MouseDisasterFactionRelationPolicy.ResolveDefaultRelation(
+                ClassifyManagedFaction(first),
+                first != null && first.IsPlayer,
+                first?.def != null && first.def.permanentEnemy,
+                ClassifyManagedFaction(second),
+                second != null && second.IsPlayer,
+                second?.def != null && second.def.permanentEnemy,
+                out kind,
+                out goodwill);
         }
 
         internal static Faction GetEventFaction(bool hostile, bool friendly)
@@ -435,8 +579,10 @@ namespace MouseDisaster
 
         internal static bool IsEventBehaviorFaction(Faction faction)
         {
-            return faction != null && (faction.def == MouseDisasterDefOf.MouseDisaster_NeutralVisitors ||
-                faction.def == MouseDisasterDefOf.MouseDisaster_HostileVisitors || faction.def == MouseDisasterDefOf.MouseDisaster_FriendlyVisitors);
+            MouseDisasterManagedFactionKind kind = ClassifyManagedFaction(faction);
+            return kind == MouseDisasterManagedFactionKind.NeutralVisitors ||
+                   kind == MouseDisasterManagedFactionKind.HostileVisitors ||
+                   kind == MouseDisasterManagedFactionKind.FriendlyVisitors;
         }
 
         public static bool IsMouseDisasterNeutralFaction(Faction faction)

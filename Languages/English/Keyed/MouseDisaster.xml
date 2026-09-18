@@ -167,6 +167,21 @@
   <MouseDisaster_Settings_PawnHistory_EventCategory_Theft>theft</MouseDisaster_Settings_PawnHistory_EventCategory_Theft>
   <MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>conflict</MouseDisaster_Settings_PawnHistory_EventCategory_Conflict>
   <MouseDisaster_Settings_PawnHistory_EventCategory_Siege>siege</MouseDisaster_Settings_PawnHistory_EventCategory_Siege>
+  <MouseDisaster_Settings_Section_PawnTrait>Character traits</MouseDisaster_Settings_Section_PawnTrait>
+  <MouseDisaster_Settings_EnablePawnTraits>Enable traits for event-generated Ratkin</MouseDisaster_Settings_EnablePawnTraits>
+  <MouseDisaster_Settings_EnablePawnTraits_Tooltip>When enabled, eligible event-generated Ratkin may receive one of the selected traits. A higher weight makes that trait more likely. A weight of 0 is never chosen. Enabled by default.</MouseDisaster_Settings_EnablePawnTraits_Tooltip>
+  <MouseDisaster_Settings_PawnTrait_EnableAll>Enable all traits</MouseDisaster_Settings_PawnTrait_EnableAll>
+  <MouseDisaster_Settings_PawnTrait_DisableAll>Disable all traits</MouseDisaster_Settings_PawnTrait_DisableAll>
+  <MouseDisaster_Settings_PawnTrait_SelectionHint>Select the traits that may be assigned and set their weights. The master switch above must also be enabled.</MouseDisaster_Settings_PawnTrait_SelectionHint>
+  <MouseDisaster_Settings_PawnTrait_Weight>Weight: {0}</MouseDisaster_Settings_PawnTrait_Weight>
+  <MouseDisaster_Settings_PawnTrait_Weight_Tooltip>Higher weights are more likely to be chosen. 0 means this trait is never assigned.</MouseDisaster_Settings_PawnTrait_Weight_Tooltip>
+  <MouseDisaster_Settings_PawnTrait_Slot>Age: {0}</MouseDisaster_Settings_PawnTrait_Slot>
+  <MouseDisaster_Settings_PawnTrait_Slot_Any>any</MouseDisaster_Settings_PawnTrait_Slot_Any>
+  <MouseDisaster_Settings_PawnTrait_Slot_Young>young</MouseDisaster_Settings_PawnTrait_Slot_Young>
+  <MouseDisaster_Settings_PawnTrait_Slot_Adult>adult</MouseDisaster_Settings_PawnTrait_Slot_Adult>
+  <MouseDisaster_Settings_PawnTrait_Event>Event: {0}</MouseDisaster_Settings_PawnTrait_Event>
+  <MouseDisaster_Settings_PawnTrait_SpecificEvents>specific events</MouseDisaster_Settings_PawnTrait_SpecificEvents>
+  <MouseDisaster_Settings_PawnTrait_History>May appear with matching character histories</MouseDisaster_Settings_PawnTrait_History>
   <MouseDisaster_Settings_ResetDefaults>Reset to defaults</MouseDisaster_Settings_ResetDefaults>
   <MouseDisaster_Settings_ImplNote>Choose how Ratkin arrive, behave and become part of your colony's story.</MouseDisaster_Settings_ImplNote>
   <MouseDisaster_PrisonerScavenge_Text_FloorDust_1>Tummy's rumbling... even dusty crumbs count.</MouseDisaster_PrisonerScavenge_Text_FloorDust_1>

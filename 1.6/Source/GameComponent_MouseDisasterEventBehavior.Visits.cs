@@ -47,7 +47,7 @@ namespace MouseDisaster
 
         internal bool ManagesFoodVisit(Pawn pawn) => pawn?.Spawned == true && pawn.needs?.food != null &&
             TryGetGroup(pawn, out var group) && !group.hostile && !group.leaving &&
-            pawn.Faction?.HostileTo(Faction.OfPlayer) != true && HasFoodSeekingProfile(pawn) && !HasProtectedVisit(pawn);
+            !MouseDisasterUtility.IsHostileTo(pawn.Faction, Faction.OfPlayer) && HasFoodSeekingProfile(pawn) && !HasProtectedVisit(pawn);
 
         internal void RequestDeparture(Pawn pawn)
         {
@@ -72,7 +72,7 @@ namespace MouseDisaster
             {
                 if (group == null) continue;
                 if (group.faction == null && group.pawns.Count > 0) Apply(group, group.pawns);
-                if (!group.hostile && group.faction?.HostileTo(Faction.OfPlayer) == true)
+                if (!group.hostile && MouseDisasterUtility.IsHostileTo(group.faction, Faction.OfPlayer))
                 {
                     group.hostile = true;
                     group.leaving = false;

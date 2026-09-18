@@ -226,7 +226,7 @@ namespace MouseDisaster
 
             if (pawn == null || pawn.Dead || !pawn.Spawned || pawn.mindState == null || !pawn.mindState.wantsToTradeWithColony ||
                 !pawn.CanCasuallyInteractNow(false, false, false, false) || pawn.Downed || pawn.IsPrisoner ||
-                pawn.Faction == Faction.OfPlayer || (pawn.Faction != null && pawn.Faction.HostileTo(Faction.OfPlayer)))
+                pawn.Faction == Faction.OfPlayer || MouseDisasterUtility.IsHostileTo(pawn.Faction, Faction.OfPlayer))
             {
                 return;
             }

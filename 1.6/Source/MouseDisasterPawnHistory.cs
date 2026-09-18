@@ -321,7 +321,7 @@ namespace MouseDisaster
                 .ToArray();
         }
 
-        private static bool EventCategoryMatches(MouseDisasterPawnHistoryEventCategory category, string eventId)
+        internal static bool EventCategoryMatches(MouseDisasterPawnHistoryEventCategory category, string eventId)
         {
             if (eventId.NullOrEmpty())
             {
@@ -395,12 +395,12 @@ namespace MouseDisaster
             return PushContext(CurrentIncidentDefName, map);
         }
 
-        public static void TryApply(Pawn pawn, DevelopmentalStage stage)
+        public static MouseDisasterPawnHistoryDefinition TryApply(Pawn pawn, DevelopmentalStage stage)
         {
             MouseDisasterSettings settings = MouseDisasterMod.Settings;
             if (!MouseDisasterRuntime.AllowsNewContent || settings?.enablePawnHistories != true || pawn?.story == null)
             {
-                return;
+                return null;
             }
 
             float? temperature = ResolveTemperature();
@@ -411,20 +411,20 @@ namespace MouseDisaster
                 .ToList();
             if (candidates.Count == 0)
             {
-                return;
+                return null;
             }
 
             MouseDisasterPawnHistoryDefinition selected = SelectHistory(candidates, pawn, temperature, eventId, settings);
             if (selected == null)
             {
-                return;
+                return null;
             }
 
             BackstoryDef backstory = DefDatabase<BackstoryDef>.GetNamedSilentFail(selected.BackstoryDefName);
             if (backstory == null)
             {
                 Log.Warning("[MouseDisaster] Enabled pawn history is missing its BackstoryDef: " + selected.BackstoryDefName);
-                return;
+                return null;
             }
 
             if (selected.Slot == MouseDisasterPawnHistorySlot.Adult)
@@ -444,6 +444,7 @@ namespace MouseDisaster
             MouseDisasterTrace.Log("pawn history selected; pawn=" + pawn +
                 "; id=" + selected.Id + "; title=" + selected.Title +
                 "; event=" + (eventId ?? "none") + "; candidates=" + candidates.Count);
+            return selected;
         }
 
         private static MouseDisasterPawnHistoryDefinition SelectHistory(
@@ -495,7 +496,7 @@ namespace MouseDisaster
         private static string CurrentIncidentDefName =>
             currentContext?.IncidentDefName ?? MouseDisasterEventExecution.Current?.incidentDefName;
 
-        private static string CurrentEventDisplayId
+        internal static string CurrentEventDisplayId
         {
             get
             {

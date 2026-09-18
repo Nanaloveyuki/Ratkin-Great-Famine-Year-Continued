@@ -142,12 +142,15 @@
     <Compile Include="MouseDisasterIncidentCatalog.cs" />
     <Compile Include="MouseDisasterPawnHistory.cs" />
     <Compile Include="MouseDisasterPawnHistoryData.cs" />
+    <Compile Include="MouseDisasterTrait.cs" />
+    <Compile Include="MouseDisasterTraitData.cs" />
     <Compile Include="MouseDisasterIncidentTargetPolicy.cs" />
     <Compile Include="MouseDisasterGeneRemovalScope.cs" />
     <Compile Include="MouseDisasterPrisonTransferUtility.cs" />
     <Compile Include="MouseDisasterTraderTradePolicy.cs" />
     <Compile Include="MouseDisasterVisitorChoicePolicy.cs" />
     <Compile Include="MouseDisasterVisitorHostilityPolicy.cs" />
+    <Compile Include="MouseDisasterFactionRelationPolicy.cs" />
     <Compile Include="IncidentChancePatches.cs" />
     <Compile Include="MouseDisasterIncidentScheduling.cs" />
     <Compile Include="MouseDisasterTrace.cs" />
@@ -208,6 +211,7 @@
     <Compile Include="ThoughtWorker_MouseDisasterGuanyinTu.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterN004.cs" />
     <Compile Include="ThoughtWorker_MouseDisasterVisitorShelterMood.cs" />
+    <Compile Include="ThoughtWorker_MouseDisasterTraits.cs" />
     <Compile Include="Utilities\MouseDisasterUtility.State.cs" />
     <Compile Include="Utilities\MouseDisasterUtility.Identity.cs" />
     <Compile Include="Utilities\MouseDisasterUtility.Factions.cs" />

@@ -106,7 +106,7 @@ namespace MouseDisaster
 
         private void StartEnvoy(Map map)
         {
-            if (!MouseDisasterUtility.TryFindFormerFaction(out Faction faction) || faction.HostileTo(Faction.OfPlayer) ||
+            if (!MouseDisasterUtility.TryFindFormerFaction(out Faction faction) || MouseDisasterUtility.IsHostileTo(faction, Faction.OfPlayer) ||
                 !MouseDisasterUtility.TryFindEntryCell(map, out IntVec3 cell)) return;
             Pawn pawn;
             using (MouseDisasterPawnHistoryCatalog.PushContext(null, map))

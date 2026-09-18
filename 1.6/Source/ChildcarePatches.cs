@@ -107,7 +107,7 @@ namespace MouseDisaster
                    (faction.def == MouseDisasterDefOf.MouseDisaster_HiddenFaction ||
                     faction.def == MouseDisasterDefOf.MouseDisaster_NeutralVisitors) &&
                    Faction.OfPlayer != null &&
-                   !faction.HostileTo(Faction.OfPlayer);
+                   !MouseDisasterUtility.IsHostileTo(faction, Faction.OfPlayer);
         }
     }
 

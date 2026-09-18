@@ -21,7 +21,7 @@ namespace MouseDisaster
                 return null;
             }
 
-            if (pawn.InAggroMentalState || (pawn.Faction != null && Faction.OfPlayer != null && pawn.Faction.HostileTo(Faction.OfPlayer)))
+            if (pawn.InAggroMentalState || MouseDisasterUtility.IsHostileTo(pawn.Faction, Faction.OfPlayer))
             {
                 return null;
             }

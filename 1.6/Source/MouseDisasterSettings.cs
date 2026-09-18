@@ -51,6 +51,8 @@ namespace MouseDisaster
         public const float MinRatkinXenotypeSpawnWeight = 0f;
         public const float MaxRatkinXenotypeSpawnWeight = 100f;
         public const float DefaultRatkinXenotypeSpawnWeight = 15f;
+        public const float MinPawnTraitWeight = 0f;
+        public const float MaxPawnTraitWeight = 100f;
         public const float DefaultExternalRatkinXenotypeSpawnWeight = 5f;
         public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
         public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
@@ -166,6 +168,9 @@ namespace MouseDisaster
         public float ratEggTraitGenerationChance = 0.5f;
         public bool enablePawnHistories = true;
         public List<string> enabledPawnHistoryIds = CreateDefaultPawnHistoryIds();
+        public bool enablePawnTraits = true;
+        public List<string> enabledPawnTraitIds = CreateDefaultPawnTraitIds();
+        public Dictionary<string, float> pawnTraitWeights = new Dictionary<string, float>();
         public List<string> disabledIncidentDefNames = new List<string>();
         public int maxRatkinAge = 50;
         public float ageDiseaseMultiplier = 1f;
@@ -248,6 +253,9 @@ namespace MouseDisaster
             ratEggTraitGenerationChance = 0.5f;
             enablePawnHistories = true;
             enabledPawnHistoryIds = CreateDefaultPawnHistoryIds();
+            enablePawnTraits = true;
+            enabledPawnTraitIds = CreateDefaultPawnTraitIds();
+            pawnTraitWeights = new Dictionary<string, float>();
             disabledIncidentDefNames = new List<string>();
             maxRatkinAge = 50;
             ageDiseaseMultiplier = 1f;
@@ -330,6 +338,7 @@ namespace MouseDisaster
             }
             NormalizeTemperatureApparelSettings();
             NormalizePawnHistorySettings();
+            NormalizePawnTraitSettings();
             if (!System.Enum.IsDefined(typeof(PrisonerScavengePoisonMode), prisonerScavengePoisonMode))
             {
                 prisonerScavengePoisonMode = PrisonerScavengePoisonMode.Normal;
@@ -452,6 +461,56 @@ namespace MouseDisaster
                 ? MouseDisasterPawnHistoryCatalog.All.Select(history => history.Id).ToList()
                 : new List<string>();
             NormalizePawnHistorySettings();
+        }
+
+        public bool IsPawnTraitSelected(string id)
+        {
+            return !string.IsNullOrWhiteSpace(id) &&
+                   (enabledPawnTraitIds ?? new List<string>())
+                       .Any(entry => string.Equals(entry, id, System.StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool IsPawnTraitEnabled(string id)
+        {
+            return enablePawnTraits && IsPawnTraitSelected(id);
+        }
+
+        public void SetPawnTraitEnabled(string id, bool enabled)
+        {
+            if (!MouseDisasterTraitCatalog.IsKnown(id)) return;
+            enabledPawnTraitIds ??= new List<string>();
+            enabledPawnTraitIds.RemoveAll(entry =>
+                string.Equals(entry, id, System.StringComparison.OrdinalIgnoreCase));
+            if (enabled) enabledPawnTraitIds.Add(id);
+            NormalizePawnTraitSettings();
+        }
+
+        public void SetAllPawnTraitsEnabled(bool enabled)
+        {
+            enabledPawnTraitIds = enabled
+                ? MouseDisasterTraitCatalog.All.Select(trait => trait.Id).ToList()
+                : new List<string>();
+            NormalizePawnTraitSettings();
+        }
+
+        public float GetPawnTraitWeight(string id)
+        {
+            float fallback = MouseDisasterTraitCatalog.GetDefaultWeight(id);
+            if (string.IsNullOrWhiteSpace(id) || pawnTraitWeights == null ||
+                !pawnTraitWeights.TryGetValue(id, out float value))
+            {
+                return fallback;
+            }
+
+            return NormalizePawnTraitWeight(value, fallback);
+        }
+
+        public void SetPawnTraitWeight(string id, float value)
+        {
+            if (!MouseDisasterTraitCatalog.IsKnown(id)) return;
+            pawnTraitWeights ??= new Dictionary<string, float>();
+            pawnTraitWeights[id] = NormalizePawnTraitWeight(value, MouseDisasterTraitCatalog.GetDefaultWeight(id));
+            NormalizePawnTraitSettings();
         }
 
         public float GetTemperatureApparelInsulation(string defName, float fallback)
@@ -622,6 +681,9 @@ namespace MouseDisaster
             Scribe_Values.Look(ref ratEggTraitGenerationChance, "ratEggTraitGenerationChance", 0.5f);
             Scribe_Values.Look(ref enablePawnHistories, "enablePawnHistories", true);
             Scribe_Collections.Look(ref enabledPawnHistoryIds, "enabledPawnHistoryIds", LookMode.Value);
+            Scribe_Values.Look(ref enablePawnTraits, "enablePawnTraits", true);
+            Scribe_Collections.Look(ref enabledPawnTraitIds, "enabledPawnTraitIds", LookMode.Value);
+            Scribe_Collections.Look(ref pawnTraitWeights, "pawnTraitWeights", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref disabledIncidentDefNames, "disabledIncidentDefNames", LookMode.Value);
             Scribe_Values.Look(ref maxRatkinAge, "maxRatkinAge", 50);
             Scribe_Values.Look(ref ageDiseaseMultiplier, "ageDiseaseMultiplier", 1f);
@@ -647,6 +709,7 @@ namespace MouseDisaster
 
             NormalizeIncidentToggleState();
             NormalizePawnHistorySettings();
+            NormalizePawnTraitSettings();
             ClampValues();
         }
 
@@ -680,6 +743,57 @@ namespace MouseDisaster
                 .Where(MouseDisasterPawnHistoryCatalog.IsKnown)
                 .OrderBy(id => id)
                 .ToList();
+        }
+
+        private void NormalizePawnTraitSettings()
+        {
+            // A missing list means this save predates pawn traits. Keep the
+            // feature's default-on behavior, while preserving an explicitly
+            // saved empty list from "Disable all traits".
+            if (enabledPawnTraitIds == null)
+            {
+                enabledPawnTraitIds = CreateDefaultPawnTraitIds();
+            }
+            else
+            {
+                enabledPawnTraitIds = enabledPawnTraitIds
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .Select(id => id.Trim())
+                    .Distinct(System.StringComparer.OrdinalIgnoreCase)
+                    .Where(MouseDisasterTraitCatalog.IsKnown)
+                    .OrderBy(id => id)
+                    .ToList();
+            }
+
+            var normalized = new Dictionary<string, float>(System.StringComparer.OrdinalIgnoreCase);
+            if (pawnTraitWeights != null)
+            {
+                foreach (KeyValuePair<string, float> entry in pawnTraitWeights)
+                {
+                    if (!MouseDisasterTraitCatalog.IsKnown(entry.Key)) continue;
+                    normalized[entry.Key] = NormalizePawnTraitWeight(entry.Value,
+                        MouseDisasterTraitCatalog.GetDefaultWeight(entry.Key));
+                }
+            }
+
+            pawnTraitWeights = normalized;
+        }
+
+        private static List<string> CreateDefaultPawnTraitIds()
+        {
+            return MouseDisasterTraitCatalog.All
+                .Select(trait => trait.Id)
+                .ToList();
+        }
+
+        private static float NormalizePawnTraitWeight(float value, float fallback)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value))
+            {
+                return fallback;
+            }
+
+            return Mathf.Clamp(Mathf.Round(value), MinPawnTraitWeight, MaxPawnTraitWeight);
         }
 
         private static List<string> CreateDefaultPawnHistoryIds()

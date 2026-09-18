@@ -77,6 +77,7 @@ namespace MouseDisaster {
         private static void DrawEnvironmentSettings(Verse.Listing_Standard list) { Calls.Add("Environment"); }
         private static void DrawPawnSettings(Verse.Listing_Standard list) { Calls.Add("Pawns"); }
         private static void DrawPawnHistorySettings(Verse.Listing_Standard list) { Calls.Add("PawnHistory"); }
+        private static void DrawPawnTraitSettings(Verse.Listing_Standard list) { Calls.Add("PawnTrait"); }
         private static void DrawPredationSettings(Verse.Listing_Standard list) { Calls.Add("Predation"); }
         private static void DrawIncidentSection(Verse.Listing_Standard list, bool? original = null) { Calls.Add("Incidents:" + original); }
         private static void DrawNarrativeControls(Verse.Listing_Standard list, bool hosted = false) { Calls.Add("Narrative:" + hosted); }
@@ -99,12 +100,12 @@ namespace MouseDisaster {
             Check(Verse.Log.Warnings == 2, "incompatible API warning");
             Verse.GenTypes.Registry = typeof(IrisMenus.MenuRegistry);
             mod.RegisterIrisMenus();
-            Check(string.Join(",", IrisMenus.MenuRegistry.Ids) == "settings.Safety,settings.General,settings.Environment,settings.PawnBehavior,settings.PawnHistory,settings.Predation,settings.OriginalEvents,settings.ContinuedEvents,settings.Endings,settings.Developer", "ten settings pages");
-            Check(Saves == 10, "save callbacks");
-            Check(string.Join(",", Calls) == "Safety,Footer,General,Environment,Pawns,PawnHistory,Predation,Incidents:True,Incidents:False,Narrative:True,Endings:True,MouseDisaster_IrisMenus_Developer", "hosted category dispatch");
+            Check(string.Join(",", IrisMenus.MenuRegistry.Ids) == "settings.Safety,settings.General,settings.Environment,settings.PawnBehavior,settings.PawnHistory,settings.PawnTrait,settings.Predation,settings.OriginalEvents,settings.ContinuedEvents,settings.Endings,settings.Developer", "eleven settings pages");
+            Check(Saves == 11, "save callbacks");
+            Check(string.Join(",", Calls) == "Safety,Footer,General,Environment,Pawns,PawnHistory,PawnTrait,Predation,Incidents:True,Incidents:False,Narrative:True,Endings:True,MouseDisaster_IrisMenus_Developer", "hosted category dispatch");
             Calls.Clear();
             DrawSettings(new Verse.Listing_Standard());
-            Check(string.Join(",", Calls) == "Safety,General,Environment,Pawns,PawnHistory,Predation,Incidents:,Narrative:False,Endings:False,Footer", "legacy drawing order");
+            Check(string.Join(",", Calls) == "Safety,General,Environment,Pawns,PawnHistory,PawnTrait,Predation,Incidents:,Narrative:False,Endings:False,Footer", "legacy drawing order");
             Check(Verse.Listing_Standard.Buttons.Count == 0, "developer actions shown without dev mode");
             Verse.Prefs.DevMode=true;
             DrawDeveloperSettings(new Verse.Listing_Standard());
@@ -125,7 +126,7 @@ Add-Type -TypeDefinition ($bridge + "`n" + $stub.Replace('__DRAW__', $draw))
 [MouseDisaster.MouseDisasterMod]::Verify()
 foreach ($language in @('ChineseSimplified', 'English')) {
     [xml]$xml = Get-Content (Join-Path $root "Languages/$language/Keyed/MouseDisasterIrisMenus.xml") -Raw
-    foreach ($page in @('Safety', 'OriginalEvents', 'ContinuedEvents', 'Endings', 'General', 'Environment', 'PawnBehavior', 'PawnHistory', 'Predation', 'Developer')) {
+    foreach ($page in @('Safety', 'OriginalEvents', 'ContinuedEvents', 'Endings', 'General', 'Environment', 'PawnBehavior', 'PawnHistory', 'PawnTrait', 'Predation', 'Developer')) {
         if (!$xml.LanguageData.("MouseDisaster_IrisMenus_" + $page)) { throw "Missing title: $language/$page" }
     }
 }

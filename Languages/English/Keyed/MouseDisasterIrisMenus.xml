@@ -8,6 +8,7 @@
   <MouseDisaster_IrisMenus_Environment>Environment adaptation</MouseDisaster_IrisMenus_Environment>
   <MouseDisaster_IrisMenus_PawnBehavior>Character behavior</MouseDisaster_IrisMenus_PawnBehavior>
   <MouseDisaster_IrisMenus_PawnHistory>Character histories</MouseDisaster_IrisMenus_PawnHistory>
+  <MouseDisaster_IrisMenus_PawnTrait>Traits</MouseDisaster_IrisMenus_PawnTrait>
   <MouseDisaster_IrisMenus_Predation>Predation</MouseDisaster_IrisMenus_Predation>
   <MouseDisaster_IrisMenus_Developer>Developer</MouseDisaster_IrisMenus_Developer>
   <MouseDisaster_Developer_Disabled>Development mode is off.</MouseDisaster_Developer_Disabled>

@@ -13,6 +13,7 @@ namespace MouseDisaster
             Environment,
             PawnBehavior,
             PawnHistory,
+            PawnTrait,
             Predation,
             OriginalEvents,
             ContinuedEvents,

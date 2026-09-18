@@ -188,7 +188,8 @@ namespace MouseDisaster
                 SetBiologicalAgeYears(pawn, Rand.Range(RatkinYoungChildMinAgeYears, RatkinYoungChildMaxAgeYears));
             }
 
-            MouseDisasterPawnHistoryCatalog.TryApply(pawn, stage);
+            MouseDisasterPawnHistoryDefinition history = MouseDisasterPawnHistoryCatalog.TryApply(pawn, stage);
+            MouseDisasterTraitCatalog.TryApply(pawn, stage, history);
             if (!hasFixedAge && !preserveRoleAge && stage != DevelopmentalStage.Baby)
             {
                 float lower = Mathf.Max(stage.Adult() ? RatkinAdultMinAgeYears : RatkinYoungChildMinAgeYears,

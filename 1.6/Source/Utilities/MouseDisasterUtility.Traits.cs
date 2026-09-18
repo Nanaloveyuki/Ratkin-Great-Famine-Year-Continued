@@ -70,7 +70,8 @@ namespace MouseDisaster
                 !MouseDisasterGenerationPolicy.AllowsTrait(t.def)).ToList())
                 traitSet.RemoveTrait(trait);
             List<Trait> generatedTraits = traitSet.allTraits
-                .Where(trait => trait != null && trait.sourceGene == null)
+                .Where(trait => trait != null && trait.sourceGene == null &&
+                    !MouseDisasterGenerationPolicy.IsOwnedTrait(trait.def))
                 .ToList();
 
             float randomShootingKeepChance = GetRandomShootingKeepChance(stage);
@@ -223,6 +224,7 @@ namespace MouseDisaster
             negativeTraitPoolResolved = true;
             negativeTraitPool = DefDatabase<TraitDef>.AllDefsListForReading
                 .Where(def => MouseDisasterGenerationPolicy.AllowsTrait(def) && IsNegativeTraitDef(def) &&
+                              !MouseDisasterGenerationPolicy.IsOwnedTrait(def) &&
                               def != TraitDefOf.Gay &&
                               def != TraitDefOf.Bisexual &&
                               def != TraitDefOf.Asexual)
@@ -253,6 +255,11 @@ namespace MouseDisaster
             }
 
             return true;
+        }
+
+        internal static bool CanAssignGeneratedTrait(Pawn pawn, TraitDef candidate)
+        {
+            return CanAssignTraitDef(pawn, candidate);
         }
 
         private static bool TryPickNegativeDegree(TraitDef traitDef, out int degree)
@@ -515,6 +522,7 @@ namespace MouseDisaster
             ratEggTraitPoolResolved = true;
             ratEggTraitPool = DefDatabase<TraitDef>.AllDefsListForReading
                 .Where(def => MouseDisasterGenerationPolicy.AllowsTrait(def) &&
+                              !MouseDisasterGenerationPolicy.IsOwnedTrait(def) &&
                               !def.degreeDatas.NullOrEmpty() &&
                               def != TraitDefOf.Gay &&
                               def != TraitDefOf.Bisexual &&

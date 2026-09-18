@@ -32,7 +32,7 @@ public class Pawn_InventoryTracker { public Pawn pawn; public Container innerCon
 public class Pawn {
     public bool Dead, Downed, Spawned = true, IsPrisonerOfColony, IsSlaveOfColony, reachable = true;
     public DevelopmentalStage DevelopmentalStage = DevelopmentalStage.Adult;
-    public Map Map; public Map MapHeld => Map; public IntVec3 Position;
+    public Map Map; public Map MapHeld { get { return Map; } } public IntVec3 Position;
     public Faction Faction = new Faction(); public object ParentHolder; public Corpse Corpse;
     public Pawn_InventoryTracker inventory; public Mind mindState = new Mind(); public Lord lord;
     public Pawn() { inventory = new Pawn_InventoryTracker { pawn = this }; }
@@ -67,11 +67,15 @@ public class Harness : JobGiver_MouseDisasterFamilyExit {
         var official = new TraitDef { modContentPack = new ModContentPack { IsOfficialMod = true } };
         var foreign = new TraitDef { modContentPack = new ModContentPack() };
         var opted = new TraitDef { extension = new MouseDisasterGenerationExtension { allowTrait = true } };
+        var owned = new TraitDef { defName = "MouseDisaster_Trait_HardyLabor" };
         Check(MouseDisasterGenerationPolicy.AllowsTrait(official), "official trait denied");
         Check(!MouseDisasterGenerationPolicy.AllowsTrait(foreign), "foreign trait leaked");
         Check(MouseDisasterGenerationPolicy.AllowsTrait(opted), "trait opt-in denied");
         Check(!MouseDisasterGenerationPolicy.AllowsTrait(null), "null trait allowed");
-        DefDatabase<TraitDef>.AllDefsListForReading.AddRange(new[] { official, foreign, opted });
+        Check(MouseDisasterGenerationPolicy.IsOwnedTrait(owned), "owned trait not recognized");
+        Check(!MouseDisasterGenerationPolicy.IsOwnedTrait(foreign), "foreign trait marked owned");
+        Check(MouseDisasterGenerationPolicy.AllowsTrait(owned), "owned trait denied");
+        DefDatabase<TraitDef>.AllDefsListForReading.AddRange(new[] { official, foreign, opted, owned });
         Check(MouseDisasterGenerationPolicy.ProhibitedTraits.SequenceEqual(new[] { foreign }), "generation blacklist mismatch");
         Check(MouseDisasterGenerationPolicy.AllowsApparel(new ThingDef { IsApparel=true, defName="Apparel_TribalA" }), "tribalwear denied");
         Check(!MouseDisasterGenerationPolicy.AllowsApparel(new ThingDef { IsApparel=true, defName="Apparel_PowerArmor" }), "armor leaked");
