@@ -63,7 +63,7 @@ namespace MouseDisaster
         {
             if ((fedPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber))
                 fedDepartureTicks[pawn.thingIDNumber] = (Find.TickManager?.TicksGame ?? 0) +
-                    (int)((MouseDisasterMod.Settings?.fedWanderDays ?? 0.5f) * GenDate.TicksPerDay * Rand.Range(0.5f, 1.5f));
+                    (int)((MouseDisasterMod.Settings?.fedWanderDays ?? MouseDisasterSettings.DefaultFedWanderDays) * GenDate.TicksPerDay * Rand.Range(0.5f, 1.5f));
         }
         internal bool HasAppliedRefeeding(Pawn pawn) => refeedingPawnIds?.Contains(pawn.thingIDNumber) == true;
         internal void RecordRefeeding(Pawn pawn) => (refeedingPawnIds ??= new HashSet<int>()).Add(pawn.thingIDNumber);

@@ -29,6 +29,7 @@ public static class Mathf { public static int Clamp(int n,int min,int max)=>Math
 public static class GenDate { public const int TicksPerDay=60000; }
 public static class Rand { public static float sample=0.5f; public static int draws; public static float Range(float min,float max) { draws++; return min+(max-min)*sample; } }
 public class Settings { public int maxEventPawns=30; public float fedWanderDays=0.5f,noFoodWaitDays=0.5f; public bool leaveAfterFed=true,waitWhenNoFood=true; }
+public static class MouseDisasterSettings { public const float DefaultFedWanderDays = 0f; }
 public static class MouseDisasterMod { public static Settings Settings=new Settings(); }
 public class TickManager { public int TicksGame; }
 public static class Find { public static TickManager TickManager=new TickManager(); }

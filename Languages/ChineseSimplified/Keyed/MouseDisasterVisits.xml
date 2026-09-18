@@ -19,7 +19,7 @@
   <MouseDisaster_Settings_MaxEventPawns>事件基准人数上限：{0}</MouseDisaster_Settings_MaxEventPawns>
   <MouseDisaster_Settings_MaxEventPawns_Tooltip>单次事件生成的 Pawn 基准最大数量（1～100，默认 30），包含成人、儿童、鼠蛋和动物。保留事件原有最低人数；上限低于该事件最低人数时忽略此限制。母子等固定组合事件不受此限制影响。</MouseDisaster_Settings_MaxEventPawns_Tooltip>
   <MouseDisaster_Settings_FedWanderDays>吃饱后平均停留：{0} 天</MouseDisaster_Settings_FedWanderDays>
-  <MouseDisaster_Settings_FedWanderDays_Tooltip>每只鼠首次吃饱后独立随机停留设定时长的 50%～150%，随后离开地图。0 表示吃饱即离开；默认 0.5 天。关闭吃饱后离开时不生效。收留、雇佣和剧情等待使用各自期限。</MouseDisaster_Settings_FedWanderDays_Tooltip>
+  <MouseDisaster_Settings_FedWanderDays_Tooltip>每只鼠首次吃饱后独立随机停留设定时长的 50%～150%，随后离开地图。0 表示吃饱即离开；默认 0 天。关闭吃饱后离开时不生效。收留、雇佣和剧情等待使用各自期限。</MouseDisaster_Settings_FedWanderDays_Tooltip>
   <MouseDisaster_Settings_WaitWhenNoFood>找不到食物时等待</MouseDisaster_Settings_WaitWhenNoFood>
   <MouseDisaster_Settings_WaitWhenNoFood_Tooltip>开启后，在找不到可达食物时继续等待并定期寻找，超过等待时长则离开；关闭后直接离开。始终优先寻找赈灾区食物；仅当开启“可去非赈灾区吃东西”时，找不到赈灾食物才会寻找殖民地其他食物。</MouseDisaster_Settings_WaitWhenNoFood_Tooltip>
   <MouseDisaster_Settings_NoFoodWaitDays>无食物等待时长：{0} 天</MouseDisaster_Settings_NoFoodWaitDays>

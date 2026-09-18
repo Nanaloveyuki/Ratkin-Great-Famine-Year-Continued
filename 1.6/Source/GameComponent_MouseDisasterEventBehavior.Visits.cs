@@ -28,7 +28,7 @@ namespace MouseDisaster
             foreach (int id in fedPawnIds)
                 if (!fedDepartureTicks.ContainsKey(id))
                     fedDepartureTicks[id] = (Find.TickManager?.TicksGame ?? 0) +
-                        (int)((MouseDisasterMod.Settings?.fedWanderDays ?? 0.5f) * GenDate.TicksPerDay);
+                        (int)((MouseDisasterMod.Settings?.fedWanderDays ?? MouseDisasterSettings.DefaultFedWanderDays) * GenDate.TicksPerDay);
         }
 
         internal bool FedDepartureDue(Pawn pawn) => pawn != null &&

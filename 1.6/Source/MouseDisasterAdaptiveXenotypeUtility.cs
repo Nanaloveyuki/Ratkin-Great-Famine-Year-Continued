@@ -49,13 +49,19 @@ namespace MouseDisaster
 
         public static float GetDefaultSpawnWeight(XenotypeDef xenotype)
         {
-            if (IsMouseDisasterXenotype(xenotype) ||
-                string.Equals(xenotype?.defName, "Ratkin", StringComparison.OrdinalIgnoreCase))
+            if (IsOriginalRatkinXenotype(xenotype))
             {
                 return MouseDisasterSettings.DefaultRatkinXenotypeSpawnWeight;
             }
 
             return MouseDisasterSettings.DefaultExternalRatkinXenotypeSpawnWeight;
+        }
+
+        public static bool IsOriginalRatkinXenotype(XenotypeDef xenotype)
+        {
+            return xenotype != null &&
+                   (string.Equals(xenotype.defName, "Ratkin", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(xenotype.defName, "RK_XenoType_Ratkin", StringComparison.OrdinalIgnoreCase));
         }
 
         public static float GetSpawnWeight(XenotypeDef xenotype)

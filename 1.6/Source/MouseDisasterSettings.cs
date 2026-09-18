@@ -48,15 +48,16 @@ namespace MouseDisaster
         public const int MinHiredWorkerDurationDays = 5;
         public const int DefaultHiredWorkerDurationDays = GenDate.DaysPerYear;
         public const int MaxHiredWorkerDurationDays = GenDate.DaysPerYear * 10;
+        public const float DefaultFedWanderDays = 0f;
         public const float MinRatkinXenotypeSpawnWeight = 0f;
         public const float MaxRatkinXenotypeSpawnWeight = 100f;
-        public const float DefaultRatkinXenotypeSpawnWeight = 15f;
+        public const float DefaultRatkinXenotypeSpawnWeight = 85f;
         public const float MinPawnTraitWeight = 0f;
         public const float MaxPawnTraitWeight = 100f;
         public const float DefaultEventFoodWeight = MouseDisasterEventFoodPolicy.DefaultWeight;
         public const float MinEventFoodWeight = MouseDisasterEventFoodPolicy.MinWeight;
         public const float MaxEventFoodWeight = MouseDisasterEventFoodPolicy.MaxWeight;
-        public const float DefaultExternalRatkinXenotypeSpawnWeight = 5f;
+        public const float DefaultExternalRatkinXenotypeSpawnWeight = 0f;
         public const float DefaultMouseDisasterMinimumEnvironmentTemperature = -35f;
         public const float DefaultMouseDisasterMaximumEnvironmentTemperature = 70f;
         public const float MinMouseDisasterEnvironmentTemperature = -35f;
@@ -81,7 +82,7 @@ namespace MouseDisaster
         public List<string> disabledEventFoodDefNames = new List<string>();
         public Dictionary<string, float> eventFoodWeights = new Dictionary<string, float>();
         public int EventFoodSettingsStamp { get; private set; }
-        public float fedWanderDays = 0.5f;
+        public float fedWanderDays = DefaultFedWanderDays;
         public bool waitWhenNoFood = true;
         public float noFoodWaitDays = 0.5f;
         public bool allowMouseDisasterFactionToLeaveWhenIdle = false;
@@ -200,7 +201,8 @@ namespace MouseDisaster
             disabledEventFoodDefNames = new List<string>();
             eventFoodWeights = new Dictionary<string, float>();
             TouchEventFoodSettings();
-            fedWanderDays = noFoodWaitDays = 0.5f;
+            fedWanderDays = DefaultFedWanderDays;
+            noFoodWaitDays = 0.5f;
             waitWhenNoFood = true;
             allowMouseDisasterFactionToLeaveWhenIdle = false;
             preventUnnecessaryNeutralPawnRelations = true;
@@ -326,7 +328,7 @@ namespace MouseDisaster
             maxGeneratedAge = float.IsNaN(maxGeneratedAge) ? 50f : Mathf.Clamp(maxGeneratedAge, minGeneratedAge, 100f);
             reliefFoodScoreBonus = float.IsNaN(reliefFoodScoreBonus) ? 0.1f : Mathf.Clamp01(reliefFoodScoreBonus);
             NormalizeEventFoodSettings();
-            fedWanderDays = float.IsNaN(fedWanderDays) ? 0.5f : Mathf.Clamp(fedWanderDays, 0f, 5f);
+            fedWanderDays = float.IsNaN(fedWanderDays) ? DefaultFedWanderDays : Mathf.Clamp(fedWanderDays, 0f, 5f);
             noFoodWaitDays = float.IsNaN(noFoodWaitDays) ? 0.5f : Mathf.Clamp(noFoodWaitDays, 0f, 5f);
             maxRatkinAge = Mathf.Clamp(maxRatkinAge, MinRatkinAge, MaxRatkinAge);
             ageDiseaseMultiplier = Mathf.Clamp(ageDiseaseMultiplier, MinAgeDiseaseMultiplier, MaxAgeDiseaseMultiplier);
@@ -678,7 +680,7 @@ namespace MouseDisaster
             Scribe_Collections.Look(ref eventFoodWeights, "eventFoodWeights", LookMode.Value, LookMode.Value);
             disabledEventFoodDefNames ??= new List<string>();
             eventFoodWeights ??= new Dictionary<string, float>();
-            Scribe_Values.Look(ref fedWanderDays, "fedWanderDays", 0.5f);
+            Scribe_Values.Look(ref fedWanderDays, "fedWanderDays", DefaultFedWanderDays);
             Scribe_Values.Look(ref waitWhenNoFood, "waitWhenNoFood", true);
             Scribe_Values.Look(ref noFoodWaitDays, "noFoodWaitDays", 0.5f);
             Scribe_Values.Look(ref allowMouseDisasterFactionToLeaveWhenIdle, "allowMouseDisasterFactionToLeaveWhenIdle", false);
