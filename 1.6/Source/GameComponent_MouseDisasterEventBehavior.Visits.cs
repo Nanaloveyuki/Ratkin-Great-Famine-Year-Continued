@@ -241,7 +241,9 @@ namespace MouseDisaster
     {
         public static bool Prefix(Pawn pawn, ref Job __result)
         {
-            if (MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn))
+            if (MouseDisasterUtility.IsPendingAbandonedChild(pawn) ||
+                (MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn) &&
+                 !MouseDisasterUtility.IsAbandonedDeliveryLeaving(pawn)))
             {
                 __result = null;
                 return false;

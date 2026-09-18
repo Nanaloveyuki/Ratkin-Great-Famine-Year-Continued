@@ -205,7 +205,6 @@ namespace MouseDisaster
                         bool adultArrived = adult.Position.InHorDistOf(state.foodCell, 3f);
                         if (!adultArrived)
                         {
-                            state.adultArrivedAtDropoffTick = -1;
                             TryTakeAutoOrderedJob(adult, CreateGotoJob(state.foodCell), JobTag.Misc, requireStarving: false);
                             continue;
                         }
@@ -222,19 +221,7 @@ namespace MouseDisaster
                                 adultArrivedAtDropoff: true,
                                 ticksWaitingSinceArrival))
                             {
-                                if (!TryFindFarEdgeCell(map, state.foodCell, out IntVec3 forcedExitCell))
-                                {
-                                    forcedExitCell = map.Center;
-                                }
-
-                                bool alreadyExitingAfterTimeout = adult.GetLord()?.LordJob is LordJob_TravelAndExit;
-                                if (!alreadyExitingAfterTimeout)
-                                {
-                                    MakeTravelAndExitLord(map, new[] { adult }, forcedExitCell);
-                                }
-
-                                state.adultHasLeft = true;
-                                Messages.Message("MouseDisaster_UI_AbandoningMotherTimedOut".Translate().Resolve(), adult, MessageTypeDefOf.NeutralEvent, historical: false);
+                                StartAbandonedDeliveryAdultExit(adult, state, map, timedOut: true);
                             }
                             else
                             {
@@ -252,18 +239,7 @@ namespace MouseDisaster
                             }
                         }
 
-                        if (!TryFindFarEdgeCell(map, state.foodCell, out IntVec3 exitCell))
-                        {
-                            exitCell = map.Center;
-                        }
-
-                        bool alreadyExiting = adult.GetLord()?.LordJob is LordJob_TravelAndExit;
-                        if (!alreadyExiting)
-                        {
-                            MakeTravelAndExitLord(map, new[] { adult }, exitCell);
-                            state.adultHasLeft = true;
-                            Messages.Message("MouseDisaster_UI_AbandoningMotherLeft".Translate().Resolve(), adult, MessageTypeDefOf.NeutralEvent, historical: false);
-                        }
+                        StartAbandonedDeliveryAdultExit(adult, state, map, timedOut: false);
                     }
                 }
 
@@ -303,6 +279,26 @@ namespace MouseDisaster
             return ActiveAbandonedDeliveryByAdultId.ContainsKey(pawn.thingIDNumber) || IsPendingAbandonedChild(pawn);
         }
 
+        public static bool IsAbandonedDeliveryLeaving(Pawn pawn)
+        {
+            if (pawn == null)
+            {
+                return false;
+            }
+
+            if (pawn.GetLord()?.LordJob is LordJob_TravelAndExit ||
+                pawn.GetLord()?.LordJob is LordJob_MouseDisasterFamilyExit ||
+                pawn.GetLord()?.LordJob is LordJob_MouseDisasterDeparture)
+            {
+                return true;
+            }
+
+            return ActiveAbandonedDeliveryByAdultId != null &&
+                   ActiveAbandonedDeliveryByAdultId.TryGetValue(pawn.thingIDNumber, out AbandonedDeliveryState state) &&
+                   state != null &&
+                   state.adultHasLeft;
+        }
+
         private static void DetachFromReliefVisit(Pawn pawn, IntVec3 restoreDropoff)
         {
             Lord lord = pawn?.GetLord();
@@ -325,9 +321,35 @@ namespace MouseDisaster
             }
         }
 
+        private static void StartAbandonedDeliveryAdultExit(Pawn adult, AbandonedDeliveryState state, Map map, bool timedOut)
+        {
+            if (adult == null || state == null || map == null)
+            {
+                return;
+            }
+
+            if (!TryFindFarEdgeCell(map, state.foodCell.IsValid ? state.foodCell : adult.Position, out IntVec3 exitCell))
+            {
+                exitCell = map.Center;
+            }
+
+            if (adult.GetLord()?.LordJob is not LordJob_TravelAndExit)
+            {
+                adult.jobs?.StopAll();
+                MakeTravelAndExitLord(map, new[] { adult }, exitCell);
+            }
+
+            state.adultHasLeft = true;
+            Messages.Message(
+                (timedOut ? "MouseDisaster_UI_AbandoningMotherTimedOut" : "MouseDisaster_UI_AbandoningMotherLeft").Translate().Resolve(),
+                adult,
+                MessageTypeDefOf.NeutralEvent,
+                historical: false);
+        }
+
         private static void KeepAbandonedDeliveryPawnAtDropoff(Pawn pawn, IntVec3 foodCell)
         {
-            if (pawn == null || !pawn.Spawned || pawn.Dead || !foodCell.IsValid)
+            if (pawn == null || !pawn.Spawned || pawn.Dead || !foodCell.IsValid || IsAbandonedDeliveryLeaving(pawn))
             {
                 return;
             }
@@ -337,8 +359,7 @@ namespace MouseDisaster
                 return;
             }
 
-            Job waitJob = JobMaker.MakeJob(JobDefOf.Wait);
-            waitJob.expiryInterval = 250;
+            Job waitJob = JobMaker.MakeJob(JobDefOf.Wait, 1800, false);
             TryTakeAutoOrderedJob(pawn, waitJob, JobTag.Misc, requireStarving: false);
         }
 
@@ -445,7 +466,39 @@ namespace MouseDisaster
     {
         public static bool Prefix(Pawn pawn, ref Job __result)
         {
-            if (!MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn))
+            if (!MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn) ||
+                MouseDisasterUtility.IsAbandonedDeliveryLeaving(pawn))
+            {
+                return true;
+            }
+
+            __result = null;
+            return false;
+        }
+    }
+
+    [HarmonyPatch]
+    internal static class MouseDisasterAbandonedDeliveryApparelPatch
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            MethodInfo vanilla = AccessTools.Method(typeof(JobGiver_OptimizeApparel), "TryGiveJob");
+            if (vanilla != null)
+            {
+                yield return vanilla;
+            }
+
+            Type musType = AccessTools.TypeByName("MUS_StylingStation.JobGiver_OptimizeApparel_MUS");
+            MethodInfo musMethod = musType == null ? null : AccessTools.Method(musType, "TryGiveJob");
+            if (musMethod != null)
+            {
+                yield return musMethod;
+            }
+        }
+
+        public static bool Prefix(Pawn pawn, ref Job __result)
+        {
+            if (pawn?.outfits != null || !MouseDisasterUtility.IsAbandonedDeliveryPawn(pawn))
             {
                 return true;
             }
