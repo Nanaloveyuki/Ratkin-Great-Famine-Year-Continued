@@ -15,6 +15,10 @@ tests/
 *.log
 *.cache
 
+# Python emit leftovers (uncommitted split sources and bytecode)
+__pycache__/
+scripts/_emit_parts/
+
 # OS junk
 Thumbs.db
 Desktop.ini
