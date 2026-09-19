@@ -19,7 +19,6 @@ namespace MouseDisaster
         {
             Pawn mother = birtherThing as Pawn ?? geneticMother;
             Pawn newborn = __result as Pawn ?? (__result as Corpse)?.InnerPawn;
-            MouseDisasterUtility.TryForceRatkinBirthXenotype(newborn, mother);
         }
     }
 
@@ -33,7 +32,6 @@ namespace MouseDisaster
                 return;
             }
 
-            MouseDisasterUtility.TryForceRatkinBirthXenotype(pawn, parentPawn);
             MouseDisasterUtility.TryNormalizeColonyBornRatkinBabyBackstory(pawn, parentPawn);
             MouseDisasterUtility.TryAssignBirthMouseDisasterGenes(pawn, parentPawn);
             MouseDisasterUtility.TryInheritBirthStatus(pawn, parentPawn);
