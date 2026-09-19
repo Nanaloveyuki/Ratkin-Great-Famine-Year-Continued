@@ -209,7 +209,7 @@
     <Compile Include="Utilities\MouseDisasterPhase2Utility.Plague.cs" />
     <Compile Include="Utilities\MouseDisasterPlagueUtility.cs" />
     <Compile Include="Thoughts\\ThoughtWorker_MouseDisasterChildExchangeMood.cs" />
-    <Compile Include="ThoughtWorker_Core\\MouseDisasterGuanyinTu.cs" />
+    <Compile Include="Thoughts\\ThoughtWorker_MouseDisasterGuanyinTu.cs" />
     <Compile Include="Thoughts\\ThoughtWorker_MouseDisasterN004.cs" />
     <Compile Include="Thoughts\\ThoughtWorker_MouseDisasterVisitorShelterMood.cs" />
     <Compile Include="Thoughts\\ThoughtWorker_MouseDisasterTraits.cs" />
